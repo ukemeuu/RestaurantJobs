@@ -45,7 +45,8 @@
             <h1 style="font-size: 3.5rem; margin-bottom: 20px; color: #fff;">Find Your Dream Kitchen in Kenya</h1>
             <p
                 style="font-size: 1.25rem; margin-bottom: 30px; max-width: 600px; margin-left: auto; margin-right: auto; opacity: 0.9;">
-                Connecting Kenya's top hospitality talent with the best restaurants, hotels, and cafes.
+                Connecting Kenya's top hospitality talent with the best restaurants. We handle sourcing, interviewing,
+                and vetting so you don't have to.
             </p>
             <a href="/jobs.html" class="btn" style="background-color: var(--accent-color); color: white;">Browse Kenyan
                 Jobs</a>
@@ -69,69 +70,10 @@
         </div>
     </footer>
 
-    <!-- Candidate Payment Modal -->
-    <div id="upgrade-modal"
-        style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); align-items: center; justify-content: center; z-index: 1001;">
-        <div class="card" style="width: 100%; max-width: 400px; text-align: center;">
-            <h3 style="margin-bottom: 20px; color: var(--accent-color);">Join Premium Talent</h3>
-            <p style="margin-bottom: 20px;">Pay <strong>KES 1,000</strong> for Early Access.</p>
-            <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: left;">
-                <label style="font-size: 0.9rem; font-weight: 700; margin-bottom: 5px; display: block;">M-Pesa Phone
-                    Number</label>
-                <input type="tel" id="mpesa-phone-candidate" placeholder="07XX XXX XXX"
-                    style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 4px;">
-            </div>
-            <button id="upgrade-pay-btn" class="btn"
-                style="width: 100%; background-color: #25D366; color: white; border: none;">Pay with M-Pesa</button>
-            <button onclick="document.getElementById('upgrade-modal').style.display='none'"
-                style="margin-top: 15px; background: none; border: none; color: var(--text-muted); cursor: pointer;">Cancel</button>
-        </div>
-    </div>
-
+    <!-- No Payment Modal for now -->
 
     <script>
-        // Simple script to handle homepage upgrades
-        const upgradeBtns = document.querySelectorAll('a');
-        const modal = document.getElementById('upgrade-modal');
-
-        upgradeBtns.forEach(btn => {
-            if (btn.innerText.includes('Upgrade Now')) {
-                btn.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    modal.style.display = 'flex';
-                });
-            }
-        });
-
-        // Payment Logic (Client-side Mock)
-        document.getElementById('upgrade-pay-btn').onclick = async () => {
-            const phone = document.getElementById('mpesa-phone-candidate').value;
-            if (!phone) { alert('Please enter a phone number'); return; }
-
-            const btn = document.getElementById('upgrade-pay-btn');
-            const originalText = btn.innerText;
-            btn.innerText = 'Processing...';
-            btn.disabled = true;
-
-            try {
-                // Mocking
-                console.log(`[M-Pesa Mock] Initiating STK Push to ${phone} for KES 1000`);
-                await new Promise(resolve => setTimeout(resolve, 2000));
-
-                btn.innerText = 'Check your phone...';
-                await new Promise(resolve => setTimeout(resolve, 2000));
-
-                alert('Upgrade Successful! Welcome to Premium Talent.');
-                modal.style.display = 'none';
-
-            } catch (e) {
-                console.error(e);
-                alert('Payment Failed');
-            } finally {
-                btn.innerText = originalText;
-                btn.disabled = false;
-            }
-        };
+        // No upgrade logic needed
     </script>
 </body>
 
