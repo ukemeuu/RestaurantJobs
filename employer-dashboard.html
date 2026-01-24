@@ -92,25 +92,7 @@
             </div>
         </div>
 
-        <!-- Payment Modal -->
-        <div id="payment-modal"
-            style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); align-items: center; justify-content: center; z-index: 1001;">
-            <div class="card" style="width: 100%; max-width: 400px; text-align: center;">
-                <h3 style="margin-bottom: 20px; color: var(--accent-color);">Secure Payment</h3>
-                <p style="margin-bottom: 20px;">Pay <strong>KES 1,000</strong> to post this job.</p>
-                <div
-                    style="background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: left;">
-                    <label style="font-size: 0.9rem; font-weight: 700; margin-bottom: 5px; display: block;">M-Pesa Phone
-                        Number</label>
-                    <input type="tel" id="mpesa-phone" placeholder="07XX XXX XXX"
-                        style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 4px;">
-                </div>
-                <button id="pay-btn" class="btn"
-                    style="width: 100%; background-color: #25D366; color: white; border: none;">Pay with M-Pesa</button>
-                <button onclick="document.getElementById('payment-modal').style.display='none'"
-                    style="margin-top: 15px; background: none; border: none; color: var(--text-muted); cursor: pointer;">Cancel</button>
-            </div>
-        </div>
+        <!-- Payment Modal Removed -->
 
         <!-- Activity Feed (Simulated) -->
         <div class="card">
@@ -143,84 +125,21 @@
 
         // Modal Logic
         const modal = document.getElementById('job-modal');
-        const paymentModal = document.getElementById('payment-modal');
         document.getElementById('post-job-btn').onclick = () => modal.style.display = 'flex';
         window.closeModal = function () { modal.style.display = 'none'; }
         document.querySelector('button[onclick="closeModal()"]').onclick = window.closeModal;
 
-        // M-Pesa Payment Logic (Client-side Mock)
-        async function processPayment(amount, reference) {
-            const phone = document.getElementById('mpesa-phone').value;
-            if (!phone) { alert('Please enter a phone number'); return false; }
-
-            const payBtn = document.getElementById('pay-btn');
-            const originalText = payBtn.innerText;
-            payBtn.innerText = 'Sending Request...';
-            payBtn.disabled = true;
-
-            try {
-                // Mocking the delay and success
-                console.log(`[M-Pesa Mock] Initiating STK Push to ${phone} for KES ${amount}`);
-                await new Promise(resolve => setTimeout(resolve, 2000));
-
-                payBtn.innerText = 'Check your phone...';
-                await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate user paying
-
-                alert('Payment Successful!');
-                paymentModal.style.display = 'none';
-                return true;
-
-            } catch (e) {
-                console.error(e);
-                alert('Payment Failed');
-            } finally {
-                payBtn.innerText = originalText;
-                payBtn.disabled = false;
-            }
-            return false;
-        }
-
-        // Bind button since module scope
-        document.getElementById('pay-btn').onclick = () => {
-            // Logic handled in submit handler but needing binding if direct click? 
-            // Actually ProcessPayment is called from submit handler context
-        };
-
 
         // Form Logic
         const form = document.getElementById('job-form');
-        let pendingJobData = null;
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             const formData = new FormData(form);
             const data = Object.fromEntries(formData.entries());
-            // data.employerId = employerId; // handled by RLS via auth.uid()
 
-            // Check if Direct Post -> Require Payment
-            if (data.postingType === 'direct') {
-                pendingJobData = data;
-                modal.style.display = 'none';
-                paymentModal.style.display = 'flex';
-
-                // Handle Payment Click
-                // Re-binding logic to avoid duplicates or closure issues
-                const payExecutor = async () => {
-                    const paid = await processPayment(1000, 'Job Post: ' + data.title);
-                    if (paid) {
-                        submitJob(data);
-                    }
-                };
-                // Remove old listeners to be safe? Simple replace
-                const newBtn = document.getElementById('pay-btn').cloneNode(true);
-                document.getElementById('pay-btn').replaceWith(newBtn);
-                newBtn.onclick = payExecutor;
-                newBtn.innerText = 'Pay with M-Pesa'; // reset text
-
-            } else {
-                // Agency Managed (Free to request, commision later)
-                submitJob(data);
-            }
+            // Direct Post or Agency -> Submit directly (No Payment)
+            submitJob(data);
         });
 
         async function submitJob(data) {
