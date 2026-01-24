@@ -128,9 +128,9 @@ alter table applications add column candidate_id uuid references auth.users(id);
 -- STRICTER RLS POLICIES (Re-defining for clarity)
 -- Jobs: Only Admin can insert. Public can view.
 drop policy if exists "Employers can insert their own jobs" on jobs;
-create policy "Admins can insert jobs" on jobs
+create policy "Admins and Employers can insert jobs" on jobs
   for insert with check (
-    exists (select 1 from user_roles where id = auth.uid() and role = 'admin')
+    exists (select 1 from user_roles where id = auth.uid() and role in ('admin', 'employer'))
   );
 
 -- Hiring Requests: Employers can insert.

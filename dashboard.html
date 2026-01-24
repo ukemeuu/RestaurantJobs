@@ -87,6 +87,7 @@
                         <th style="padding: 15px; text-align: left;">Employer ID</th>
                         <th style="padding: 15px; text-align: left;">Job Title</th>
                         <th style="padding: 15px; text-align: left;">Status</th>
+                        <th style="padding: 15px; text-align: left;">Actions</th>
                     </tr>
                 </thead>
                 <tbody id="request-table-body">
@@ -145,9 +146,24 @@
                     reqBody.innerHTML = reqs.map(req => `
                         <tr style="border-bottom: 1px solid var(--border-color);">
                             <td style="padding: 15px;">${new Date(req.created_at).toLocaleDateString()}</td>
-                            <td style="padding: 15px;">Employer ID: ${req.employer_id}</td>
-                            <td style="padding: 15px;">${req.title}</td>
-                            <td style="padding: 15px;"><span style="background: #e3f2fd; padding: 4px 8px; border-radius: 4px; font-size: 0.85rem;">${req.status}</span></td>
+                            <td style="padding: 15px;">${req.org_name || 'Employer ' + req.employer_id.substr(0, 4)}</td>
+                            <td style="padding: 15px;">
+                                <strong>${req.title}</strong><br>
+                                <small>${req.type} | ${req.location}</small>
+                            </td>
+                            <td style="padding: 15px;">
+                                <span style="background: ${req.status === 'approved' ? '#d4edda' : req.status === 'rejected' ? '#f8d7da' : '#fff3cd'}; color: #333; padding: 4px 8px; border-radius: 4px; font-size: 0.85rem;">
+                                    ${req.status}
+                                </span>
+                            </td>
+                            <td style="padding: 15px;">
+                                ${req.status === 'pending_agency_review' || req.status === 'new_lead' ? `
+                                    <button onclick="updateRequestStatus('${req.id}', 'approved', '${req.title}', '${req.location || ''}', '${req.type || ''}', '${req.description || ''}', '${req.employer_id}')" 
+                                        style="background: #28a745; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; margin-right: 5px;">Approve</button>
+                                    <button onclick="updateRequestStatus('${req.id}', 'rejected')" 
+                                        style="background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">Reject</button>
+                                ` : '-'}
+                            </td>
                         </tr>
                     `).join('');
                 }
@@ -202,6 +218,55 @@
                 btn.disabled = false;
             }
         });
+
+        // Admin Actions
+        window.updateRequestStatus = async (id, status, title, location, type, description, employer_id) => {
+            if (!confirm(`Are you sure you want to ${status} this request?`)) return;
+
+            try {
+                // 1. Update Request Status
+                const { error: reqError } = await supabase
+                    .from('hiring_requests')
+                    .update({ status: status === 'approved' ? 'approved' : 'rejected' })
+                    .eq('id', id);
+
+                if (reqError) throw reqError;
+
+                // 2. If Approved, Create a Job
+                if (status === 'approved') {
+                    const { error: jobError } = await supabase
+                        .from('jobs')
+                        .insert({
+                            title, location, type, description, employer_id,
+                            status: 'published',
+                            source: 'agency_managed'
+                        });
+                    if (jobError) throw jobError;
+                    alert('Request Approved & Job Published!');
+                } else {
+                    alert('Request Rejected.');
+                }
+
+                loadData(); // Refresh
+
+            } catch (err) {
+                console.error(err);
+                alert('Error: ' + err.message);
+            }
+        };
+
+        window.deleteJob = async (jobId) => {
+            if (!confirm('Permanently delete this job?')) return;
+            try {
+                const { error } = await supabase.from('jobs').delete().eq('id', jobId);
+                if (error) throw error;
+                alert('Job deleted.');
+                loadData();
+            } catch (err) {
+                console.error(err);
+                alert('Error deleting job: ' + err.message);
+            }
+        };
 
         loadData();
     </script>
