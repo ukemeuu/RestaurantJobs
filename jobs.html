@@ -88,7 +88,7 @@
                             <span>⏱ ${job.type}</span>
                         </div>
                         <p style="margin-bottom: 20px;">${job.description}</p>
-                        <a href="/apply.html?jobId=${job.id}&jobTitle=${encodeURIComponent(job.title)}" class="btn">Apply Now</a>
+                        <a href="/job-details.html?id=${job.id}" class="btn">View Details</a>
                     `;
                     container.appendChild(card);
                 });
