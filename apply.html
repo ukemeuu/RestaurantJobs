@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Apply | RestaurantJobs Kenya</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&family=Playfair+Display:wght@500;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="./style.css">
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="container" style="padding: 20px 0; display: flex; justify-content: space-between; align-items: center;">
+        <a href="/" style="font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 700;">Restaurant<span
+                style="color: var(--accent-color);">Jobs</span></a>
+        <div style="display: flex; gap: 20px;">
+            <a href="/" style="font-weight: 600;">Home</a>
+            <a href="/jobs.html" style="font-weight: 600;">Find Jobs</a>
+            <a href="/employer-register.html" style="font-weight: 600;">Submit Job</a>
+            <a href="/apply.html" style="font-weight: 600; color: var(--accent-color);">Submit CV</a>
+        </div>
+    </nav>
+
+    <main class="container" style="padding: 40px 20px; max-width: 800px; text-align: center;">
+        <div class="card fade-in" style="padding: 40px;">
+            <h1 style="margin-bottom: 30px;">Apply for <span id="job-title-display">Position</span></h1>
+
+            <form id="application-form" enctype="multipart/form-data"
+                style="max-width: 600px; margin: 0 auto; text-align: left;">
+                <input type="hidden" id="position" name="position">
+
+                <!-- Step 1: Personal Info -->
+                <div class="form-step" id="step-1">
+                    <h3 style="margin-bottom: 20px; color: var(--accent-color); text-align: center;">Step 1: Personal
+                        Details</h3>
+                    <div style="margin-bottom: 15px;">
+                        <label for="name">Full Name</label>
+                        <input type="text" id="name" name="name" required style="width: 100%;">
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <label for="email">Email Address</label>
+                        <input type="email" id="email" name="email" required style="width: 100%;">
+                    </div>
+                </div>
+
+                <!-- Step 2: Experience -->
+                <div class="form-step" id="step-2" style="margin-top: 30px;">
+                    <h3 style="margin-bottom: 20px; color: var(--accent-color); text-align: center;">Step 2: Your Story
+                    </h3>
+                    <div style="margin-bottom: 15px;">
+                        <label for="reason">Why do you want to join us?</label>
+                        <textarea id="reason" name="reason" rows="4" required style="width: 100%;"></textarea>
+                    </div>
+                </div>
+
+                <!-- Step 3: Upload -->
+                <div class="form-step" id="step-3" style="margin-top: 30px;">
+                    <h3 style="margin-bottom: 20px; color: var(--accent-color); text-align: center;">Step 3: Resume</h3>
+                    <div style="margin-bottom: 15px;">
+                        <label for="resume">Upload Resume (PDF/Doc)</label>
+                        <input type="file" id="resume" name="resume" accept=".pdf,.doc,.docx" required
+                            style="width: 100%;">
+                    </div>
+                </div>
+
+                <div style="margin-top: 30px; text-align: center;">
+                    <button type="submit" class="btn" style="width: 100%;">Submit Application</button>
+                </div>
+            </form>
+            <div id="message" style="margin-top: 20px; display: none;"></div>
+        </div>
+    </main>
+
+    <script type="module">
+        import { supabase } from './src/supabaseClient.js';
+
+        // Get Job Title and ID from URL
+        const params = new URLSearchParams(window.location.search);
+        const jobTitle = params.get('jobTitle') || 'a Role';
+        const jobId = params.get('jobId'); // Expecting jobId in URL now
+
+        document.getElementById('job-title-display').innerText = jobTitle;
+        document.getElementById('position').value = jobTitle;
+
+        // Form Submit
+        const form = document.getElementById('application-form');
+        const messageDiv = document.getElementById('message');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = form.querySelector('button');
+            btn.disabled = true;
+            btn.innerText = 'Submitting...';
+
+            const formData = new FormData(form);
+            const file = formData.get('resume');
+            const name = formData.get('name');
+            const email = formData.get('email');
+            const reason = formData.get('reason');
+            const position = formData.get('position');
+
+            try {
+                // 1. Upload Resume
+                const fileExt = file.name.split('.').pop();
+                const fileName = `${Date.now()}-${name.replace(/\s+/g, '-').toLowerCase()}.${fileExt}`;
+                const { data: uploadData, error: uploadError } = await supabase.storage
+                    .from('resumes')
+                    .upload(fileName, file);
+
+                if (uploadError) throw new Error('Resume upload failed: ' + uploadError.message);
+
+                // 2. Get Public URL (optional, or just store path)
+                // const { data: { publicUrl } } = supabase.storage.from('resumes').getPublicUrl(fileName);
+
+                // 3. Insert Application
+                const { error: dbError } = await supabase
+                    .from('applications')
+                    .insert({
+                        job_id: jobId || null, // Handle general applications if jobId is missing
+                        name,
+                        email,
+                        position,
+                        reason,
+                        resume_url: uploadData.path, // Storing the path is enough
+                        status: 'new'
+                    });
+
+                if (dbError) throw new Error('Database insertion failed: ' + dbError.message);
+
+                form.style.display = 'none';
+                messageDiv.style.display = 'block';
+                messageDiv.style.color = 'var(--success-color)';
+                messageDiv.innerHTML = `<h3>Thank you!</h3><p>Your application has been received successfully.</p><p><a href="/jobs.html">View more jobs</a></p>`;
+
+            } catch (error) {
+                console.error(error);
+                messageDiv.style.display = 'block';
+                messageDiv.style.color = 'red';
+                messageDiv.innerText = error.message || 'Something went wrong. Please try again.';
+                btn.disabled = false;
+                btn.innerText = 'Submit Application';
+            }
+        });
+    </script>
+</body>
+
+</html>

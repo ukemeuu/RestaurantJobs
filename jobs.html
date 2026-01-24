@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Open Positions | RestaurantJobs Kenya</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&family=Playfair+Display:wght@500;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="./style.css">
+    <!-- Schema Markup will be injected dynamically or script tag here -->
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="container" style="padding: 20px 0; display: flex; justify-content: space-between; align-items: center;">
+        <a href="/" style="font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 700;">Restaurant<span
+                style="color: var(--accent-color);">Jobs</span></a>
+        <div style="display: flex; gap: 20px;">
+            <a href="/" style="font-weight: 600;">Home</a>
+            <a href="/jobs.html" style="font-weight: 600; color: var(--accent-color);">Find Jobs</a>
+            <a href="/employer-register.html" style="font-weight: 600;">Submit Job</a>
+            <a href="/apply.html" style="font-weight: 600;">Submit CV</a>
+        </div>
+    </nav>
+
+    <main class="container" style="padding: 40px 20px;">
+        <div style="text-align: center; margin-bottom: 60px;">
+            <h1 style="font-size: 3rem; margin-bottom: 15px;">Hospitality Jobs in Kenya</h1>
+            <p style="color: var(--text-muted); max-width: 600px; margin: 0 auto;">Discover opportunities at Nairobi's
+                top
+                restaurants and Kenyan resorts.</p>
+
+            <div style="margin-top: 30px;">
+                <input type="text" id="job-search" placeholder="Search positions..." style="max-width: 400px;">
+            </div>
+        </div>
+
+        <div id="jobs-container"
+            style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 30px;">
+            <!-- Jobs will be loaded here via JS -->
+            <p class="fade-in">Loading positions...</p>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer style="background-color: var(--text-main); color: white; padding: 40px 0; margin-top: 80px;">
+        <div class="container">
+            <p style="text-align: center; color: #999; font-size: 0.9rem;">&copy; 2026 RestaurantJobs Kenya. All rights
+                reserved.</p>
+        </div>
+    </footer>
+
+    <script type="module">
+        // Basic fetch logic inline or from src/main.js
+        // We'll put logic in separate file but for simplicity inline here for now or linked
+
+        // Supabase Integration
+        import { supabase } from './src/supabaseClient.js';
+
+        async function loadJobs() {
+            try {
+                const { data: jobs, error } = await supabase
+                    .from('jobs')
+                    .select('*')
+                    .eq('status', 'published'); // Only show published jobs
+
+                if (error) throw error;
+
+                const container = document.getElementById('jobs-container');
+                container.innerHTML = '';
+
+                if (!jobs || jobs.length === 0) {
+                    container.innerHTML = '<p>No positions available at the moment.</p>';
+                    return;
+                }
+
+                jobs.forEach(job => {
+                    const card = document.createElement('div');
+                    card.className = 'card fade-in';
+                    card.innerHTML = `
+                        <h3 style="margin-bottom: 10px;">${job.title}</h3>
+                        <div style="display: flex; gap: 10px; margin-bottom: 15px; font-size: 0.9rem; color: var(--text-muted);">
+                            <span>📍 ${job.location}</span>
+                            <span>⏱ ${job.type}</span>
+                        </div>
+                        <p style="margin-bottom: 20px;">${job.description}</p>
+                        <a href="/apply.html?jobId=${job.id}&jobTitle=${encodeURIComponent(job.title)}" class="btn">Apply Now</a>
+                    `;
+                    container.appendChild(card);
+                });
+
+                // Simple search
+                const searchInput = document.getElementById('job-search');
+                searchInput.addEventListener('input', (e) => {
+                    const term = e.target.value.toLowerCase();
+                    const cards = container.querySelectorAll('.card');
+                    cards.forEach(card => {
+                        const title = card.querySelector('h3').innerText.toLowerCase();
+                        if (title.includes(term)) {
+                            card.style.display = 'block';
+                        } else {
+                            card.style.display = 'none';
+                        }
+                    });
+                });
+
+            } catch (error) {
+                console.error('Error loading jobs:', error);
+                document.getElementById('jobs-container').innerText = 'Failed to load jobs. Please ensure you are connected to the internet.';
+            }
+        }
+
+        // Setup simple SEO Schema
+        const script = document.createElement('script');
+        script.type = 'application/ld+json';
+        script.text = JSON.stringify({
+            "@context": "https://schema.org/",
+            "@type": "EmploymentAgency",
+            "name": "RestaurantJobs Kenya",
+            "url": "https://restaurantjobs.co.ke",
+            "address": {
+                "@type": "PostalAddress",
+                "addressLocality": "Nairobi",
+                "addressCountry": "KE"
+            },
+            "telephone": "+254 700 123 456"
+        });
+        document.head.appendChild(script);
+
+        loadJobs();
+    </script>
+</body>
+
+</html>

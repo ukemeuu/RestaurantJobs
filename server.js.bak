@@ -1,0 +1,168 @@
+import express from 'express';
+import multer from 'multer';
+import cors from 'cors';
+import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const app = express();
+const PORT = 3000;
+
+// Middleware
+app.use(cors());
+app.use(express.json());
+// Serve static files from 'uploads' directory
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// Ensure uploads directory exists
+if (!fs.existsSync(path.join(__dirname, 'uploads'))) {
+    fs.mkdirSync(path.join(__dirname, 'uploads'));
+}
+
+// Storage configuration
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'uploads/');
+    },
+    filename: (req, file, cb) => {
+        cb(null, Date.now() + '-' + file.originalname);
+    }
+});
+const upload = multer({ storage });
+
+// Mock Database (In-memory)
+let jobs = [
+    { id: 1, title: 'Sous Chef', type: 'Full-time', location: 'Westlands, Nairobi', description: 'Experienced chef needed to lead our kitchen team.' },
+    { id: 2, title: 'Front of House', type: 'Part-time', location: 'Mombasa', description: 'Friendly face needed to greet our guests.' },
+    { id: 3, title: 'Bartender', type: 'Full-time', location: 'Karen, Nairobi', description: 'Mixology expert for our busy bar.' },
+    { id: 4, title: 'Head Waiter', type: 'Full-time', location: 'Nairobi CBD', description: 'Experienced waiter to manage floor staff.' }
+];
+
+let applications = [];
+let employers = [];
+let hiringRequests = []; // For "Agency Managed" requests
+
+// Routes
+// GET /api/jobs
+app.get('/api/jobs', (req, res) => {
+    res.json(jobs);
+});
+
+// POST /api/apply
+app.post('/api/apply', upload.single('resume'), (req, res) => {
+    const { name, email, position, reason } = req.body;
+    const resumePath = req.file ? req.file.path : null;
+
+    const newApplication = {
+        id: Date.now(),
+        name,
+        email,
+        position,
+        reason,
+        resumePath,
+        date: new Date().toISOString()
+    };
+
+    applications.push(newApplication);
+    console.log('New Application received:', newApplication);
+    res.status(201).json({ message: 'Application submitted successfully!', applicationId: newApplication.id });
+});
+
+// GET /api/applications (Admin Dashboard)
+app.get('/api/applications', (req, res) => {
+    res.json(applications);
+});
+
+// POST /api/employers/register
+app.post('/api/employers/register', (req, res) => {
+    const { orgName, branches, staffCount, pocName, pocEmail, pocPhone } = req.body;
+    const newEmployer = {
+        id: Date.now(),
+        orgName,
+        branches,
+        staffCount,
+        pocName,
+        pocEmail,
+        pocPhone,
+        date: new Date().toISOString()
+    };
+    employers.push(newEmployer);
+    console.log('New Employer Registered:', newEmployer);
+    res.status(201).json({ message: 'Employer registered successfully!', employerId: newEmployer.id });
+});
+
+// POST /api/employers/login (Employer Login)
+app.post('/api/employers/login', (req, res) => {
+    const { email } = req.body;
+    // Simple "Mock" login by Email only for prototype
+    const employer = employers.find(e => e.email === email || e.pocEmail === email);
+
+    if (employer) {
+        res.json({ success: true, employer });
+    } else {
+        res.status(404).json({ success: false, message: 'Employer not found. Please register.' });
+    }
+});
+
+// POST /api/employers/jobs
+app.post('/api/employers/jobs', (req, res) => {
+    const { employerId, title, type, location, description, postingType } = req.body; // postingType: 'direct' or 'agency'
+
+    if (postingType === 'direct') {
+        const newJob = {
+            id: Date.now(),
+            title,
+            type,
+            location,
+            description,
+            employerId,
+            source: 'employer'
+        };
+        jobs.push(newJob);
+        console.log('New Direct Job Posted:', newJob);
+        res.status(201).json({ message: 'Job posted successfully!', jobId: newJob.id, status: 'published' });
+    } else {
+        const newRequest = {
+            id: Date.now(),
+            employerId,
+            title,
+            type,
+            location,
+            description,
+            date: new Date().toISOString(),
+            status: 'pending_agency_review'
+        };
+        hiringRequests.push(newRequest);
+        console.log('New Agency Hiring Request:', newRequest);
+        res.status(201).json({ message: 'Hiring request submitted to agency!', requestId: newRequest.id, status: 'pending' });
+    }
+});
+
+// GET /api/admin/requests (Agency Hiring Requests)
+app.get('/api/admin/requests', (req, res) => {
+    res.json(hiringRequests);
+});
+
+// POST /api/mpesa/stkpush (Mock)
+app.post('/api/mpesa/stkpush', (req, res) => {
+    const { phoneNumber, amount, reference } = req.body;
+    console.log(`[M-Pesa Mock] Initiating STK Push to ${phoneNumber} for KES ${amount} (Ref: ${reference})`);
+
+    // Simulate processing delay
+    setTimeout(() => {
+        console.log(`[M-Pesa Mock] Payment Successful for ${reference}`);
+    }, 2000);
+
+    res.json({
+        success: true,
+        message: 'STK Push initiated successfully. Check your phone.',
+        checkoutRequestID: 'ws_CO_' + Date.now()
+    });
+});
+
+app.listen(PORT, () => {
+    console.log(`Server running on http://localhost:${PORT}`);
+});
