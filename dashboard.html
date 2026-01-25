@@ -57,7 +57,11 @@
             </form>
         </div>
 
-        <h1 style="margin-bottom: 40px;">Received Applications</h1>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h1 style="margin-bottom: 0;">Received Applications</h1>
+            <input type="text" id="app-filter" placeholder="Filter by Name or Job..."
+                style="padding: 10px; border: 1px solid #ddd; border-radius: 6px; width: 250px;">
+        </div>
 
         <div style="overflow-x: auto; margin-bottom: 60px;">
             <table
@@ -117,17 +121,38 @@
                 if (!apps || apps.length === 0) {
                     appBody.innerHTML = '<tr><td colspan="5" style="padding: 20px; text-align: center;">No applications yet.</td></tr>';
                 } else {
-                    appBody.innerHTML = apps.map(app => `
-                        <tr style="border-bottom: 1px solid var(--border-color);">
+                    const rows = apps.map(app => {
+                        const jobTitle = app.jobs?.title || 'Unknown Job';
+                        return `
+                        <tr class="app-row" data-search="${app.name.toLowerCase()} ${jobTitle.toLowerCase()}" style="border-bottom: 1px solid var(--border-color);">
                             <td style="padding: 15px;">${new Date(app.created_at).toLocaleDateString()}</td>
                             <td style="padding: 15px; font-weight: 600;">${app.name}</td>
-                            <td style="padding: 15px;">${app.position}</td>
+                            <td style="padding: 15px;">
+                                <div>${app.position}</div>
+                                <small style="color: #666;">${jobTitle}</small>
+                            </td>
                             <td style="padding: 15px;">${app.email}</td>
                             <td style="padding: 15px;">
                                 ${app.resume_url ? `<a href="${app.resume_url.startsWith('http') ? app.resume_url : supabase.storage.from('resumes').getPublicUrl(app.resume_url).data.publicUrl}" target="_blank" style="color: var(--accent-color); text-decoration: underline;">View Resume</a>` : 'N/A'}
                             </td>
                         </tr>
-                    `).join('');
+                    `}).join('');
+
+                    appBody.innerHTML = rows;
+
+                    // Filter Logic
+                    document.getElementById('app-filter').addEventListener('input', (e) => {
+                        const term = e.target.value.toLowerCase();
+                        const allRows = document.querySelectorAll('.app-row');
+                        allRows.forEach(row => {
+                            const searchData = row.getAttribute('data-search');
+                            if (searchData.includes(term)) {
+                                row.style.display = 'table-row';
+                            } else {
+                                row.style.display = 'none';
+                            }
+                        })
+                    });
                 }
 
                 // Load Requests

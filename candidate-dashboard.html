@@ -95,7 +95,16 @@
             }
 
             apps.forEach(app => {
-                const jobTitle = app.jobs?.title || 'Unknown Job'; // Handle if job was deleted
+                const jobTitle = app.jobs?.title || 'Unknown Job';
+                const statusColors = {
+                    'new': '#eee',
+                    'viewed': '#cce5ff',
+                    'interviewing': '#fff3cd',
+                    'offer': '#d4edda',
+                    'rejected': '#f8d7da'
+                };
+                const statusColor = statusColors[app.status] || '#eee';
+
                 const item = document.createElement('div');
                 item.style.borderBottom = '1px solid #eee';
                 item.style.padding = '15px 0';
@@ -105,7 +114,7 @@
                             <strong>${jobTitle}</strong>
                             <div style="font-size: 0.9rem; color: #666;">Applied on ${new Date(app.created_at).toLocaleDateString()}</div>
                         </div>
-                        <span style="padding: 5px 12px; border-radius: 20px; background: #eee; font-size: 0.85rem;">${app.status.toUpperCase()}</span>
+                        <span style="padding: 5px 12px; border-radius: 20px; background: ${statusColor}; font-size: 0.85rem;">${app.status.toUpperCase()}</span>
                     </div>
                 `;
                 list.appendChild(item);

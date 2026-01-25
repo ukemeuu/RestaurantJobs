@@ -87,7 +87,8 @@
                     .eq('id', jobId)
                     .single();
 
-                if (error || !job) throw error;
+                if (error) throw error;
+                if (!job) throw new Error('Job not found (ID might be invalid)');
 
                 // Render Content
                 document.getElementById('job-title').innerText = job.title;
@@ -106,13 +107,17 @@
 
             } catch (err) {
                 console.error(err);
-                showError();
+                showError(err.message);
             }
         }
 
-        function showError() {
+        function showError(msg) {
             document.getElementById('loading').style.display = 'none';
-            document.getElementById('error-msg').style.display = 'block';
+            const errDiv = document.getElementById('error-msg');
+            errDiv.style.display = 'block';
+            if (msg) {
+                errDiv.querySelector('p').innerText = "Error: " + msg;
+            }
         }
 
         loadJobDetails();
