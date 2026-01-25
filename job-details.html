@@ -95,7 +95,7 @@
                 document.getElementById('job-location').innerText = '📍 ' + job.location;
                 document.getElementById('job-type').innerText = '⏱ ' + job.type;
                 document.getElementById('job-date').innerText = '📅 Posted: ' + new Date(job.created_at).toLocaleDateString();
-                document.getElementById('job-description').innerText = job.description;
+                document.getElementById('job-description').innerHTML = job.description;
 
                 // Render Logo if exists (Insert before Title)
                 if (job.logo_url) {
