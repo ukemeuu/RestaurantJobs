@@ -154,6 +154,17 @@
     <script type="module">
         import { supabase } from './src/supabaseClient.js';
 
+        // Utility: Escape HTML to prevent XSS
+        window.escapeHtml = function(text) {
+            if (!text) return '';
+            return text
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
         async function loadData() {
             try {
                 // Load Applications
@@ -274,8 +285,15 @@
                 document.getElementById('loading').style.display = 'none';
 
             } catch (error) {
-                console.error('Error:', error);
-                document.getElementById('loading').innerText = 'Error loading data. Ensure you have permission (RLS).';
+                console.error('FULL ERROR:', error);
+                document.getElementById('loading').innerHTML = `
+                    <div style="color: red; padding: 20px; background: #fff0f0; border-radius: 8px; text-align: left;">
+                        <h3>Error Loading Data</h3>
+                        <p><strong>Message:</strong> ${error.message}</p>
+                        <p><strong>Hint:</strong> ${error.hint || 'No hint provided'}</p>
+                        <p><strong>Details:</strong> ${error.details || 'Check console logs'}</p>
+                    </div>
+                `;
             }
         }
 
