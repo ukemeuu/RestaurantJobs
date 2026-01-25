@@ -29,129 +29,129 @@
     </nav>
 
     <main class="container" style="padding: 40px 20px;">
-        <main class="container" style="padding: 40px 20px;">
-            <!-- Stats Overview -->
-            <div
-                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 40px;">
-                <div class="card" style="text-align: center; padding: 25px;">
-                    <h2 style="font-size: 2.5rem; color: var(--accent-color); margin-bottom: 5px;" id="stat-apps">0</h2>
-                    <p style="color: #666; font-size: 0.9rem; font-weight: 600; text-transform: uppercase;">Total
-                        Applications</p>
-                </div>
-                <div class="card" style="text-align: center; padding: 25px;">
-                    <h2 style="font-size: 2.5rem; color: #2ecc71; margin-bottom: 5px;" id="stat-hiring">0</h2>
-                    <p style="color: #666; font-size: 0.9rem; font-weight: 600; text-transform: uppercase;">Hiring
-                        Requests</p>
-                </div>
-                <div class="card" style="text-align: center; padding: 25px;">
-                    <h2 style="font-size: 2.5rem; color: #3498db; margin-bottom: 5px;" id="stat-jobs">0</h2>
-                    <p style="color: #666; font-size: 0.9rem; font-weight: 600; text-transform: uppercase;">Active Jobs
-                    </p>
-                </div>
+
+        <!-- Stats Overview -->
+        <div
+            style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 40px;">
+            <div class="card" style="text-align: center; padding: 25px;">
+                <h2 style="font-size: 2.5rem; color: var(--accent-color); margin-bottom: 5px;" id="stat-apps">0</h2>
+                <p style="color: #666; font-size: 0.9rem; font-weight: 600; text-transform: uppercase;">Total
+                    Applications</p>
             </div>
+            <div class="card" style="text-align: center; padding: 25px;">
+                <h2 style="font-size: 2.5rem; color: #2ecc71; margin-bottom: 5px;" id="stat-hiring">0</h2>
+                <p style="color: #666; font-size: 0.9rem; font-weight: 600; text-transform: uppercase;">Hiring
+                    Requests</p>
+            </div>
+            <div class="card" style="text-align: center; padding: 25px;">
+                <h2 style="font-size: 2.5rem; color: #3498db; margin-bottom: 5px;" id="stat-jobs">0</h2>
+                <p style="color: #666; font-size: 0.9rem; font-weight: 600; text-transform: uppercase;">Active Jobs
+                </p>
+            </div>
+        </div>
 
-            <h1 style="margin-bottom: 20px;">Admin Actions</h1>
+        <h1 style="margin-bottom: 20px;">Admin Actions</h1>
 
-            <!-- Post Job Section -->
-            <div class="card" style="margin-bottom: 40px; padding: 30px;">
-                <h2 style="margin-bottom: 20px;">Post a Job Directly</h2>
-                <form id="admin-post-job-form">
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
-                        <div>
-                            <label style="display: block; margin-bottom: 5px; font-weight: 600;">Job Title</label>
-                            <input type="text" name="title" required
-                                style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
-                        </div>
-                        <div>
-                            <label style="display: block; margin-bottom: 5px; font-weight: 600;">Location</label>
-                            <input type="text" name="location" required
-                                style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
-                        </div>
-                        <div>
-                            <label style="display: block; margin-bottom: 5px; font-weight: 600;">Job Type</label>
-                            <select name="type"
-                                style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
-                                <option>Full-time</option>
-                                <option>Part-time</option>
-                                <option>Contract</option>
-                                <option>Casual</option>
-                            </select>
-                        </div>
+        <!-- Post Job Section -->
+        <div class="card" style="margin-bottom: 40px; padding: 30px;">
+            <h2 style="margin-bottom: 20px;">Post a Job Directly</h2>
+            <form id="admin-post-job-form">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                    <div>
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600;">Job Title</label>
+                        <input type="text" name="title" required
+                            style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
                     </div>
-                    <div style="margin-bottom: 20px;">
-                        <label style="display: block; margin-bottom: 5px; font-weight: 600;">Description</label>
-                        <textarea name="description" rows="4" required
-                            style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;"></textarea>
+                    <div>
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600;">Location</label>
+                        <input type="text" name="location" required
+                            style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
                     </div>
-                    <button type="submit" class="btn" id="post-btn">Post Job to Feed</button>
-                </form>
-            </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600;">Job Type</label>
+                        <select name="type"
+                            style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+                            <option>Full-time</option>
+                            <option>Part-time</option>
+                            <option>Contract</option>
+                            <option>Casual</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: 600;">Description</label>
+                    <textarea name="description" rows="4" required
+                        style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;"></textarea>
+                </div>
+                <button type="submit" class="btn" id="post-btn">Post Job to Feed</button>
+            </form>
+        </div>
 
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h1 style="margin-bottom: 0;">Received Applications</h1>
-                <input type="text" id="app-filter" placeholder="Filter by Name or Job..."
-                    style="padding: 10px; border: 1px solid #ddd; border-radius: 6px; width: 250px;">
-            </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h1 style="margin-bottom: 0;">Received Applications</h1>
+            <input type="text" id="app-filter" placeholder="Filter by Name or Job..."
+                style="padding: 10px; border: 1px solid #ddd; border-radius: 6px; width: 250px;">
+        </div>
 
-            <div style="overflow-x: auto; margin-bottom: 60px;">
-                <table
-                    style="width: 100%; border-collapse: collapse; min-width: 600px; background: white; border-radius: var(--radius-sm); overflow: hidden; box-shadow: var(--shadow-sm);">
-                    <thead style="background-color: var(--bg-color); border-bottom: 2px solid var(--border-color);">
-                        <tr>
-                            <th style="padding: 15px; text-align: left;">Date</th>
-                            <th style="padding: 15px; text-align: left;">Name</th>
-                            <th style="padding: 15px; text-align: left;">Position</th>
-                            <th style="padding: 15px; text-align: left;">Email</th>
-                            <th style="padding: 15px; text-align: left;">Resume</th>
-                        </tr>
-                    </thead>
-                    <tbody id="app-table-body">
-                        <!-- Rows injected here -->
-                    </tbody>
-                </table>
-            </div>
+        <div style="overflow-x: auto; margin-bottom: 60px;">
+            <table
+                style="width: 100%; border-collapse: collapse; min-width: 600px; background: white; border-radius: var(--radius-sm); overflow: hidden; box-shadow: var(--shadow-sm);">
+                <thead style="background-color: var(--bg-color); border-bottom: 2px solid var(--border-color);">
+                    <tr>
+                        <th style="padding: 15px; text-align: left;">Date</th>
+                        <th style="padding: 15px; text-align: left;">Name</th>
+                        <th style="padding: 15px; text-align: left;">Position</th>
+                        <th style="padding: 15px; text-align: left;">Email</th>
+                        <th style="padding: 15px; text-align: left;">Resume</th>
+                    </tr>
+                </thead>
+                <tbody id="app-table-body">
+                    <!-- Rows injected here -->
+                </tbody>
+            </table>
+        </div>
 
-            <h1 style="margin-bottom: 40px;">Agency Hiring Requests</h1>
-            <div style="overflow-x: auto;">
-                <table
-                    style="width: 100%; border-collapse: collapse; min-width: 600px; background: white; border-radius: var(--radius-sm); overflow: hidden; box-shadow: var(--shadow-sm);">
-                    <thead style="background-color: var(--bg-color); border-bottom: 2px solid var(--border-color);">
-                        <tr>
-                            <th style="padding: 15px; text-align: left;">Date</th>
-                            <th style="padding: 15px; text-align: left;">Employer ID</th>
-                            <th style="padding: 15px; text-align: left;">Job Title</th>
-                            <th style="padding: 15px; text-align: left;">Status</th>
-                            <th style="padding: 15px; text-align: left;">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="request-table-body">
-                        <!-- Rows injected here -->
-                    </tbody>
-                </table>
-            </div>
-            <h1 style="margin-bottom: 20px;">Job Posted History</h1>
-            <div style="overflow-x: auto; margin-bottom: 60px;">
-                <table
-                    style="width: 100%; border-collapse: collapse; min-width: 600px; background: white; border-radius: var(--radius-sm); overflow: hidden; box-shadow: var(--shadow-sm);">
-                    <thead style="background-color: var(--bg-color); border-bottom: 2px solid var(--border-color);">
-                        <tr>
-                            <th style="padding: 15px; text-align: left;">Date</th>
-                            <th style="padding: 15px; text-align: left;">Title</th>
-                            <th style="padding: 15px; text-align: left;">Location</th>
-                            <th style="padding: 15px; text-align: left;">Status</th>
-                            <th style="padding: 15px; text-align: left;">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="job-table-body">
-                        <!-- Jobs injected here -->
-                    </tbody>
-                </table>
-            </div>
+        <h1 style="margin-bottom: 40px;">Agency Hiring Requests</h1>
+        <div style="overflow-x: auto;">
+            <table
+                style="width: 100%; border-collapse: collapse; min-width: 600px; background: white; border-radius: var(--radius-sm); overflow: hidden; box-shadow: var(--shadow-sm);">
+                <thead style="background-color: var(--bg-color); border-bottom: 2px solid var(--border-color);">
+                    <tr>
+                        <th style="padding: 15px; text-align: left;">Date</th>
+                        <th style="padding: 15px; text-align: left;">Employer ID</th>
+                        <th style="padding: 15px; text-align: left;">Job Title</th>
+                        <th style="padding: 15px; text-align: left;">Status</th>
+                        <th style="padding: 15px; text-align: left;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="request-table-body">
+                    <!-- Rows injected here -->
+                </tbody>
+            </table>
+        </div>
+        <h1 style="margin-bottom: 20px;">Job Posted History</h1>
+        <div style="overflow-x: auto; margin-bottom: 60px;">
+            <table
+                style="width: 100%; border-collapse: collapse; min-width: 600px; background: white; border-radius: var(--radius-sm); overflow: hidden; box-shadow: var(--shadow-sm);">
+                <thead style="background-color: var(--bg-color); border-bottom: 2px solid var(--border-color);">
+                    <tr>
+                        <th style="padding: 15px; text-align: left;">Date</th>
+                        <th style="padding: 15px; text-align: left;">Title</th>
+                        <th style="padding: 15px; text-align: left;">Location</th>
+                        <th style="padding: 15px; text-align: left;">Status</th>
+                        <th style="padding: 15px; text-align: left;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="job-table-body">
+                    <!-- Jobs injected here -->
+                </tbody>
+            </table>
+        </div>
 
-            <p id="loading" style="margin-top: 20px;">Loading data...</p>
-        </main>
+        <p id="loading" style="margin-top: 20px;">Loading data...</p>
+    </main>
 
-        <script type="module">
+    <script type="module">
             import { supabase } from './src/supabaseClient.js';
 
             async function loadData() {
@@ -372,7 +372,7 @@
             };
 
             loadData();
-        </script>
+    </script>
 </body>
 
 </html>
