@@ -16,6 +16,7 @@ export default defineConfig({
                 auth: resolve(__dirname, 'auth.html'),
                 settings: resolve(__dirname, 'settings.html'),
                 candidateDashboard: resolve(__dirname, 'candidate-dashboard.html'),
+                jobDetails: resolve(__dirname, 'job-details.html'),
             },
         },
     },
