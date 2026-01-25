@@ -23,7 +23,7 @@
         </div>
         <div>
             <span style="font-weight: 600; margin-right: 20px;">Hello, Admin</span>
-            <button onclick="logout()" class="btn-secondary"
+            <button id="logout-btn" class="btn-secondary"
                 style="padding: 8px 16px; font-size: 0.9rem; border: 1px solid var(--accent-color); color: var(--accent-color);">Logout</button>
         </div>
     </nav>
@@ -152,72 +152,72 @@
     </main>
 
     <script type="module">
-            import { supabase } from './src/supabaseClient.js';
+        import { supabase } from './src/supabaseClient.js';
 
-            async function loadData() {
-                try {
-                    // Load Applications
-                    // Note: RLS policies might restrict visibility unless logged in as specific user/admin
-                    const { data: apps, error: appError } = await supabase
-                        .from('applications')
-                        .select('*, jobs(title, employer_id)')
-                        .order('created_at', { ascending: false });
+        async function loadData() {
+            try {
+                // Load Applications
+                // Note: RLS policies might restrict visibility unless logged in as specific user/admin
+                const { data: apps, error: appError } = await supabase
+                    .from('applications')
+                    .select('*, jobs(title, employer_id)')
+                    .order('created_at', { ascending: false });
 
-                    if (appError) throw appError;
+                if (appError) throw appError;
 
-                    const appBody = document.getElementById('app-table-body');
+                const appBody = document.getElementById('app-table-body');
 
-                    if (!apps || apps.length === 0) {
-                        appBody.innerHTML = '<tr><td colspan="5" style="padding: 20px; text-align: center;">No applications yet.</td></tr>';
-                    } else {
-                        const rows = apps.map(app => {
-                            const jobTitle = app.jobs?.title || 'Unknown Job';
-                            return `
-                        <tr class="app-row" data-search="${app.name.toLowerCase()} ${jobTitle.toLowerCase()}" style="border-bottom: 1px solid var(--border-color);">
+                if (!apps || apps.length === 0) {
+                    appBody.innerHTML = '<tr><td colspan="5" style="padding: 20px; text-align: center;">No applications yet.</td></tr>';
+                } else {
+                    const rows = apps.map(app => {
+                        const jobTitle = app.jobs?.title || 'Unknown Job';
+                        return `
+                        <tr class="app-row" data-search="${escapeHtml(app.name).toLowerCase()} ${escapeHtml(jobTitle).toLowerCase()}" style="border-bottom: 1px solid var(--border-color);">
                             <td style="padding: 15px;">${new Date(app.created_at).toLocaleDateString()}</td>
-                            <td style="padding: 15px; font-weight: 600;">${app.name}</td>
+                            <td style="padding: 15px; font-weight: 600;">${escapeHtml(app.name)}</td>
                             <td style="padding: 15px;">
-                                <div>${app.position}</div>
-                                <small style="color: #666;">${jobTitle}</small>
+                                <div>${escapeHtml(app.position)}</div>
+                                <small style="color: #666;">${escapeHtml(jobTitle)}</small>
                             </td>
-                            <td style="padding: 15px;">${app.email}</td>
+                            <td style="padding: 15px;">${escapeHtml(app.email)}</td>
                             <td style="padding: 15px;">
                                 ${app.resume_url ? `<a href="${app.resume_url.startsWith('http') ? app.resume_url : supabase.storage.from('resumes').getPublicUrl(app.resume_url).data.publicUrl}" target="_blank" style="color: var(--accent-color); text-decoration: underline;">View Resume</a>` : 'N/A'}
                             </td>
                         </tr>
                     `}).join('');
 
-                        appBody.innerHTML = rows;
+                    appBody.innerHTML = rows;
 
-                        // Filter Logic
-                        document.getElementById('app-filter').addEventListener('input', (e) => {
-                            const term = e.target.value.toLowerCase();
-                            const allRows = document.querySelectorAll('.app-row');
-                            allRows.forEach(row => {
-                                const searchData = row.getAttribute('data-search');
-                                if (searchData.includes(term)) {
-                                    row.style.display = 'table-row';
-                                } else {
-                                    row.style.display = 'none';
-                                }
-                            })
-                        });
-                    }
+                    // Filter Logic
+                    document.getElementById('app-filter').addEventListener('input', (e) => {
+                        const term = e.target.value.toLowerCase();
+                        const allRows = document.querySelectorAll('.app-row');
+                        allRows.forEach(row => {
+                            const searchData = row.getAttribute('data-search');
+                            if (searchData.includes(term)) {
+                                row.style.display = 'table-row';
+                            } else {
+                                row.style.display = 'none';
+                            }
+                        })
+                    });
+                }
 
-                    // Load Requests
-                    const { data: reqs, error: reqError } = await supabase
-                        .from('hiring_requests')
-                        .select('*')
-                        .order('created_at', { ascending: false });
+                // Load Requests
+                const { data: reqs, error: reqError } = await supabase
+                    .from('hiring_requests')
+                    .select('*')
+                    .order('created_at', { ascending: false });
 
-                    if (reqError) throw reqError;
+                if (reqError) throw reqError;
 
-                    const reqBody = document.getElementById('request-table-body');
+                const reqBody = document.getElementById('request-table-body');
 
-                    if (!reqs || reqs.length === 0) {
-                        reqBody.innerHTML = '<tr><td colspan="4" style="padding: 20px; text-align: center;">No agency requests yet.</td></tr>';
-                    } else {
-                        reqBody.innerHTML = reqs.map(req => `
+                if (!reqs || reqs.length === 0) {
+                    reqBody.innerHTML = '<tr><td colspan="4" style="padding: 20px; text-align: center;">No agency requests yet.</td></tr>';
+                } else {
+                    reqBody.innerHTML = reqs.map(req => `
                         <tr style="border-bottom: 1px solid var(--border-color);">
                             <td style="padding: 15px;">${new Date(req.created_at).toLocaleDateString()}</td>
                             <td style="padding: 15px;">${req.org_name || 'Employer ' + req.employer_id.substr(0, 4)}</td>
@@ -240,23 +240,23 @@
                             </td>
                         </tr>
                     `).join('');
-                    }
+                }
 
-                    document.getElementById('stat-apps').innerText = apps.length;
-                    document.getElementById('stat-hiring').innerText = reqs.length;
-                    // Load All Jobs (History)
-                    const { data: allJobs, error: jobError } = await supabase
-                        .from('jobs')
-                        .select('*')
-                        .order('created_at', { ascending: false });
+                document.getElementById('stat-apps').innerText = apps.length;
+                document.getElementById('stat-hiring').innerText = reqs.length;
+                // Load All Jobs (History)
+                const { data: allJobs, error: jobError } = await supabase
+                    .from('jobs')
+                    .select('*')
+                    .order('created_at', { ascending: false });
 
-                    if (jobError) throw jobError;
+                if (jobError) throw jobError;
 
-                    const jobBody = document.getElementById('job-table-body');
-                    if (!allJobs || allJobs.length === 0) {
-                        jobBody.innerHTML = '<tr><td colspan="5" style="padding: 20px; text-align: center;">No active jobs found.</td></tr>';
-                    } else {
-                        jobBody.innerHTML = allJobs.map(job => `
+                const jobBody = document.getElementById('job-table-body');
+                if (!allJobs || allJobs.length === 0) {
+                    jobBody.innerHTML = '<tr><td colspan="5" style="padding: 20px; text-align: center;">No active jobs found.</td></tr>';
+                } else {
+                    jobBody.innerHTML = allJobs.map(job => `
                         <tr style="border-bottom: 1px solid var(--border-color);">
                             <td style="padding: 15px;">${new Date(job.created_at).toLocaleDateString()}</td>
                             <td style="padding: 15px; font-weight: 600;">${job.title}</td>
@@ -267,111 +267,111 @@
                             </td>
                         </tr>
                     `).join('');
-                    }
-
-                    document.getElementById('stat-jobs').innerText = allJobs ? allJobs.length : 0;
-
-                    document.getElementById('loading').style.display = 'none';
-
-                } catch (error) {
-                    console.error('Error:', error);
-                    document.getElementById('loading').innerText = 'Error loading data. Ensure you have permission (RLS).';
                 }
+
+                document.getElementById('stat-jobs').innerText = allJobs ? allJobs.length : 0;
+
+                document.getElementById('loading').style.display = 'none';
+
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('loading').innerText = 'Error loading data. Ensure you have permission (RLS).';
             }
+        }
 
-            // Admin Post Job Logic
-            const postForm = document.getElementById('admin-post-job-form');
-            postForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const btn = document.getElementById('post-btn');
-                const originalText = btn.innerText;
-                btn.innerText = 'Posting...';
-                btn.disabled = true;
+        // Admin Post Job Logic
+        const postForm = document.getElementById('admin-post-job-form');
+        postForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('post-btn');
+            const originalText = btn.innerText;
+            btn.innerText = 'Posting...';
+            btn.disabled = true;
 
-                const formData = new FormData(postForm);
-                const data = Object.fromEntries(formData.entries());
+            const formData = new FormData(postForm);
+            const data = Object.fromEntries(formData.entries());
 
-                try {
-                    // Ensure user is admin (RLS will enforce, but good to check context)
-                    const { data: { user } } = await supabase.auth.getUser();
-                    if (!user) throw new Error('Not authenticated');
+            try {
+                // Ensure user is admin (RLS will enforce, but good to check context)
+                const { data: { user } } = await supabase.auth.getUser();
+                if (!user) throw new Error('Not authenticated');
 
-                    const { error } = await supabase
+                const { error } = await supabase
+                    .from('jobs')
+                    .insert({
+                        title: data.title,
+                        location: data.location,
+                        type: data.type,
+                        description: data.description,
+                        employer_id: user.id, // Admin is the 'employer' in this context
+                        status: 'published',
+                        source: 'admin'
+                    });
+
+                if (error) throw error;
+
+                alert('Job posted successfully to the feed!');
+                postForm.reset();
+
+            } catch (err) {
+                console.error(err);
+                alert('Error posting job: ' + err.message);
+            } finally {
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }
+        });
+
+        // Admin Actions
+        window.updateRequestStatus = async (id, status, title, location, type, description, employer_id) => {
+            if (!confirm(`Are you sure you want to ${status} this request?`)) return;
+
+            try {
+                // 1. Update Request Status
+                const { error: reqError } = await supabase
+                    .from('hiring_requests')
+                    .update({ status: status === 'approved' ? 'approved' : 'rejected' })
+                    .eq('id', id);
+
+                if (reqError) throw reqError;
+
+                // 2. If Approved, Create a Job
+                if (status === 'approved') {
+                    const { error: jobError } = await supabase
                         .from('jobs')
                         .insert({
-                            title: data.title,
-                            location: data.location,
-                            type: data.type,
-                            description: data.description,
-                            employer_id: user.id, // Admin is the 'employer' in this context
+                            title, location, type, description, employer_id,
                             status: 'published',
-                            source: 'admin'
+                            source: 'agency_managed'
                         });
-
-                    if (error) throw error;
-
-                    alert('Job posted successfully to the feed!');
-                    postForm.reset();
-
-                } catch (err) {
-                    console.error(err);
-                    alert('Error posting job: ' + err.message);
-                } finally {
-                    btn.innerText = originalText;
-                    btn.disabled = false;
+                    if (jobError) throw jobError;
+                    alert('Request Approved & Job Published!');
+                } else {
+                    alert('Request Rejected.');
                 }
-            });
 
-            // Admin Actions
-            window.updateRequestStatus = async (id, status, title, location, type, description, employer_id) => {
-                if (!confirm(`Are you sure you want to ${status} this request?`)) return;
+                loadData(); // Refresh
 
-                try {
-                    // 1. Update Request Status
-                    const { error: reqError } = await supabase
-                        .from('hiring_requests')
-                        .update({ status: status === 'approved' ? 'approved' : 'rejected' })
-                        .eq('id', id);
+            } catch (err) {
+                console.error(err);
+                alert('Error: ' + err.message);
+            }
+        };
 
-                    if (reqError) throw reqError;
+        window.deleteJob = async (jobId) => {
+            if (!confirm('Permanently delete this job?')) return;
+            try {
+                const { error } = await supabase.from('jobs').delete().eq('id', jobId);
+                if (error) throw error;
+                alert('Job deleted.');
+                loadData();
+            } catch (err) {
+                console.error(err);
+                alert('Error deleting job: ' + err.message);
+            }
+        };
 
-                    // 2. If Approved, Create a Job
-                    if (status === 'approved') {
-                        const { error: jobError } = await supabase
-                            .from('jobs')
-                            .insert({
-                                title, location, type, description, employer_id,
-                                status: 'published',
-                                source: 'agency_managed'
-                            });
-                        if (jobError) throw jobError;
-                        alert('Request Approved & Job Published!');
-                    } else {
-                        alert('Request Rejected.');
-                    }
-
-                    loadData(); // Refresh
-
-                } catch (err) {
-                    console.error(err);
-                    alert('Error: ' + err.message);
-                }
-            };
-
-            window.deleteJob = async (jobId) => {
-                if (!confirm('Permanently delete this job?')) return;
-                try {
-                    const { error } = await supabase.from('jobs').delete().eq('id', jobId);
-                    if (error) throw error;
-                    alert('Job deleted.');
-                    loadData();
-                } catch (err) {
-                    console.error(err);
-                    alert('Error deleting job: ' + err.message);
-                }
-            };
-
-            loadData();
+        loadData();
     </script>
 </body>
 
