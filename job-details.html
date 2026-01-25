@@ -116,6 +116,27 @@
                 const applyLink = `/apply.html?jobId=${job.id}&jobTitle=${encodeURIComponent(job.title)}`;
                 document.getElementById('apply-btn').href = applyLink;
 
+                // Dynamic SEO & Social Tags
+                document.title = `${job.title} at ${job.location} | RestaurantJobs Kenya`;
+
+                // Meta Description
+                let metaDesc = document.querySelector('meta[name="description"]');
+                if (!metaDesc) {
+                    metaDesc = document.createElement('meta');
+                    metaDesc.name = 'description';
+                    document.head.appendChild(metaDesc);
+                }
+                metaDesc.content = `Hiring: ${job.title} in ${job.location}. ${job.type}. Apply now on RestaurantJobs Kenya.`;
+
+                // Open Graph Title
+                let ogTitle = document.querySelector('meta[property="og:title"]');
+                if (!ogTitle) {
+                    ogTitle = document.createElement('meta');
+                    ogTitle.setAttribute('property', 'og:title');
+                    document.head.appendChild(ogTitle);
+                }
+                ogTitle.content = `${job.title} | RestaurantJobs Kenya`;
+
                 // Show
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('job-content').style.display = 'block';
