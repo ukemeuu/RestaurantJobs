@@ -64,6 +64,13 @@
                         </div>
                     </div>
 
+                    <div style="margin-bottom: 20px;">
+                        <label for="logo">Company Logo (Optional)</label>
+                        <input type="file" id="logo" name="logo" accept="image/*" style="width: 100%;">
+                        <p style="font-size: 0.8rem; color: #666; margin-top: 5px;">Recommended: Square image (PNG/JPG)
+                        </p>
+                    </div>
+
                     <div style="margin-bottom: 15px;">
                         <label for="title">Job Title</label>
                         <input type="text" id="title" name="title" required>
@@ -139,11 +146,29 @@
             const data = Object.fromEntries(formData.entries());
 
             // Direct Post or Agency -> Submit directly (No Payment)
-            submitJob(data);
         });
 
         async function submitJob(data) {
             try {
+                // 1. Upload Logo if exists
+                let logoUrl = null;
+                const fileInput = document.getElementById('logo');
+                if (fileInput.files.length > 0) {
+                    const file = fileInput.files[0];
+                    const fileExt = file.name.split('.').pop();
+                    const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+
+                    const { data: uploadData, error: uploadError } = await supabase.storage
+                        .from('logos')
+                        .upload(fileName, file);
+
+                    if (uploadError) throw new Error('Logo upload failed: ' + uploadError.message);
+
+                    // Get Public URL
+                    const { data: { publicUrl } } = supabase.storage.from('logos').getPublicUrl(fileName);
+                    logoUrl = publicUrl;
+                }
+
                 let responseError;
 
                 if (data.postingType === 'direct') {
@@ -155,7 +180,8 @@
                             location: data.location,
                             description: data.description,
                             employer_id: user.id,
-                            status: 'published'
+                            status: 'published',
+                            logo_url: logoUrl
                         });
                     responseError = error;
                 } else {
@@ -168,6 +194,8 @@
                             location: data.location,
                             description: data.description,
                             status: 'pending_agency_review'
+                            // Note: Hiring requests table might need logo_url too if we want to persist it there
+                            // For now, assuming it's mostly for direct posts or will be handled manually by admin
                         });
                     responseError = error;
                 }
@@ -183,7 +211,7 @@
                 }
             } catch (err) {
                 console.error(err);
-                alert('An error occurred.');
+                alert('An error occurred: ' + err.message);
             }
         }
 

@@ -141,11 +141,23 @@
                     card.className = 'card fade-in';
                     card.style.display = 'flex';
                     card.style.flexDirection = 'column';
+
+                    const logoHtml = job.logo_url
+                        ? `<img src="${job.logo_url}" alt="${job.title}" style="width: 50px; height: 50px; object-fit: contain; border-radius: 6px; border: 1px solid #eee;">`
+                        : `<div style="width: 50px; height: 50px; background: #eee; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">🏢</div>`;
+
                     card.innerHTML = `
-                        <h3 style="margin-bottom: 10px;">${job.title}</h3>
-                        <div style="display: flex; gap: 10px; margin-bottom: 15px; font-size: 0.9rem; color: var(--text-muted);">
-                            <span>📍 ${job.location}</span>
-                            <span>⏱ ${job.type}</span>
+                        <div style="display: flex; gap: 15px; margin-bottom: 10px;">
+                            ${logoHtml}
+                            <div>
+                                <h3 style="margin-bottom: 5px;">${job.title}</h3>
+                                <div style="font-size: 0.9rem; color: var(--text-muted);">
+                                    <span>📍 ${job.location}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 15px; font-size: 0.85rem;">
+                             <span style="background: #f0f0f0; padding: 4px 8px; border-radius: 4px;">⏱ ${job.type}</span>
                         </div>
                         <p style="margin-bottom: 20px; flex-grow: 1;">${job.description.substring(0, 150)}...</p>
                         <a href="/job-details.html?id=${job.id}" class="btn" style="text-align: center;">View Details</a>
