@@ -30,12 +30,47 @@
     <main class="container" style="padding: 40px 20px;">
         <div style="text-align: center; margin-bottom: 60px;">
             <h1 style="font-size: 3rem; margin-bottom: 15px;">Hospitality Jobs in Kenya</h1>
-            <p style="color: var(--text-muted); max-width: 600px; margin: 0 auto;">Discover opportunities at Nairobi's
-                top
-                restaurants and Kenyan resorts.</p>
+            <p style="color: var(--text-muted); max-width: 600px; margin: 0 auto; margin-bottom: 30px;">Discover
+                opportunities at Nairobi's
+                top restaurants and Kenyan resorts.</p>
 
-            <div style="margin-top: 30px;">
-                <input type="text" id="job-search" placeholder="Search positions..." style="max-width: 400px;">
+            <div class="card"
+                style="max-width: 900px; margin: 0 auto; padding: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; align-items: end;">
+                <div>
+                    <label
+                        style="display: block; text-align: left; font-weight: 600; margin-bottom: 5px; font-size: 0.9rem;">Search</label>
+                    <input type="text" id="search-text" placeholder="Chef, Waiter, Manager..."
+                        style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+                </div>
+                <div>
+                    <label
+                        style="display: block; text-align: left; font-weight: 600; margin-bottom: 5px; font-size: 0.9rem;">Location</label>
+                    <select id="filter-location"
+                        style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; background: white;">
+                        <option value="">All Locations</option>
+                        <option value="Nairobi">Nairobi</option>
+                        <option value="Mombasa">Mombasa</option>
+                        <option value="Kisumu">Kisumu</option>
+                        <option value="Nakuru">Nakuru</option>
+                        <option value="Eldoret">Eldoret</option>
+                    </select>
+                </div>
+                <div>
+                    <label
+                        style="display: block; text-align: left; font-weight: 600; margin-bottom: 5px; font-size: 0.9rem;">Job
+                        Type</label>
+                    <select id="filter-type"
+                        style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; background: white;">
+                        <option value="">All Types</option>
+                        <option value="Full-time">Full-time</option>
+                        <option value="Part-time">Part-time</option>
+                        <option value="Contract">Contract</option>
+                        <option value="Casual">Casual</option>
+                    </select>
+                </div>
+                <button onclick="loadJobs()" class="btn"
+                    style="height: 42px; display: flex; align-items: center; justify-content: center;">Find
+                    Jobs</button>
             </div>
         </div>
 
@@ -61,51 +96,61 @@
         // Supabase Integration
         import { supabase } from './src/supabaseClient.js';
 
-        async function loadJobs() {
+        window.loadJobs = async function () {
             try {
-                const { data: jobs, error } = await supabase
+                const container = document.getElementById('jobs-container');
+                container.innerHTML = '<p class="fade-in">Loading positions...</p>';
+
+                // Get filter values
+                const searchText = document.getElementById('search-text').value;
+                const location = document.getElementById('filter-location').value;
+                const type = document.getElementById('filter-type').value;
+
+                let query = supabase
                     .from('jobs')
                     .select('*')
-                    .eq('status', 'published'); // Only show published jobs
+                    .eq('status', 'published')
+                    .order('created_at', { ascending: false });
+
+                // Apply Filters
+                if (location) {
+                    query = query.ilike('location', `%${location}%`);
+                }
+                if (type) {
+                    query = query.eq('type', type);
+                }
+                if (searchText) {
+                    // Search in title OR description
+                    // Supabase 'or' syntax: .or(`title.ilike.%${searchText}%,description.ilike.%${searchText}%`)
+                    query = query.or(`title.ilike.%${searchText}%,description.ilike.%${searchText}%`);
+                }
+
+                const { data: jobs, error } = await query;
 
                 if (error) throw error;
 
-                const container = document.getElementById('jobs-container');
                 container.innerHTML = '';
 
                 if (!jobs || jobs.length === 0) {
-                    container.innerHTML = '<p>No positions available at the moment.</p>';
+                    container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; background: #f9f9f9; border-radius: 8px;"><h3>No jobs match your filters.</h3><p>Try adjusting your search criteria.</p></div>';
                     return;
                 }
 
                 jobs.forEach(job => {
                     const card = document.createElement('div');
                     card.className = 'card fade-in';
+                    card.style.display = 'flex';
+                    card.style.flexDirection = 'column';
                     card.innerHTML = `
                         <h3 style="margin-bottom: 10px;">${job.title}</h3>
                         <div style="display: flex; gap: 10px; margin-bottom: 15px; font-size: 0.9rem; color: var(--text-muted);">
                             <span>📍 ${job.location}</span>
                             <span>⏱ ${job.type}</span>
                         </div>
-                        <p style="margin-bottom: 20px;">${job.description}</p>
-                        <a href="/job-details.html?id=${job.id}" class="btn">View Details</a>
+                        <p style="margin-bottom: 20px; flex-grow: 1;">${job.description.substring(0, 150)}...</p>
+                        <a href="/job-details.html?id=${job.id}" class="btn" style="text-align: center;">View Details</a>
                     `;
                     container.appendChild(card);
-                });
-
-                // Simple search
-                const searchInput = document.getElementById('job-search');
-                searchInput.addEventListener('input', (e) => {
-                    const term = e.target.value.toLowerCase();
-                    const cards = container.querySelectorAll('.card');
-                    cards.forEach(card => {
-                        const title = card.querySelector('h3').innerText.toLowerCase();
-                        if (title.includes(term)) {
-                            card.style.display = 'block';
-                        } else {
-                            card.style.display = 'none';
-                        }
-                    });
                 });
 
             } catch (error) {
@@ -113,6 +158,9 @@
                 document.getElementById('jobs-container').innerText = 'Failed to load jobs. Please ensure you are connected to the internet.';
             }
         }
+
+        // Expose to window for button click
+        // window.loadJobs = loadJobs; // Already defined as window.loadJobs above
 
         // Setup simple SEO Schema
         const script = document.createElement('script');
