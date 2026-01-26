@@ -15,14 +15,17 @@
 
 <body>
     <!-- Navbar -->
-    <nav class="container" style="padding: 20px 0; display: flex; justify-content: space-between; align-items: center;">
-        <a href="/" style="font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 700;">Restaurant<span
-                style="color: var(--accent-color);">Jobs</span></a>
-        <div style="display: flex; gap: 20px;">
-            <a href="/" style="font-weight: 600;">Home</a>
-            <a href="/jobs.html" style="font-weight: 600;">Find Jobs</a>
-            <a href="/employer-register.html" style="font-weight: 600;">Submit Job</a>
-            <a href="/apply.html" style="font-weight: 600; color: var(--accent-color);">Submit CV</a>
+    <!-- Navbar -->
+    <nav class="container">
+        <a href="/" class="nav-brand">Restaurant<span style="color: var(--accent-color);">Jobs</span></a>
+
+        <button id="mobile-menu-btn" class="mobile-menu-btn" aria-label="Toggle Menu">&#9776;</button>
+
+        <div id="nav-links" class="nav-links">
+            <a href="/">Home</a>
+            <a href="/jobs.html">Find Jobs</a>
+            <a href="/employer-register.html">Submit Job</a>
+            <a href="/apply.html" style="color: var(--accent-color);">Submit CV</a>
         </div>
     </nav>
 
@@ -68,6 +71,7 @@
         </div>
     </footer>
 
+    <script type="module" src="/src/ui.js"></script>
     <script type="module">
         import { supabase } from './src/supabaseClient.js';
 

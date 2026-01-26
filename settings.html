@@ -69,8 +69,10 @@
         </div>
     </main>
 
+    <script type="module" src="/src/ui.js"></script>
     <script type="module">
         import { supabase } from './src/supabaseClient.js';
+        import { showToast } from './src/ui.js';
 
         const backLink = document.getElementById('back-link');
         const roleDisplay = document.getElementById('user-role-display');
@@ -160,12 +162,11 @@
                     // Candidates don't have a profile table yet (besides auth metadata), 
                     // so nothing to save unless we add a profiles table.
 
-                    message.innerText = 'Settings updated successfully!';
-                    setTimeout(() => message.innerText = '', 3000);
+                    showToast('Settings updated successfully!');
 
                 } catch (error) {
                     console.error(error);
-                    alert('Error saving settings: ' + error.message);
+                    showToast('Error saving settings: ' + error.message, 'error');
                 } finally {
                     btn.innerText = 'Save Changes';
                     btn.disabled = false;

@@ -4,16 +4,13 @@
 :root {
   /* Colors - Warm Minimalism */
   --bg-color: #FDFCF8;
-  /* Warm off-white */
   --surface-color: #FFFFFF;
   --text-main: #2C2C2C;
-  /* Deep grey */
   --text-muted: #6B6B6B;
   --accent-color: #A98467;
-  /* Clay/Tan */
   --accent-hover: #8C6A51;
   --success-color: #8A9A5B;
-  /* Sage Green */
+  --error-color: #D32F2F;
   --border-color: #EAEAEA;
 
   /* Layout */
@@ -26,17 +23,6 @@
   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
   --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.06);
   --transition: all 0.3s ease;
-}
-
-/* Fix for Navigation on Small Screens */
-nav.container {
-  flex-wrap: wrap;
-  gap: 15px;
-}
-
-nav.container>div {
-  flex-wrap: wrap;
-  justify-content: center;
 }
 
 * {
@@ -66,6 +52,7 @@ h4 {
 a {
   text-decoration: none;
   color: inherit;
+  transition: var(--transition);
 }
 
 /* Utilities */
@@ -75,6 +62,45 @@ a {
   padding: 0 20px;
 }
 
+/* Navigation */
+nav.container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 0;
+  position: relative;
+}
+
+.nav-brand {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.nav-links {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+.nav-links a {
+  font-weight: 600;
+}
+
+.nav-links a:hover {
+  color: var(--accent-color);
+}
+
+.mobile-menu-btn {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--text-main);
+}
+
+/* Buttons */
 .btn {
   display: inline-block;
   background-color: var(--text-main);
@@ -85,6 +111,7 @@ a {
   cursor: pointer;
   border: none;
   transition: var(--transition);
+  text-align: center;
 }
 
 .btn:hover {
@@ -92,10 +119,22 @@ a {
   transform: translateY(-2px);
 }
 
+.btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
 .btn-secondary {
   background-color: transparent;
   border: 2px solid var(--text-main);
   color: var(--text-main);
+  padding: 10px 22px;
+  /* slight adjust for border */
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
 }
 
 .btn-secondary:hover {
@@ -145,6 +184,51 @@ label {
   color: var(--text-main);
 }
 
+/* Footer */
+footer .container {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 40px;
+}
+
+/* Toast Notifications */
+#toast-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.toast {
+  background: white;
+  padding: 15px 20px;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-md);
+  border-left: 4px solid var(--accent-color);
+  font-weight: 600;
+  opacity: 0;
+  transform: translateX(100%);
+  transition: all 0.3s ease;
+  min-width: 250px;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.toast-success {
+  border-left-color: var(--success-color);
+}
+
+.toast-error {
+  border-left-color: var(--error-color);
+}
+
 /* Animations */
 @keyframes fadeIn {
   from {
@@ -160,4 +244,96 @@ label {
 
 .fade-in {
   animation: fadeIn 0.6s ease forwards;
+}
+
+/* Responsive Media Queries */
+@media (max-width: 768px) {
+
+  /* Fonts */
+  h1 {
+    font-size: 2rem !important;
+  }
+
+  h2 {
+    font-size: 1.75rem !important;
+  }
+
+  /* Navigation */
+  .mobile-menu-btn {
+    display: block;
+  }
+
+  .nav-links {
+    display: none;
+    /* Hidden by default */
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    flex-direction: column;
+    padding: 20px;
+    box-shadow: var(--shadow-md);
+    z-index: 1000;
+    border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+  }
+
+  .nav-links.active {
+    display: flex;
+  }
+
+  .nav-links a {
+    width: 100%;
+    text-align: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .nav-links a:last-child {
+    border-bottom: none;
+  }
+
+  /* Footer */
+  footer .container {
+    flex-direction: column;
+    gap: 30px;
+  }
+
+  /* Cards/Tables on Mobile */
+  /* Utility class for converting tables to cards if needed, 
+       or applied directly to specific tables via CSS */
+  .mobile-table thead {
+    display: none;
+  }
+
+  .mobile-table tbody,
+  .mobile-table tr,
+  .mobile-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .mobile-table tr {
+    margin-bottom: 20px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    padding: 15px;
+    background: white;
+  }
+
+  .mobile-table td {
+    padding: 8px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    text-align: right;
+  }
+
+  .mobile-table td::before {
+    content: attr(data-label);
+    font-weight: 700;
+    margin-right: 15px;
+    text-align: left;
+    color: var(--text-muted);
+  }
 }

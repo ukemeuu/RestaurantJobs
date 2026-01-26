@@ -16,15 +16,15 @@
 </head>
 
 <body>
-    <nav class="container" style="padding: 20px 0; display: flex; justify-content: space-between; align-items: center;">
-        <a href="/" style="font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 700;">Restaurant<span
-                style="color: var(--accent-color);">Jobs</span></a>
-        <div>
-            <a href="/settings.html"
-                style="font-weight: 600; margin-right: 20px; color: var(--text-color); text-decoration: none;">Settings</a>
-            <span id="welcome-msg" style="font-weight: 600; margin-right: 20px;">Welcome</span>
-            <button onclick="logout()" class="btn-secondary"
-                style="padding: 8px 16px; font-size: 0.9rem;">Logout</button>
+    <nav class="container">
+        <a href="/" class="nav-brand">Restaurant<span style="color: var(--accent-color);">Jobs</span></a>
+
+        <button id="mobile-menu-btn" class="mobile-menu-btn" aria-label="Toggle Menu">&#9776;</button>
+
+        <div id="nav-links" class="nav-links">
+            <a href="/settings.html" style="font-weight: 600; color: var(--text-color);">Settings</a>
+            <span id="welcome-msg" style="font-weight: 600;">Welcome</span>
+            <button onclick="logout()" class="btn-secondary">Logout</button>
         </div>
     </nav>
 
@@ -127,6 +127,7 @@
         </div>
     </main>
 
+    <script type="module" src="/src/ui.js"></script>
     <script type="module">
         import { supabase } from './src/supabaseClient.js';
 

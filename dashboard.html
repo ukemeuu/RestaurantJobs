@@ -14,17 +14,19 @@
 </head>
 
 <body>
-    <nav class="container" style="padding: 20px 0; display: flex; justify-content: space-between; align-items: center;">
+    <nav class="container">
         <div style="display: flex; align-items: center; gap: 20px;">
-            <a href="/"
-                style="font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 700; text-decoration: none; color: #333;">Restaurant<span
+            <a href="/" class="nav-brand" style="text-decoration: none; color: #333;">Restaurant<span
                     style="color: var(--accent-color);">Jobs</span> <span
                     style="font-size: 0.9rem; color: #666; font-weight: 400; margin-left: 5px;">Admin</span></a>
         </div>
-        <div>
-            <span style="font-weight: 600; margin-right: 20px;">Hello, Admin</span>
+
+        <button id="mobile-menu-btn" class="mobile-menu-btn" aria-label="Toggle Menu">&#9776;</button>
+
+        <div id="nav-links" class="nav-links">
+            <span style="font-weight: 600;">Hello, Admin</span>
             <button id="logout-btn" class="btn-secondary"
-                style="padding: 8px 16px; font-size: 0.9rem; border: 1px solid var(--accent-color); color: var(--accent-color);">Logout</button>
+                style="border: 1px solid var(--accent-color); color: var(--accent-color);">Logout</button>
         </div>
     </nav>
 
@@ -151,11 +153,12 @@
         <p id="loading" style="margin-top: 20px;">Loading data...</p>
     </main>
 
+    <script type="module" src="/src/ui.js"></script>
     <script type="module">
         import { supabase } from './src/supabaseClient.js';
 
         // Utility: Escape HTML to prevent XSS
-        window.escapeHtml = function(text) {
+        window.escapeHtml = function (text) {
             if (!text) return '';
             return text
                 .replace(/&/g, "&amp;")

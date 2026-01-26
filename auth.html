@@ -97,10 +97,17 @@
 
 <body>
 
-    <nav class="container" style="padding: 20px 0; display: flex; justify-content: center;">
-        <a href="/"
-            style="font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 700; text-decoration: none; color: #333;">Restaurant<span
+    <nav class="container">
+        <a href="/" class="nav-brand" style="text-decoration: none; color: #333;">Restaurant<span
                 style="color: var(--accent-color);">Jobs</span></a>
+
+        <button id="mobile-menu-btn" class="mobile-menu-btn" aria-label="Toggle Menu">&#9776;</button>
+
+        <div id="nav-links" class="nav-links">
+            <a href="/">Home</a>
+            <a href="/jobs.html">Find Jobs</a>
+            <a href="/auth.html" style="color: var(--accent-color);">Sign In</a>
+        </div>
     </nav>
 
     <div class="auth-container">
@@ -148,6 +155,7 @@
         </form>
     </div>
 
+    <script type="module" src="/src/ui.js"></script>
     <script type="module">
         import { supabase } from './src/supabaseClient.js';
 
@@ -226,12 +234,12 @@
                             });
                         }
 
-                // Redirect Logic
-                if (selectedRole === 'employer') {
-                    window.location.href = '/employer-dashboard.html';
-                } else {
-                    window.location.href = '/candidate-dashboard.html';
-                }
+                        // Redirect Logic
+                        if (selectedRole === 'employer') {
+                            window.location.href = '/employer-dashboard.html';
+                        } else {
+                            window.location.href = '/candidate-dashboard.html';
+                        }
                     }
 
                 } else {
