@@ -43,6 +43,7 @@
         <div id="nav-links" class="nav-links">
             <a href="/">Home</a>
             <a href="/jobs.html">Find Jobs</a>
+            <a href="/saved-jobs.html">Saved Jobs</a>
             <a href="/employer-register.html">Submit Job</a>
             <a href="/apply.html" style="color: var(--accent-color);">Submit CV</a>
             <a href="/auth.html">Sign In</a>
@@ -53,12 +54,12 @@
     <header
         style="position: relative; height: 80vh; display: flex; align-items: center; justify-content: center; overflow: hidden; color: white; text-align: center;">
         <!-- Video Background Placeholder -->
-        <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #2c2c2c; z-index: -1;">
-            <!-- In a real scenario, we'd use a video tag here. Using an overlay for now. -->
-            <div
-                style="width: 100%; height: 100%; background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('/kitchen-color.png') center/cover;">
-            </div>
+        <div class="hero-slideshow">
+            <div class="hero-slide" style="background-image: url('/hero-dining.png');"></div>
+            <div class="hero-slide" style="background-image: url('/hero-bar.png');"></div>
+            <div class="hero-slide" style="background-image: url('/kitchen-color.png');"></div>
         </div>
+        <div class="hero-overlay"></div>
 
         <div class="container fade-in" style="position: relative; z-index: 10;">
             <h1 style="font-size: 3.5rem; margin-bottom: 20px; color: #fff;">Hospitality Jobs Across Kenya</h1>
@@ -71,6 +72,22 @@
                 Jobs</a>
         </div>
     </header>
+
+    <!-- Featured Section -->
+    <section class="featured-section container fade-in">
+        <h2 style="font-size: 2.5rem; margin-bottom: 10px;">Featured Opportunities</h2>
+        <p style="color: var(--text-muted); max-width: 600px; margin: 0 auto;">Hand-picked roles from Kenya's most
+            prestigious establishments.</p>
+
+        <div id="featured-grid" class="featured-grid">
+            <!-- Loading -->
+            <p>Loading top jobs...</p>
+        </div>
+
+        <div style="margin-top: 40px;">
+            <a href="/jobs.html" class="btn-secondary">View All Positions</a>
+        </div>
+    </section>
 
     <!-- Footer -->
     <footer style="background-color: var(--text-main); color: white; padding: 40px 0; margin-top: 40px;">
@@ -92,8 +109,75 @@
     <!-- No Payment Modal for now -->
 
     <script type="module" src="/src/ui.js"></script>
-    <script>
-        // No upgrade logic needed
+    <script type="module">
+        import { supabase } from './src/supabaseClient.js';
+        import { isJobSaved, toggleSaveJob } from './src/ui.js';
+
+        // Expose toggle to window
+        window.toggleSave = function (id, btn) {
+            const isNowSaved = toggleSaveJob(id);
+            btn.innerText = isNowSaved ? '♥' : '♡';
+            btn.style.color = isNowSaved ? 'var(--error-color)' : 'var(--text-muted)';
+            if (isNowSaved) {
+                btn.style.transform = 'scale(1.2)';
+                setTimeout(() => btn.style.transform = 'scale(1)', 200);
+            }
+        };
+
+        async function loadFeaturedJobs() {
+            const grid = document.getElementById('featured-grid');
+            try {
+                // Fetch top 3 paying jobs
+                const { data: jobs, error } = await supabase
+                    .from('jobs')
+                    .select('*')
+                    .eq('status', 'published')
+                    .gt('salary_max', 40000) // "High paying"
+                    .order('created_at', { ascending: false })
+                    .limit(3);
+
+                if (error) throw error;
+
+                if (!jobs || jobs.length === 0) {
+                    grid.innerHTML = '<p>No featured jobs at the moment.</p>';
+                    return;
+                }
+
+                grid.innerHTML = '';
+                jobs.forEach(job => {
+                    const card = document.createElement('div');
+                    card.className = 'card';
+                    card.style.textAlign = 'left';
+                    card.style.display = 'flex';
+                    card.style.flexDirection = 'column';
+                    card.style.position = 'relative'; // For heart icon
+
+                    const isSaved = isJobSaved(job.id);
+                    const heartIcon = isSaved ? '♥' : '♡';
+                    const heartColor = isSaved ? 'var(--error-color)' : 'var(--text-muted)';
+
+                    card.innerHTML = `
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 15px;">
+                            <h3 style="font-size: 1.25rem;">${job.title}</h3>
+                            <span style="background: var(--accent-color); color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem;">Featured</span>
+                        </div>
+                        <div style="margin-bottom: 10px; color: var(--text-muted); font-size: 0.9rem;">
+                            <span>📍 ${job.location}</span> • <span>💰 ${job.salary_max ? (job.salary_max / 1000) + 'k' : 'Competitive'}</span>
+                        </div>
+                        <p style="font-size: 0.9rem; margin-bottom: 20px; flex-grow: 1;">${job.description.substring(0, 100)}...</p>
+                        <a href="/job-details.html?id=${job.id}" style="color: var(--accent-color); font-weight: 600;">Apply Now &rarr;</a>
+                        <button onclick="toggleSave('${job.id}', this)" style="position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 1.5rem; color: ${heartColor}; cursor: pointer; transition: transform 0.2s;">${heartIcon}</button>
+                    `;
+                    grid.appendChild(card);
+                });
+
+            } catch (err) {
+                console.error(err);
+                grid.innerHTML = '<p>Could not load jobs.</p>';
+            }
+        }
+
+        loadFeaturedJobs();
     </script>
 </body>
 

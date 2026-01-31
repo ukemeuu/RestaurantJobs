@@ -52,11 +52,33 @@ export function showToast(message, type = 'success') {
     }, 3000);
 }
 
+// Saved Jobs Management
+export function getSavedJobs() {
+    const saved = localStorage.getItem('restaurant_saved_jobs');
+    return saved ? JSON.parse(saved) : [];
+}
+
+export function isJobSaved(id) {
+    const saved = getSavedJobs();
+    return saved.includes(id);
+}
+
+export function toggleSaveJob(id) {
+    let saved = getSavedJobs();
+    if (saved.includes(id)) {
+        saved = saved.filter(jobId => jobId !== id);
+        showToast('Job removed from favorites', 'success');
+    } else {
+        saved.push(id);
+        showToast('Job saved to favorites', 'success');
+    }
+    localStorage.setItem('restaurant_saved_jobs', JSON.stringify(saved));
+    return saved.includes(id);
+}
+
 // Auto-initialize if running in browser
 if (typeof window !== 'undefined') {
     document.addEventListener('DOMContentLoaded', () => {
-        // We can optionally call setupMobileMenu here if we rely on DOMContentLoaded
-        // But since we use type="module", scripts defer by default.
         setupMobileMenu();
     });
 }

@@ -261,8 +261,24 @@
                     </div>
                 </div>
 
-                <!-- Step 2: Duration -->
+                <!-- Step 2: Experience Level -->
                 <div class="step-container" data-step="2">
+                    <h2 class="step-question">What experience level is required?</h2>
+                    <select id="experienceLevel" name="experienceLevel" class="typeform-input" required>
+                        <option value="" disabled selected>Select Level</option>
+                        <option value="Entry">Entry Level (0-2 years)</option>
+                        <option value="Mid">Mid Level (2-5 years)</option>
+                        <option value="Senior">Senior Level (5+ years)</option>
+                        <option value="Executive">Executive / Management</option>
+                    </select>
+                    <div class="nav-buttons">
+                        <button type="button" class="btn-white" onclick="nextStep()">Next</button>
+                        <button type="button" class="btn-text" onclick="prevStep()">Back</button>
+                    </div>
+                </div>
+
+                <!-- Step 3: Duration -->
+                <div class="step-container" data-step="3">
                     <h2 class="step-question">How long is this position for?</h2>
                     <select id="jobDuration" name="jobDuration" class="typeform-input" required>
                         <option value="" disabled selected>Select Duration</option>
@@ -276,8 +292,8 @@
                     </div>
                 </div>
 
-                <!-- Step 3: Salary -->
-                <div class="step-container" data-step="3">
+                <!-- Step 4: Salary -->
+                <div class="step-container" data-step="4">
                     <h2 class="step-question">What is the salary budget?</h2>
                     <input type="text" id="jobSalary" name="jobSalary" class="typeform-input"
                         style="border-radius: 50px;" placeholder="e.g. KES 50,000 - 80,000" required>
@@ -287,8 +303,8 @@
                     </div>
                 </div>
 
-                <!-- Step 4: Start Date -->
-                <div class="step-container" data-step="4">
+                <!-- Step 5: Start Date -->
+                <div class="step-container" data-step="5">
                     <h2 class="step-question">How soon do you need them?</h2>
                     <select id="startDate" name="startDate" class="typeform-input" required>
                         <option value="" disabled selected>Select Timeline</option>
@@ -303,8 +319,8 @@
                     </div>
                 </div>
 
-                <!-- Step 5: Org Details -->
-                <div class="step-container" data-step="5">
+                <!-- Step 6: Org Details -->
+                <div class="step-container" data-step="6">
                     <h2 class="step-question">About your establishment.</h2>
                     <div style="display: flex; gap: 20px; flex-wrap: wrap;">
                         <div style="flex:1; min-width: 250px;">
@@ -328,8 +344,8 @@
                     </div>
                 </div>
 
-                <!-- Step 6: Contact Info -->
-                <div class="step-container" data-step="6">
+                <!-- Step 7: Contact Info -->
+                <div class="step-container" data-step="7">
                     <h2 class="step-question">How can we reach you?</h2>
                     <div style="display: flex; gap: 20px; flex-wrap: wrap;">
                         <div style="flex:1; min-width: 250px;">
@@ -383,7 +399,7 @@
         import { supabase } from './src/supabaseClient.js';
 
         let currentStep = 0;
-        const totalSteps = 6;
+        const totalSteps = 7;
         const form = document.getElementById('submission-form');
         const progressBar = document.getElementById('progressBar');
 
@@ -460,6 +476,7 @@
                         description: data.jobDesc,
                         duration: data.jobDuration,
                         salary: data.jobSalary,
+                        experience_level: data.experienceLevel,
                         start_date: data.startDate,
 
                         // Contact Info

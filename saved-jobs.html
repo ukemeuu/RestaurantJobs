@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Open Positions | RestaurantJobs Kenya</title>
+    <title>Your Saved Jobs | RestaurantJobs Kenya</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -24,8 +24,8 @@
 
         <div id="nav-links" class="nav-links">
             <a href="/">Home</a>
-            <a href="/jobs.html" style="color: var(--accent-color);">Find Jobs</a>
-            <a href="/saved-jobs.html">Saved Jobs</a>
+            <a href="/jobs.html">Find Jobs</a>
+            <a href="/saved-jobs.html" style="color: var(--accent-color);">Saved Jobs</a>
             <a href="/employer-register.html">Submit Job</a>
             <a href="/apply.html">Submit CV</a>
         </div>
@@ -33,75 +33,10 @@
 
     <main class="container" style="padding: 40px 20px;">
         <div style="text-align: center; margin-bottom: 60px;">
-            <h1 style="font-size: 3rem; margin-bottom: 15px;">Hospitality Jobs in Kenya</h1>
-            <p style="color: var(--text-muted); max-width: 600px; margin: 0 auto; margin-bottom: 30px;">Discover
-                opportunities at Nairobi's
-                top restaurants and Kenyan resorts.</p>
-
-            <div class="card"
-                style="max-width: 900px; margin: 0 auto; padding: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; align-items: end;">
-                <div>
-                    <label
-                        style="display: block; text-align: left; font-weight: 600; margin-bottom: 5px; font-size: 0.9rem;">Search</label>
-                    <input type="text" id="search-text" placeholder="Chef, Waiter, Manager..."
-                        style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
-                </div>
-                <div>
-                    <label
-                        style="display: block; text-align: left; font-weight: 600; margin-bottom: 5px; font-size: 0.9rem;">Location</label>
-                    <select id="filter-location"
-                        style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; background: white;">
-                        <option value="">All Locations</option>
-                        <option value="Nairobi">Nairobi</option>
-                        <option value="Mombasa">Mombasa</option>
-                        <option value="Kisumu">Kisumu</option>
-                        <option value="Nakuru">Nakuru</option>
-                        <option value="Eldoret">Eldoret</option>
-                    </select>
-                </div>
-                <div>
-                    <label
-                        style="display: block; text-align: left; font-weight: 600; margin-bottom: 5px; font-size: 0.9rem;">Job
-                        Type</label>
-                    <select id="filter-type"
-                        style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; background: white;">
-                        <option value="">All Types</option>
-                        <option value="Full-time">Full-time</option>
-                        <option value="Part-time">Part-time</option>
-                        <option value="Contract">Contract</option>
-                        <option value="Casual">Casual</option>
-                    </select>
-                </div>
-                <div>
-                    <label
-                        style="display: block; text-align: left; font-weight: 600; margin-bottom: 5px; font-size: 0.9rem;">Experience</label>
-                    <select id="filter-experience"
-                        style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; background: white;">
-                        <option value="">Any Level</option>
-                        <option value="Entry">Entry Level</option>
-                        <option value="Mid">Mid Level</option>
-                        <option value="Senior">Senior Level</option>
-                        <option value="Executive">Executive</option>
-                    </select>
-                </div>
-                <div>
-                    <label
-                        style="display: block; text-align: left; font-weight: 600; margin-bottom: 5px; font-size: 0.9rem;">Min
-                        Salary (KES)</label>
-                    <select id="filter-salary"
-                        style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; background: white;">
-                        <option value="">Any Budget</option>
-                        <option value="20000">20,000+</option>
-                        <option value="30000">30,000+</option>
-                        <option value="50000">50,000+</option>
-                        <option value="80000">80,000+</option>
-                        <option value="100000">100,000+</option>
-                    </select>
-                </div>
-                <button onclick="loadJobs()" class="btn"
-                    style="height: 42px; display: flex; align-items: center; justify-content: center;">Find
-                    Jobs</button>
-            </div>
+            <h1 style="font-size: 3rem; margin-bottom: 15px;">Your Saved Jobs</h1>
+            <p style="color: var(--text-muted); max-width: 600px; margin: 0 auto; margin-bottom: 30px;">
+                Review and apply to your favorite positions.
+            </p>
         </div>
 
         <div id="jobs-container"
@@ -126,56 +61,38 @@
 
         // Supabase Integration
         import { supabase } from './src/supabaseClient.js';
-        import { isJobSaved, toggleSaveJob } from './src/ui.js';
+        import { isJobSaved, toggleSaveJob, getSavedJobs } from './src/ui.js';
 
         // Expose toggle to window
         window.toggleSave = function (id, btn) {
             const isNowSaved = toggleSaveJob(id);
+            // If on saved page, maybe remove card? No, simpler to just toggle state for now.
+            if (!isNowSaved) {
+                // Option: Remove the card visually instantly
+                // btn.closest('.card').remove(); 
+                // But let's just toggle icon first to avoid accidents
+            }
             btn.innerText = isNowSaved ? '♥' : '♡';
             btn.style.color = isNowSaved ? 'var(--error-color)' : 'var(--text-muted)';
-            if (isNowSaved) {
-                btn.style.transform = 'scale(1.2)';
-                setTimeout(() => btn.style.transform = 'scale(1)', 200);
-            }
         };
 
         window.loadJobs = async function () {
             try {
                 const container = document.getElementById('jobs-container');
-                container.innerHTML = '<p class="fade-in">Loading positions...</p>';
+                container.innerHTML = '<p class="fade-in">Loading saved jobs...</p>';
 
-                // Get filter values
-                const searchText = document.getElementById('search-text').value;
-                const location = document.getElementById('filter-location').value;
-                const type = document.getElementById('filter-type').value;
-                const experience = document.getElementById('filter-experience').value;
-                const minSalary = document.getElementById('filter-salary').value;
+                const savedIds = getSavedJobs();
+
+                if (savedIds.length === 0) {
+                    container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; background: #f9f9f9; border-radius: 8px;"><h3>You haven\'t saved any jobs yet.</h3><p><a href="/jobs.html">Browse Jobs</a></p></div>';
+                    return;
+                }
 
                 let query = supabase
                     .from('jobs')
                     .select('*')
-                    .eq('status', 'published')
-                    .order('created_at', { ascending: false });
+                    .in('id', savedIds);
 
-                // Apply Filters
-                if (location) {
-                    query = query.ilike('location', `%${location}%`);
-                }
-                if (type) {
-                    query = query.eq('type', type);
-                }
-                if (experience) {
-                    query = query.eq('experience_level', experience);
-                }
-                if (minSalary) {
-                    // Show jobs where max salary budget is >= user's desired min salary
-                    query = query.gte('salary_max', parseInt(minSalary));
-                }
-                if (searchText) {
-                    // Search in title OR description
-                    // Supabase 'or' syntax: .or(`title.ilike.%${searchText}%,description.ilike.%${searchText}%`)
-                    query = query.or(`title.ilike.%${searchText}%,description.ilike.%${searchText}%`);
-                }
 
                 const { data: jobs, error } = await query;
 
@@ -201,7 +118,7 @@
 
 
                     const logoHtml = job.logo_url
-                        ? `<img src="${job.logo_url}" alt="${job.title}" loading="lazy" style="width: 50px; height: 50px; object-fit: contain; border-radius: 6px; border: 1px solid #eee;">`
+                        ? `<img src="${job.logo_url}" alt="${job.title}" style="width: 50px; height: 50px; object-fit: contain; border-radius: 6px; border: 1px solid #eee;">`
                         : `<div style="width: 50px; height: 50px; background: #eee; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">🏢</div>`;
 
                     card.innerHTML = `

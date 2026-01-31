@@ -11,7 +11,10 @@ create table jobs (
   description text not null,
   employer_id uuid references auth.users(id),
   source text default 'employer', -- 'employer' or 'internal'
-  status text default 'published'
+  status text default 'published',
+  salary_min integer,
+  salary_max integer,
+  experience_level text -- 'Entry', 'Mid', 'Senior', 'Executive'
 );
 
 -- Access policies for Jobs
@@ -79,6 +82,7 @@ create table hiring_requests (
   type text,
   duration text,
   salary text,
+  experience_level text,
   start_date text,
   org_name text,
   contact_name text,
