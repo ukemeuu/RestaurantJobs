@@ -543,6 +543,7 @@ footer .container {
   line-height: 1.6;
   margin: 0;
   flex-grow: 1;
+  text-align: left;
 }
 
 .featured-cta {
