@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cook Jobs in Nakuru | Apply Now | RestaurantJobs Kenya</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&family=Playfair+Display:wght@500;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="./style.css">
+    <!-- Schema Markup will be injected dynamically or script tag here -->
+    <meta name="description" content="Browse the latest Cook jobs in Nakuru. Apply for top restaurant and hotel positions in Nakuru today on RestaurantJobs Kenya." />
+    <link rel="canonical" href="https://restaurantjobs.co.ke/cook-jobs-nakuru.html" />
+</head>
+
+<body>
+    <!-- Navbar -->
+    <!-- Navbar -->
+    <nav class="container">
+        <a href="/" class="nav-brand">Restaurant<span style="color: var(--accent-color);">Jobs</span></a>
+
+        <button id="mobile-menu-btn" class="mobile-menu-btn" aria-label="Toggle Menu">&#9776;</button>
+
+        <div id="nav-links" class="nav-links">
+            <a href="/">Home</a>
+            <a href="/jobs.html" style="color: var(--accent-color);">Find Jobs</a>
+            <a href="/saved-jobs.html">Saved Jobs</a>
+            <a href="/employer-register.html">Submit Job</a>
+            <a href="/apply.html">Submit CV</a>
+        </div>
+    </nav>
+
+    <main class="container" style="padding: 40px 20px;">
+        <div style="text-align: center; margin-bottom: 60px;">
+            <h1 style="font-size: 3rem; margin-bottom: 15px;">Cook Jobs in Nakuru</h1>
+            <p style="color: var(--text-muted); max-width: 600px; margin: 0 auto; margin-bottom: 30px;">Discover
+                opportunities at Nairobi's
+                top restaurants and Kenyan resorts.</p>
+
+            <div class="card"
+                style="max-width: 900px; margin: 0 auto; padding: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; align-items: end;">
+                <div>
+                    <label
+                        style="display: block; text-align: left; font-weight: 600; margin-bottom: 5px; font-size: 0.9rem;">Search</label>
+                    <input type="text" id="search-text" value="Cook" placeholder="Chef, Waiter, Manager..."
+                        style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+                </div>
+                <div>
+                    <label
+                        style="display: block; text-align: left; font-weight: 600; margin-bottom: 5px; font-size: 0.9rem;">Location</label>
+                    <select id="filter-location"
+                        style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; background: white;">
+                        <option value="">All Locations</option>
+                        <option value="Nairobi">Nairobi</option>
+                        <option value="Mombasa">Mombasa</option>
+                        <option value="Kisumu">Kisumu</option>
+                        <option value="Nakuru" selected>Nakuru</option>
+                        <option value="Eldoret">Eldoret</option>
+                    </select>
+                </div>
+                <div>
+                    <label
+                        style="display: block; text-align: left; font-weight: 600; margin-bottom: 5px; font-size: 0.9rem;">Job
+                        Type</label>
+                    <select id="filter-type"
+                        style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; background: white;">
+                        <option value="">All Types</option>
+                        <option value="Full-time">Full-time</option>
+                        <option value="Part-time">Part-time</option>
+                        <option value="Contract">Contract</option>
+                        <option value="Casual">Casual</option>
+                    </select>
+                </div>
+                <div>
+                    <label
+                        style="display: block; text-align: left; font-weight: 600; margin-bottom: 5px; font-size: 0.9rem;">Experience</label>
+                    <select id="filter-experience"
+                        style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; background: white;">
+                        <option value="">Any Level</option>
+                        <option value="Entry">Entry Level</option>
+                        <option value="Mid">Mid Level</option>
+                        <option value="Senior">Senior Level</option>
+                        <option value="Executive">Executive</option>
+                    </select>
+                </div>
+                <div>
+                    <label
+                        style="display: block; text-align: left; font-weight: 600; margin-bottom: 5px; font-size: 0.9rem;">Min
+                        Salary (KES)</label>
+                    <select id="filter-salary"
+                        style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; background: white;">
+                        <option value="">Any Budget</option>
+                        <option value="20000">20,000+</option>
+                        <option value="30000">30,000+</option>
+                        <option value="50000">50,000+</option>
+                        <option value="80000">80,000+</option>
+                        <option value="100000">100,000+</option>
+                    </select>
+                </div>
+                <button onclick="loadJobs()" class="btn"
+                    style="height: 42px; display: flex; align-items: center; justify-content: center;">Find
+                    Jobs</button>
+            </div>
+        </div>
+
+        <div id="jobs-container"
+            style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 30px;">
+            <!-- Jobs will be loaded here via JS -->
+            <p class="fade-in">Loading positions...</p>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer style="background-color: var(--text-main); color: white; padding: 40px 0; margin-top: 80px;">
+        <div class="container">
+            <p style="text-align: center; color: #999; font-size: 0.9rem;">&copy; 2026 RestaurantJobs Kenya. All rights
+                reserved.</p>
+        </div>
+    </footer>
+
+    <script type="module" src="/src/ui.js"></script>
+    <script type="module">
+        // Basic fetch logic inline or from src/main.js
+        // We'll put logic in separate file but for simplicity inline here for now or linked
+
+        // Supabase Integration
+        import { supabase } from './src/supabaseClient.js';
+        import { isJobSaved, toggleSaveJob } from './src/ui.js';
+
+        // Expose toggle to window
+        window.toggleSave = function (id, btn) {
+            const isNowSaved = toggleSaveJob(id);
+            btn.innerText = isNowSaved ? '♥' : '♡';
+            btn.style.color = isNowSaved ? 'var(--error-color)' : 'var(--text-muted)';
+            if (isNowSaved) {
+                btn.style.transform = 'scale(1.2)';
+                setTimeout(() => btn.style.transform = 'scale(1)', 200);
+            }
+        };
+
+        window.loadJobs = async function () {
+            try {
+                const container = document.getElementById('jobs-container');
+                container.innerHTML = '<p class="fade-in">Loading positions...</p>';
+
+                // Get filter values
+                const searchText = document.getElementById('search-text').value;
+                const location = document.getElementById('filter-location').value;
+                const type = document.getElementById('filter-type').value;
+                const experience = document.getElementById('filter-experience').value;
+                const minSalary = document.getElementById('filter-salary').value;
+
+                let query = supabase
+                    .from('jobs')
+                    .select('*')
+                    .eq('status', 'published')
+                    .order('created_at', { ascending: false });
+
+                // Apply Filters
+                if (location) {
+                    query = query.ilike('location', `%${location}%`);
+                }
+                if (type) {
+                    query = query.eq('type', type);
+                }
+                if (experience) {
+                    query = query.eq('experience_level', experience);
+                }
+                if (minSalary) {
+                    // Show jobs where max salary budget is >= user's desired min salary
+                    query = query.gte('salary_max', parseInt(minSalary));
+                }
+                if (searchText) {
+                    // Search in title OR description
+                    // Supabase 'or' syntax: .or(`title.ilike.%${searchText}%,description.ilike.%${searchText}%`)
+                    query = query.or(`title.ilike.%${searchText}%,description.ilike.%${searchText}%`);
+                }
+
+                const { data: jobs, error } = await query;
+
+                if (error) throw error;
+
+                container.innerHTML = '';
+
+                if (!jobs || jobs.length === 0) {
+                    container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; background: #f9f9f9; border-radius: 8px;"><h3>No jobs match your filters.</h3><p>Try adjusting your search criteria.</p></div>';
+                    return;
+                }
+
+                jobs.forEach(job => {
+                    const card = document.createElement('div');
+                    card.className = 'card fade-in';
+                    card.style.display = 'flex';
+                    card.style.flexDirection = 'column';
+                    card.style.position = 'relative'; // For heart icon
+
+                    const isSaved = isJobSaved(job.id);
+                    const heartIcon = isSaved ? '♥' : '♡';
+                    const heartColor = isSaved ? 'var(--error-color)' : 'var(--text-muted)';
+
+
+                    const logoHtml = job.logo_url
+                        ? `<img src="${job.logo_url}" alt="${job.title}" loading="lazy" style="width: 50px; height: 50px; object-fit: contain; border-radius: 6px; border: 1px solid #eee;">`
+                        : `<div style="width: 50px; height: 50px; background: #eee; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">🏢</div>`;
+
+                    card.innerHTML = `
+                        <div style="display: flex; gap: 15px; margin-bottom: 10px;">
+                            ${logoHtml}
+                            <div>
+                                <h3 style="margin-bottom: 5px;">${job.title}</h3>
+                                <div style="font-size: 0.9rem; color: var(--text-muted);">
+                                    <span>📍 ${job.location}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 15px; font-size: 0.85rem; display: flex; gap: 10px; flex-wrap: wrap;">
+                             <span style="background: #f0f0f0; padding: 4px 8px; border-radius: 4px;">⏱ ${job.type}</span>
+                             ${job.experience_level ? `<span style="background: #e3f2fd; color: #1565c0; padding: 4px 8px; border-radius: 4px;">🎓 ${job.experience_level}</span>` : ''}
+                             ${job.salary_max ? `<span style="background: #e8f5e9; color: #2e7d32; padding: 4px 8px; border-radius: 4px;">💰 ${job.salary_min ? (job.salary_min / 1000) + 'k' : ''} - ${(job.salary_max / 1000)}k</span>` : ''}
+                        </div>
+                        <p style="margin-bottom: 20px; flex-grow: 1;">${job.description.substring(0, 150)}...</p>
+                        <a href="/job-details.html?id=${job.id}" class="btn" style="text-align: center;">View Details</a>
+                        <button onclick="toggleSave('${job.id}', this)" style="position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 1.5rem; color: ${heartColor}; cursor: pointer; transition: transform 0.2s;">${heartIcon}</button>
+                    `;
+                    container.appendChild(card);
+                });
+
+            } catch (error) {
+                console.error('Error loading jobs:', error);
+                document.getElementById('jobs-container').innerText = 'Failed to load jobs. Please ensure you are connected to the internet.';
+            }
+        }
+
+        // Expose to window for button click
+        // window.loadJobs = loadJobs; // Already defined as window.loadJobs above
+
+        // Setup simple SEO Schema
+        const script = document.createElement('script');
+        script.type = 'application/ld+json';
+        script.text = JSON.stringify({
+            "@context": "https://schema.org/",
+            "@type": "EmploymentAgency",
+            "name": "RestaurantJobs Kenya",
+            "url": "https://restaurantjobs.co.ke",
+            "address": {
+                "@type": "PostalAddress",
+                "addressLocality": "Nairobi",
+                "addressCountry": "KE"
+            },
+            "telephone": "+254 700 123 456"
+        });
+        document.head.appendChild(script);
+
+        loadJobs();
+    </script>
+</body>
+
+</html>
