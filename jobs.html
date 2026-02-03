@@ -139,6 +139,31 @@
             }
         };
 
+        window.shareJob = async function (title, id) {
+            const url = window.location.origin + '/job-details.html?id=' + id;
+            const shareData = {
+                title: title,
+                text: `Check out this ${title} job on RestaurantJobs Kenya!`,
+                url: url
+            };
+
+            if (navigator.share) {
+                try {
+                    await navigator.share(shareData);
+                } catch (err) {
+                    console.log('Share canceled');
+                }
+            } else {
+                // Fallback: Copy to clipboard
+                try {
+                    await navigator.clipboard.writeText(url);
+                    alert('Job link copied to clipboard!');
+                } catch (err) {
+                    prompt('Copy this link:', url);
+                }
+            }
+        };
+
         window.loadJobs = async function () {
             try {
                 const container = document.getElementById('jobs-container');
@@ -201,7 +226,7 @@
 
 
                     const logoHtml = job.logo_url
-                        ? `<img src="${job.logo_url}" alt="${job.title}" loading="lazy" style="width: 50px; height: 50px; object-fit: contain; border-radius: 6px; border: 1px solid #eee;">`
+                        ? `<img src="${job.logo_url}" alt="${job.title}" loading="lazy" onerror="this.onerror=null; this.src='/images/company-logo.png';" style="width: 50px; height: 50px; object-fit: contain; border-radius: 6px; border: 1px solid #eee;">`
                         : `<img src="/images/company-logo.png" alt="RestaurantJobs" loading="lazy" style="width: 50px; height: 50px; object-fit: contain; border-radius: 6px; border: 1px solid #eee;">`;
 
                     card.innerHTML = `
@@ -221,7 +246,10 @@
                         </div>
                         <p style="margin-bottom: 20px; flex-grow: 1;">${job.description.substring(0, 150)}...</p>
                         <a href="/job-details.html?id=${job.id}" class="btn" style="text-align: center;">View Details</a>
-                        <button onclick="toggleSave('${job.id}', this)" style="position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 1.5rem; color: ${heartColor}; cursor: pointer; transition: transform 0.2s;">${heartIcon}</button>
+                        <button onclick="shareJob('${job.title.replace(/'/g, "\\'")}', '${job.id}')" style="position: absolute; top: 15px; right: 55px; background: white; border: 1px solid #eee; border-radius: 50%; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; color: var(--text-muted); cursor: pointer; transition: all 0.2s;" title="Share" onmouseover="this.style.color='var(--accent-color)'" onmouseout="this.style.color='var(--text-muted)'">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+                        </button>
+                        <button onclick="toggleSave('${job.id}', this)" style="position: absolute; top: 15px; right: 15px; background: white; border: 1px solid #eee; border-radius: 50%; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; color: ${heartColor}; cursor: pointer; transition: transform 0.2s; padding-top: 2px;">${heartIcon}</button>
                     `;
                     container.appendChild(card);
                 });

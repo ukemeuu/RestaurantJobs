@@ -41,6 +41,18 @@
                 <span id="job-location">📍 Location</span>
                 <span id="job-type">⏱ Type</span>
                 <span id="job-date">📅 Posted: Date</span>
+                <button id="share-btn"
+                    style="background:none; border:none; cursor:pointer; font-size:1rem; color:var(--accent-color); display: flex; align-items: center; gap: 5px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="18" cy="5" r="3"></circle>
+                        <circle cx="6" cy="12" r="3"></circle>
+                        <circle cx="18" cy="19" r="3"></circle>
+                        <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                        <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                    </svg>
+                    Share
+                </button>
             </div>
 
             <div class="card" style="padding: 40px; margin-bottom: 40px;">
@@ -105,6 +117,7 @@
                 if (job.logo_url) {
                     const logoImg = document.createElement('img');
                     logoImg.src = job.logo_url;
+                    logoImg.onerror = function() { this.src = '/images/company-logo.png'; };
                     logoImg.style.width = '80px';
                     logoImg.style.height = '80px';
                     logoImg.style.objectFit = 'contain';
@@ -189,6 +202,25 @@
                 // Show
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('job-content').style.display = 'block';
+                
+                // Bind Share Button
+                document.getElementById('share-btn').onclick = async function() {
+                    const shareData = {
+                        title: job.title,
+                        text: `Check out this ${job.title} position at ${job.location}`,
+                        url: window.location.href
+                    };
+                    if (navigator.share) {
+                        try { await navigator.share(shareData); } catch (e) {}
+                    } else {
+                        try {
+                            await navigator.clipboard.writeText(window.location.href);
+                            alert('Link copied to clipboard');
+                        } catch (e) {
+                             prompt('Copy link:', window.location.href);
+                        }
+                    }
+                };
 
             } catch (err) {
                 console.error(err);
