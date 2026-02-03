@@ -12,7 +12,10 @@ create table if not exists jobs (
   employer_id uuid references auth.users(id),
   source text default 'employer', -- 'employer' or 'internal'
   status text default 'published',
-  logo_url text
+  logo_url text,
+  salary_min integer,
+  salary_max integer,
+  experience_level text
 );
 
 -- Access policies for Jobs

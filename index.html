@@ -152,7 +152,7 @@
                     .from('jobs')
                     .select('*')
                     .eq('status', 'published')
-                    .gt('salary_max', 40000) // "High paying"
+                    // .gt('salary_max', 40000) // Temporarily removed to prevent "column does not exist" error
                     .order('created_at', { ascending: false })
                     .limit(3);
 
