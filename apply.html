@@ -12,97 +12,68 @@
         rel="stylesheet">
     <link rel="stylesheet" href="./index.css">
     <style>
-        .application-container {
-            max-width: 700px;
-            margin: 60px auto;
-            padding: 20px;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
-        .application-card {
-            background: white;
-            border-radius: 16px;
-            padding: 50px 40px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        body {
+            font-family: 'Nunito', sans-serif;
+            overflow-x: hidden;
         }
 
-        .progress-bar {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 50px;
-            position: relative;
-        }
-
-        .progress-bar::before {
-            content: '';
-            position: absolute;
-            top: 20px;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: #e9ecef;
-            z-index: 0;
-        }
-
-        .progress-step {
+        .typeform-container {
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
-            align-items: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             position: relative;
-            z-index: 1;
-            flex: 1;
         }
 
-        .progress-circle {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: white;
-            border: 2px solid #e9ecef;
+        .typeform-header {
+            padding: 20px 40px;
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            justify-content: center;
-            font-weight: 600;
-            color: #999;
-            margin-bottom: 8px;
-            transition: all 0.3s ease;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
         }
 
-        .progress-step.active .progress-circle {
-            background: var(--accent-color);
-            border-color: var(--accent-color);
+        .typeform-logo {
             color: white;
+            font-size: 1.5rem;
+            font-weight: 700;
+            text-decoration: none;
         }
 
-        .progress-step.completed .progress-circle {
-            background: #28a745;
-            border-color: #28a745;
+        .typeform-progress {
             color: white;
+            font-size: 0.9rem;
+            opacity: 0.9;
         }
 
-        .progress-label {
-            font-size: 0.85rem;
-            color: #999;
-            text-align: center;
-        }
-
-        .progress-step.active .progress-label {
-            color: var(--accent-color);
-            font-weight: 600;
-        }
-
-        .form-section {
+        .question-container {
+            flex: 1;
             display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 100px 40px 40px;
+            animation: slideIn 0.4s ease;
         }
 
-        .form-section.active {
-            display: block;
-            animation: fadeIn 0.3s ease;
+        .question-container.active {
+            display: flex;
         }
 
-        @keyframes fadeIn {
+        @keyframes slideIn {
             from {
                 opacity: 0;
-                transform: translateY(10px);
+                transform: translateY(20px);
             }
 
             to {
@@ -111,299 +82,409 @@
             }
         }
 
-        .form-group {
-            margin-bottom: 25px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: var(--text-main);
-        }
-
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
+        .question-content {
+            max-width: 700px;
             width: 100%;
-            padding: 12px 16px;
-            border: 2px solid #e9ecef;
-            border-radius: 8px;
-            font-size: 1rem;
+        }
+
+        .question-number {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .question-text {
+            color: white;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 40px;
+            line-height: 1.3;
+        }
+
+        .answer-input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            border-bottom: 3px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            font-size: 1.5rem;
+            padding: 15px 0;
+            outline: none;
             transition: all 0.3s ease;
             font-family: 'Nunito', sans-serif;
         }
 
-        .form-group input:focus,
-        .form-group select:focus,
-        .form-group textarea:focus {
-            outline: none;
-            border-color: var(--accent-color);
-            box-shadow: 0 0 0 3px rgba(255, 107, 0, 0.1);
+        .answer-input:focus {
+            border-bottom-color: white;
         }
 
-        .form-group textarea {
-            resize: vertical;
-            min-height: 100px;
+        .answer-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
         }
 
-        .file-upload-area {
-            border: 2px dashed #e9ecef;
+        select.answer-input {
+            background: rgba(255, 255, 255, 0.1);
             border-radius: 8px;
-            padding: 30px;
-            text-align: center;
-            transition: all 0.3s ease;
+            padding: 15px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
             cursor: pointer;
         }
 
-        .file-upload-area:hover {
-            border-color: var(--accent-color);
-            background: #fff3e0;
-        }
-
-        .file-upload-area.has-file {
-            border-color: #28a745;
-            background: #f0f9f4;
-        }
-
-        .button-group {
-            display: flex;
-            gap: 15px;
-            margin-top: 30px;
-        }
-
-        .btn-secondary {
-            background: #e9ecef;
-            color: var(--text-main);
-        }
-
-        .btn-secondary:hover {
-            background: #dee2e6;
-        }
-
-        .btn {
-            flex: 1;
-            padding: 14px 30px;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border: none;
-            font-size: 1rem;
-        }
-
-        .btn-primary {
-            background: var(--accent-color);
+        select.answer-input option {
+            background: #764ba2;
             color: white;
         }
 
-        .btn-primary:hover {
-            background: #e65c00;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(255, 107, 0, 0.3);
+        textarea.answer-input {
+            min-height: 150px;
+            resize: vertical;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
         }
 
-        .success-message {
+        .file-upload-box {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
+            padding: 50px 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .file-upload-box:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: white;
+        }
+
+        .file-upload-box.has-file {
+            border-color: #4caf50;
+            background: rgba(76, 175, 80, 0.2);
+        }
+
+        .file-upload-text {
+            color: white;
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+
+        .file-upload-hint {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+        }
+
+        .navigation-buttons {
+            margin-top: 40px;
+            display: flex;
+            gap: 15px;
+        }
+
+        .nav-btn {
+            background: white;
+            color: #667eea;
+            border: none;
+            padding: 15px 35px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Nunito', sans-serif;
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .nav-btn.secondary {
+            background: transparent;
+            color: white;
+            border: 2px solid white;
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .success-screen {
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
             text-align: center;
             padding: 40px;
         }
 
+        .success-screen.active {
+            display: flex;
+        }
+
         .success-icon {
-            width: 80px;
-            height: 80px;
-            background: #28a745;
+            width: 100px;
+            height: 100px;
+            background: white;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 20px;
+            font-size: 50px;
+            margin-bottom: 30px;
+            animation: scaleIn 0.5s ease;
+        }
+
+        @keyframes scaleIn {
+            from {
+                transform: scale(0);
+            }
+
+            to {
+                transform: scale(1);
+            }
+        }
+
+        .success-title {
             color: white;
-            font-size: 40px;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        .success-text {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.2rem;
+            margin-bottom: 40px;
+            max-width: 500px;
+        }
+
+        .error-message {
+            background: rgba(244, 67, 54, 0.9);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .hint-text {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+            margin-top: 10px;
         }
 
         @media (max-width: 768px) {
-            .application-card {
-                padding: 30px 20px;
+            .question-text {
+                font-size: 1.5rem;
             }
 
-            .progress-label {
-                font-size: 0.75rem;
+            .answer-input {
+                font-size: 1.2rem;
             }
 
-            .button-group {
-                flex-direction: column;
+            .typeform-header {
+                padding: 15px 20px;
+            }
+
+            .question-container {
+                padding: 80px 20px 20px;
             }
         }
     </style>
 </head>
 
 <body>
-    <!-- Navbar -->
-    <nav class="navbar">
-        <div class="container" style="display: flex; justify-content: space-between; align-items: center;">
-            <a href="/" style="text-decoration: none;">
-                <h1 class="logo">Restaurant<span style="color: var(--accent-color);">Jobs</span></h1>
-            </a>
-            <div id="nav-links" class="nav-links">
-                <a href="/">Home</a>
-                <a href="/jobs.html">Find Jobs</a>
-                <a href="/employer-register.html">Submit Job</a>
-                <a href="/apply.html" style="color: var(--accent-color);">Submit CV</a>
-                <a href="/auth.html" id="nav-auth-btn">Sign In</a>
+    <div class="typeform-container">
+        <!-- Header -->
+        <div class="typeform-header">
+            <a href="/" class="typeform-logo">RestaurantJobs</a>
+            <div class="typeform-progress">
+                <span id="current-step">1</span> / <span id="total-steps">8</span>
             </div>
         </div>
-    </nav>
 
-    <main class="application-container">
-        <div class="application-card">
-            <h1 style="text-align: center; margin-bottom: 10px; font-family: 'Playfair Display', serif;">
-                Apply for <span id="job-title-display" style="color: var(--accent-color);">Position</span>
-            </h1>
-            <p style="text-align: center; color: var(--text-muted); margin-bottom: 40px;">
-                Complete the form below to submit your application
-            </p>
+        <form id="application-form">
+            <input type="hidden" id="position" name="position">
+            <input type="hidden" id="job-id" name="job_id">
 
-            <!-- Progress Bar -->
-            <div class="progress-bar">
-                <div class="progress-step active" data-step="1">
-                    <div class="progress-circle">1</div>
-                    <span class="progress-label">Personal Info</span>
-                </div>
-                <div class="progress-step" data-step="2">
-                    <div class="progress-circle">2</div>
-                    <span class="progress-label">Experience</span>
-                </div>
-                <div class="progress-step" data-step="3">
-                    <div class="progress-circle">3</div>
-                    <span class="progress-label">Resume</span>
+            <!-- Question 1: Full Name -->
+            <div class="question-container active" data-question="1">
+                <div class="question-content">
+                    <div class="question-number">1 → Full Name</div>
+                    <h1 class="question-text">What's your full name?</h1>
+                    <input type="text" class="answer-input" id="name" name="name" placeholder="Type your answer here..."
+                        required autocomplete="name">
+                    <div class="navigation-buttons">
+                        <button type="button" class="nav-btn" onclick="nextQuestion()">OK ✓</button>
+                    </div>
+                    <p class="hint-text">press Enter ↵</p>
                 </div>
             </div>
 
-            <form id="application-form" enctype="multipart/form-data">
-                <input type="hidden" id="position" name="position">
-                <input type="hidden" id="job-id" name="job_id">
+            <!-- Question 2: Email -->
+            <div class="question-container" data-question="2">
+                <div class="question-content">
+                    <div class="question-number">2 → Email Address</div>
+                    <h1 class="question-text">What's your email address?</h1>
+                    <input type="email" class="answer-input" id="email" name="email" placeholder="name@example.com"
+                        required autocomplete="email">
+                    <div class="navigation-buttons">
+                        <button type="button" class="nav-btn secondary" onclick="prevQuestion()">← Back</button>
+                        <button type="button" class="nav-btn" onclick="nextQuestion()">OK ✓</button>
+                    </div>
+                    <p class="hint-text">press Enter ↵</p>
+                </div>
+            </div>
 
-                <!-- Step 1: Personal Information -->
-                <div class="form-section active" data-section="1">
-                    <div class="form-group">
-                        <label for="name">Full Name *</label>
-                        <input type="text" id="name" name="name" required placeholder="John Kamau">
+            <!-- Question 3: Phone -->
+            <div class="question-container" data-question="3">
+                <div class="question-content">
+                    <div class="question-number">3 → Phone Number</div>
+                    <h1 class="question-text">What's your phone number?</h1>
+                    <input type="tel" class="answer-input" id="phone" name="phone" placeholder="+254 712 345 678"
+                        required autocomplete="tel">
+                    <div class="navigation-buttons">
+                        <button type="button" class="nav-btn secondary" onclick="prevQuestion()">← Back</button>
+                        <button type="button" class="nav-btn" onclick="nextQuestion()">OK ✓</button>
                     </div>
-                    <div class="form-group">
-                        <label for="email">Email Address *</label>
-                        <input type="email" id="email" name="email" required placeholder="john.kamau@email.com">
-                    </div>
-                    <div class="form-group">
-                        <label for="phone">Phone Number *</label>
-                        <input type="tel" id="phone" name="phone" required placeholder="+254 712 345 678">
-                    </div>
-                    <div class="form-group">
-                        <label for="location">Location *</label>
-                        <select id="location" name="location" required>
-                            <option value="">Select your location</option>
-                            <option value="Nairobi">Nairobi</option>
-                            <option value="Mombasa">Mombasa</option>
-                            <option value="Kisumu">Kisumu</option>
-                            <option value="Nakuru">Nakuru</option>
-                            <option value="Eldoret">Eldoret</option>
-                            <option value="Thika">Thika</option>
-                            <option value="Other">Other</option>
-                        </select>
+                    <p class="hint-text">press Enter ↵</p>
+                </div>
+            </div>
+
+            <!-- Question 4: Location -->
+            <div class="question-container" data-question="4">
+                <div class="question-content">
+                    <div class="question-number">4 → Location</div>
+                    <h1 class="question-text">Where are you based?</h1>
+                    <select class="answer-input" id="location" name="location" required>
+                        <option value="">Choose your location</option>
+                        <option value="Nairobi">Nairobi</option>
+                        <option value="Mombasa">Mombasa</option>
+                        <option value="Kisumu">Kisumu</option>
+                        <option value="Nakuru">Nakuru</option>
+                        <option value="Eldoret">Eldoret</option>
+                        <option value="Thika">Thika</option>
+                        <option value="Other">Other</option>
+                    </select>
+                    <div class="navigation-buttons">
+                        <button type="button" class="nav-btn secondary" onclick="prevQuestion()">← Back</button>
+                        <button type="button" class="nav-btn" onclick="nextQuestion()">OK ✓</button>
                     </div>
                 </div>
+            </div>
 
-                <!-- Step 2: Experience -->
-                <div class="form-section" data-section="2">
-                    <div class="form-group">
-                        <label for="desired-position">Desired Position *</label>
-                        <select id="desired-position" name="desired_position" required>
-                            <option value="">Select position</option>
-                            <option value="Chef">Chef</option>
-                            <option value="Sous Chef">Sous Chef</option>
-                            <option value="Commis Chef">Commis Chef</option>
-                            <option value="Waiter/Waitress">Waiter/Waitress</option>
-                            <option value="Bartender">Bartender</option>
-                            <option value="Barista">Barista</option>
-                            <option value="Restaurant Manager">Restaurant Manager</option>
-                            <option value="Kitchen Assistant">Kitchen Assistant</option>
-                            <option value="Other">Other</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="experience">Years of Experience *</label>
-                        <select id="experience" name="experience" required>
-                            <option value="">Select experience level</option>
-                            <option value="0-1">Less than 1 year</option>
-                            <option value="1-2">1-2 years</option>
-                            <option value="2-5">2-5 years</option>
-                            <option value="5-10">5-10 years</option>
-                            <option value="10+">10+ years</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="cover-letter">Why are you a good fit for this position? *</label>
-                        <textarea id="cover-letter" name="cover_letter" required
-                            placeholder="Tell us about your relevant experience, skills, and why you're interested in this role..."></textarea>
+            <!-- Question 5: Desired Position -->
+            <div class="question-container" data-question="5">
+                <div class="question-content">
+                    <div class="question-number">5 → Position</div>
+                    <h1 class="question-text">What position are you applying for?</h1>
+                    <select class="answer-input" id="desired-position" name="desired_position" required>
+                        <option value="">Select position</option>
+                        <option value="Chef">Chef</option>
+                        <option value="Sous Chef">Sous Chef</option>
+                        <option value="Commis Chef">Commis Chef</option>
+                        <option value="Waiter/Waitress">Waiter/Waitress</option>
+                        <option value="Bartender">Bartender</option>
+                        <option value="Barista">Barista</option>
+                        <option value="Restaurant Manager">Restaurant Manager</option>
+                        <option value="Kitchen Assistant">Kitchen Assistant</option>
+                        <option value="Other">Other</option>
+                    </select>
+                    <div class="navigation-buttons">
+                        <button type="button" class="nav-btn secondary" onclick="prevQuestion()">← Back</button>
+                        <button type="button" class="nav-btn" onclick="nextQuestion()">OK ✓</button>
                     </div>
                 </div>
+            </div>
 
-                <!-- Step 3: Resume Upload -->
-                <div class="form-section" data-section="3">
-                    <div class="form-group">
-                        <label for="resume">Upload Your Resume/CV *</label>
-                        <div class="file-upload-area" id="file-upload-area">
-                            <div id="upload-prompt">
-                                <p style="font-size: 2rem; margin-bottom: 10px;">📄</p>
-                                <p style="font-weight: 600; margin-bottom: 5px;">Click to upload or drag and drop</p>
-                                <p style="font-size: 0.9rem; color: var(--text-muted);">PDF or DOC (Max 5MB)</p>
-                            </div>
-                            <div id="file-info" style="display: none;">
-                                <p style="font-size: 2rem; margin-bottom: 10px;">✓</p>
-                                <p style="font-weight: 600; color: #28a745;" id="file-name"></p>
-                                <p style="font-size: 0.9rem; color: var(--text-muted);" id="file-size"></p>
-                            </div>
+            <!-- Question 6: Experience -->
+            <div class="question-container" data-question="6">
+                <div class="question-content">
+                    <div class="question-number">6 → Experience</div>
+                    <h1 class="question-text">How many years of experience do you have?</h1>
+                    <select class="answer-input" id="experience" name="experience" required>
+                        <option value="">Select experience level</option>
+                        <option value="0-1">Less than 1 year</option>
+                        <option value="1-2">1-2 years</option>
+                        <option value="2-5">2-5 years</option>
+                        <option value="5-10">5-10 years</option>
+                        <option value="10+">10+ years</option>
+                    </select>
+                    <div class="navigation-buttons">
+                        <button type="button" class="nav-btn secondary" onclick="prevQuestion()">← Back</button>
+                        <button type="button" class="nav-btn" onclick="nextQuestion()">OK ✓</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Question 7: Cover Letter -->
+            <div class="question-container" data-question="7">
+                <div class="question-content">
+                    <div class="question-number">7 → About You</div>
+                    <h1 class="question-text">Why are you a good fit for this position?</h1>
+                    <textarea class="answer-input" id="cover-letter" name="cover_letter" required
+                        placeholder="Tell us about your relevant experience, skills, and why you're interested in this role..."></textarea>
+                    <div class="navigation-buttons">
+                        <button type="button" class="nav-btn secondary" onclick="prevQuestion()">← Back</button>
+                        <button type="button" class="nav-btn" onclick="nextQuestion()">OK ✓</button>
+                    </div>
+                    <p class="hint-text">Shift + Enter ↵ for new line</p>
+                </div>
+            </div>
+
+            <!-- Question 8: Resume Upload -->
+            <div class="question-container" data-question="8">
+                <div class="question-content">
+                    <div class="question-number">8 → Resume</div>
+                    <h1 class="question-text">Upload your resume/CV</h1>
+                    <div class="file-upload-box" id="file-upload-box"
+                        onclick="document.getElementById('resume').click()">
+                        <div id="upload-prompt">
+                            <p class="file-upload-text">📄 Click to upload</p>
+                            <p class="file-upload-hint">PDF or DOC (Max 5MB)</p>
                         </div>
-                        <input type="file" id="resume" name="resume" accept=".pdf,.doc,.docx" required
-                            style="display: none;">
+                        <div id="file-info" style="display: none;">
+                            <p class="file-upload-text">✓ <span id="file-name"></span></p>
+                            <p class="file-upload-hint" id="file-size"></p>
+                        </div>
                     </div>
+                    <input type="file" id="resume" name="resume" accept=".pdf,.doc,.docx" required
+                        style="display: none;">
 
-                    <div class="form-group">
-                        <label>
-                            <input type="checkbox" id="consent" required style="width: auto; margin-right: 8px;">
-                            I consent to the processing of my personal data for recruitment purposes
+                    <div style="margin-top: 30px;">
+                        <label style="color: white; display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                            <input type="checkbox" id="consent" required style="width: 20px; height: 20px;">
+                            <span>I consent to the processing of my personal data for recruitment purposes</span>
                         </label>
                     </div>
+
+                    <div class="navigation-buttons">
+                        <button type="button" class="nav-btn secondary" onclick="prevQuestion()">← Back</button>
+                        <button type="submit" class="nav-btn" id="submit-btn">Submit Application ✓</button>
+                    </div>
+                    <div id="error-message" class="error-message"></div>
                 </div>
-
-                <!-- Navigation Buttons -->
-                <div class="button-group">
-                    <button type="button" class="btn btn-secondary" id="prev-btn" style="display: none;">
-                        Previous
-                    </button>
-                    <button type="button" class="btn btn-primary" id="next-btn">
-                        Next
-                    </button>
-                    <button type="submit" class="btn btn-primary" id="submit-btn" style="display: none;">
-                        Submit Application
-                    </button>
-                </div>
-
-                <div id="message" style="margin-top: 20px;"></div>
-            </form>
-
-            <!-- Success Message (hidden initially) -->
-            <div id="success-message" class="success-message" style="display: none;">
-                <div class="success-icon">✓</div>
-                <h2 style="color: #28a745; margin-bottom: 15px;">Application Submitted!</h2>
-                <p style="color: var(--text-muted); margin-bottom: 25px;">
-                    Thank you for applying. We'll review your application and get back to you soon.
-                </p>
-                <a href="/jobs.html" class="btn btn-primary" style="display: inline-block; text-decoration: none;">
-                    Browse More Jobs
-                </a>
             </div>
+        </form>
+
+        <!-- Success Screen -->
+        <div class="success-screen" id="success-screen">
+            <div class="success-icon">✓</div>
+            <h1 class="success-title">Application Submitted!</h1>
+            <p class="success-text">
+                Thank you for applying. We'll review your application and get back to you soon.
+            </p>
+            <a href="/jobs.html" class="nav-btn">Browse More Jobs</a>
         </div>
-    </main>
+    </div>
 
     <script type="module" src="/src/ui.js"></script>
     <script type="module">
@@ -415,90 +496,65 @@
         const jobTitle = params.get('jobTitle') || 'a Position';
         const jobId = params.get('jobId');
 
-        document.getElementById('job-title-display').innerText = jobTitle;
         document.getElementById('position').value = jobTitle;
         if (jobId) {
             document.getElementById('job-id').value = jobId;
         }
 
-        // Multi-step form logic
-        let currentStep = 1;
-        const totalSteps = 3;
+        let currentQuestion = 1;
+        const totalQuestions = 8;
+        document.getElementById('total-steps').textContent = totalQuestions;
 
-        const nextBtn = document.getElementById('next-btn');
-        const prevBtn = document.getElementById('prev-btn');
-        const submitBtn = document.getElementById('submit-btn');
+        window.nextQuestion = function () {
+            const currentContainer = document.querySelector(`[data-question="${currentQuestion}"]`);
+            const input = currentContainer.querySelector('input:not([type="hidden"]), select, textarea');
 
-        function updateStep() {
-            // Hide all sections
-            document.querySelectorAll('.form-section').forEach(section => {
-                section.classList.remove('active');
-            });
-
-            // Show current section
-            document.querySelector(`[data-section="${currentStep}"]`).classList.add('active');
-
-            // Update progress bar
-            document.querySelectorAll('.progress-step').forEach((step, index) => {
-                const stepNum = index + 1;
-                step.classList.remove('active', 'completed');
-                if (stepNum < currentStep) {
-                    step.classList.add('completed');
-                } else if (stepNum === currentStep) {
-                    step.classList.add('active');
-                }
-            });
-
-            // Update buttons
-            prevBtn.style.display = currentStep === 1 ? 'none' : 'block';
-            nextBtn.style.display = currentStep === totalSteps ? 'none' : 'block';
-            submitBtn.style.display = currentStep === totalSteps ? 'block' : 'none';
-        }
-
-        function validateCurrentStep() {
-            const currentSection = document.querySelector(`[data-section="${currentStep}"]`);
-            const inputs = currentSection.querySelectorAll('input[required], select[required], textarea[required]');
-            let isValid = true;
-
-            inputs.forEach(input => {
-                if (!input.value.trim()) {
-                    isValid = false;
-                    input.style.borderColor = '#dc3545';
-                } else {
-                    input.style.borderColor = '#e9ecef';
-                }
-            });
-
-            return isValid;
-        }
-
-        nextBtn.addEventListener('click', () => {
-            if (validateCurrentStep()) {
-                currentStep++;
-                updateStep();
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            } else {
-                alert('Please fill in all required fields');
+            if (input && !input.value.trim()) {
+                input.style.borderColor = '#f44336';
+                setTimeout(() => {
+                    input.style.borderColor = 'rgba(255, 255, 255, 0.3)';
+                }, 1000);
+                return;
             }
-        });
 
-        prevBtn.addEventListener('click', () => {
-            currentStep--;
-            updateStep();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            if (currentQuestion < totalQuestions) {
+                currentContainer.classList.remove('active');
+                currentQuestion++;
+                document.querySelector(`[data-question="${currentQuestion}"]`).classList.add('active');
+                document.getElementById('current-step').textContent = currentQuestion;
+                window.scrollTo(0, 0);
+            }
+        };
+
+        window.prevQuestion = function () {
+            if (currentQuestion > 1) {
+                document.querySelector(`[data-question="${currentQuestion}"]`).classList.remove('active');
+                currentQuestion--;
+                document.querySelector(`[data-question="${currentQuestion}"]`).classList.add('active');
+                document.getElementById('current-step').textContent = currentQuestion;
+                window.scrollTo(0, 0);
+            }
+        };
+
+        // Enter key navigation
+        document.querySelectorAll('.answer-input').forEach(input => {
+            if (input.tagName !== 'TEXTAREA') {
+                input.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        nextQuestion();
+                    }
+                });
+            }
         });
 
         // File upload handling
         const fileInput = document.getElementById('resume');
-        const fileUploadArea = document.getElementById('file-upload-area');
+        const fileUploadBox = document.getElementById('file-upload-box');
         const uploadPrompt = document.getElementById('upload-prompt');
         const fileInfo = document.getElementById('file-info');
         const fileName = document.getElementById('file-name');
         const fileSize = document.getElementById('file-size');
-
-        fileUploadArea.addEventListener('click', () => {
-            fileInput.click();
-        });
 
         fileInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
@@ -507,62 +563,35 @@
                 fileSize.textContent = `${(file.size / 1024 / 1024).toFixed(2)} MB`;
                 uploadPrompt.style.display = 'none';
                 fileInfo.style.display = 'block';
-                fileUploadArea.classList.add('has-file');
+                fileUploadBox.classList.add('has-file');
             }
-        });
-
-        // Drag and drop
-        fileUploadArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            fileUploadArea.style.borderColor = 'var(--accent-color)';
-        });
-
-        fileUploadArea.addEventListener('dragleave', () => {
-            fileUploadArea.style.borderColor = '#e9ecef';
-        });
-
-        fileUploadArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            const file = e.dataTransfer.files[0];
-            if (file && (file.type === 'application/pdf' || file.type.includes('document'))) {
-                fileInput.files = e.dataTransfer.files;
-                fileName.textContent = file.name;
-                fileSize.textContent = `${(file.size / 1024 / 1024).toFixed(2)} MB`;
-                uploadPrompt.style.display = 'none';
-                fileInfo.style.display = 'block';
-                fileUploadArea.classList.add('has-file');
-            }
-            fileUploadArea.style.borderColor = '#e9ecef';
         });
 
         // Form submission
         const form = document.getElementById('application-form');
-        const messageDiv = document.getElementById('message');
+        const errorDiv = document.getElementById('error-message');
+        const submitBtn = document.getElementById('submit-btn');
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            if (!validateCurrentStep()) {
-                alert('Please fill in all required fields');
-                return;
-            }
-
             const resumeFile = fileInput.files[0];
             if (!resumeFile) {
-                messageDiv.innerHTML = '<p style="color: red;">Please upload your resume</p>';
+                errorDiv.textContent = 'Please upload your resume';
+                errorDiv.classList.add('show');
                 return;
             }
 
-            // Validate file
             const validation = validateResumeFile(resumeFile);
             if (!validation.isValid) {
-                displayValidationErrors(validation.errors, messageDiv);
+                errorDiv.textContent = validation.errors.join(', ');
+                errorDiv.classList.add('show');
                 return;
             }
 
             submitBtn.disabled = true;
             submitBtn.textContent = 'Submitting...';
-            messageDiv.innerHTML = '<p style="color: var(--accent-color);">Uploading your application...</p>';
+            errorDiv.classList.remove('show');
 
             try {
                 const formData = new FormData(form);
@@ -607,21 +636,19 @@
 
                 if (insertError) throw insertError;
 
-                // Show success message
-                form.style.display = 'none';
-                document.querySelector('.progress-bar').style.display = 'none';
-                document.getElementById('success-message').style.display = 'block';
+                // Show success
+                document.querySelector('.typeform-container form').style.display = 'none';
+                document.querySelector('.typeform-header').style.display = 'none';
+                document.getElementById('success-screen').classList.add('active');
 
             } catch (error) {
                 console.error('Error:', error);
-                messageDiv.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+                errorDiv.textContent = `Error: ${error.message}`;
+                errorDiv.classList.add('show');
                 submitBtn.disabled = false;
-                submitBtn.textContent = 'Submit Application';
+                submitBtn.textContent = 'Submit Application ✓';
             }
         });
-
-        // Initialize
-        updateStep();
     </script>
 </body>
 
