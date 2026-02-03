@@ -10,73 +10,398 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&family=Playfair+Display:wght@500;700&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="./style.css">
+    <link rel="stylesheet" href="./index.css">
+    <style>
+        .application-container {
+            max-width: 700px;
+            margin: 60px auto;
+            padding: 20px;
+        }
+
+        .application-card {
+            background: white;
+            border-radius: 16px;
+            padding: 50px 40px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .progress-bar {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 50px;
+            position: relative;
+        }
+
+        .progress-bar::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #e9ecef;
+            z-index: 0;
+        }
+
+        .progress-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+            flex: 1;
+        }
+
+        .progress-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: white;
+            border: 2px solid #e9ecef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: #999;
+            margin-bottom: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .progress-step.active .progress-circle {
+            background: var(--accent-color);
+            border-color: var(--accent-color);
+            color: white;
+        }
+
+        .progress-step.completed .progress-circle {
+            background: #28a745;
+            border-color: #28a745;
+            color: white;
+        }
+
+        .progress-label {
+            font-size: 0.85rem;
+            color: #999;
+            text-align: center;
+        }
+
+        .progress-step.active .progress-label {
+            color: var(--accent-color);
+            font-weight: 600;
+        }
+
+        .form-section {
+            display: none;
+        }
+
+        .form-section.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            font-family: 'Nunito', sans-serif;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(255, 107, 0, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .file-upload-area {
+            border: 2px dashed #e9ecef;
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .file-upload-area:hover {
+            border-color: var(--accent-color);
+            background: #fff3e0;
+        }
+
+        .file-upload-area.has-file {
+            border-color: #28a745;
+            background: #f0f9f4;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .btn-secondary {
+            background: #e9ecef;
+            color: var(--text-main);
+        }
+
+        .btn-secondary:hover {
+            background: #dee2e6;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 14px 30px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background: var(--accent-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #e65c00;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 107, 0, 0.3);
+        }
+
+        .success-message {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background: #28a745;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            color: white;
+            font-size: 40px;
+        }
+
+        @media (max-width: 768px) {
+            .application-card {
+                padding: 30px 20px;
+            }
+
+            .progress-label {
+                font-size: 0.75rem;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+        }
+    </style>
 </head>
 
 <body>
     <!-- Navbar -->
-    <!-- Navbar -->
-    <nav class="container">
-        <a href="/" class="nav-brand">Restaurant<span style="color: var(--accent-color);">Jobs</span></a>
-
-        <button id="mobile-menu-btn" class="mobile-menu-btn" aria-label="Toggle Menu">&#9776;</button>
-
-        <div id="nav-links" class="nav-links">
-            <a href="/">Home</a>
-            <a href="/jobs.html">Find Jobs</a>
-            <a href="/employer-register.html">Submit Job</a>
-            <a href="/apply.html" style="color: var(--accent-color);">Submit CV</a>
+    <nav class="navbar">
+        <div class="container" style="display: flex; justify-content: space-between; align-items: center;">
+            <a href="/" style="text-decoration: none;">
+                <h1 class="logo">Restaurant<span style="color: var(--accent-color);">Jobs</span></h1>
+            </a>
+            <div id="nav-links" class="nav-links">
+                <a href="/">Home</a>
+                <a href="/jobs.html">Find Jobs</a>
+                <a href="/employer-register.html">Submit Job</a>
+                <a href="/apply.html" style="color: var(--accent-color);">Submit CV</a>
+                <a href="/auth.html" id="nav-auth-btn">Sign In</a>
+            </div>
         </div>
     </nav>
 
-    <main class="container" style="padding: 40px 20px; max-width: 800px; text-align: center;">
-        <div class="card fade-in" style="padding: 40px;">
-            <h1 style="margin-bottom: 30px;">Apply for <span id="job-title-display">Position</span></h1>
+    <main class="application-container">
+        <div class="application-card">
+            <h1 style="text-align: center; margin-bottom: 10px; font-family: 'Playfair Display', serif;">
+                Apply for <span id="job-title-display" style="color: var(--accent-color);">Position</span>
+            </h1>
+            <p style="text-align: center; color: var(--text-muted); margin-bottom: 40px;">
+                Complete the form below to submit your application
+            </p>
 
-            <form id="application-form" enctype="multipart/form-data"
-                style="max-width: 600px; margin: 0 auto; text-align: left;">
+            <!-- Progress Bar -->
+            <div class="progress-bar">
+                <div class="progress-step active" data-step="1">
+                    <div class="progress-circle">1</div>
+                    <span class="progress-label">Personal Info</span>
+                </div>
+                <div class="progress-step" data-step="2">
+                    <div class="progress-circle">2</div>
+                    <span class="progress-label">Experience</span>
+                </div>
+                <div class="progress-step" data-step="3">
+                    <div class="progress-circle">3</div>
+                    <span class="progress-label">Resume</span>
+                </div>
+            </div>
+
+            <form id="application-form" enctype="multipart/form-data">
                 <input type="hidden" id="position" name="position">
+                <input type="hidden" id="job-id" name="job_id">
 
-                <!-- Step 1: Personal Info -->
-                <div class="form-step" id="step-1">
-                    <h3 style="margin-bottom: 20px; color: var(--accent-color); text-align: center;">Step 1: Personal
-                        Details</h3>
-                    <div style="margin-bottom: 15px;">
-                        <label for="name">Full Name</label>
-                        <input type="text" id="name" name="name" required style="width: 100%;">
+                <!-- Step 1: Personal Information -->
+                <div class="form-section active" data-section="1">
+                    <div class="form-group">
+                        <label for="name">Full Name *</label>
+                        <input type="text" id="name" name="name" required placeholder="John Kamau">
                     </div>
-                    <div style="margin-bottom: 15px;">
-                        <label for="email">Email Address</label>
-                        <input type="email" id="email" name="email" required style="width: 100%;">
+                    <div class="form-group">
+                        <label for="email">Email Address *</label>
+                        <input type="email" id="email" name="email" required placeholder="john.kamau@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Phone Number *</label>
+                        <input type="tel" id="phone" name="phone" required placeholder="+254 712 345 678">
+                    </div>
+                    <div class="form-group">
+                        <label for="location">Location *</label>
+                        <select id="location" name="location" required>
+                            <option value="">Select your location</option>
+                            <option value="Nairobi">Nairobi</option>
+                            <option value="Mombasa">Mombasa</option>
+                            <option value="Kisumu">Kisumu</option>
+                            <option value="Nakuru">Nakuru</option>
+                            <option value="Eldoret">Eldoret</option>
+                            <option value="Thika">Thika</option>
+                            <option value="Other">Other</option>
+                        </select>
                     </div>
                 </div>
 
                 <!-- Step 2: Experience -->
-                <div class="form-step" id="step-2" style="margin-top: 30px;">
-                    <h3 style="margin-bottom: 20px; color: var(--accent-color); text-align: center;">Step 2: Your Story
-                    </h3>
-                    <div style="margin-bottom: 15px;">
-                        <label for="reason">Why do you want to join us?</label>
-                        <textarea id="reason" name="reason" rows="4" required style="width: 100%;"></textarea>
+                <div class="form-section" data-section="2">
+                    <div class="form-group">
+                        <label for="desired-position">Desired Position *</label>
+                        <select id="desired-position" name="desired_position" required>
+                            <option value="">Select position</option>
+                            <option value="Chef">Chef</option>
+                            <option value="Sous Chef">Sous Chef</option>
+                            <option value="Commis Chef">Commis Chef</option>
+                            <option value="Waiter/Waitress">Waiter/Waitress</option>
+                            <option value="Bartender">Bartender</option>
+                            <option value="Barista">Barista</option>
+                            <option value="Restaurant Manager">Restaurant Manager</option>
+                            <option value="Kitchen Assistant">Kitchen Assistant</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="experience">Years of Experience *</label>
+                        <select id="experience" name="experience" required>
+                            <option value="">Select experience level</option>
+                            <option value="0-1">Less than 1 year</option>
+                            <option value="1-2">1-2 years</option>
+                            <option value="2-5">2-5 years</option>
+                            <option value="5-10">5-10 years</option>
+                            <option value="10+">10+ years</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="cover-letter">Why are you a good fit for this position? *</label>
+                        <textarea id="cover-letter" name="cover_letter" required
+                            placeholder="Tell us about your relevant experience, skills, and why you're interested in this role..."></textarea>
                     </div>
                 </div>
 
-                <!-- Step 3: Upload -->
-                <div class="form-step" id="step-3" style="margin-top: 30px;">
-                    <h3 style="margin-bottom: 20px; color: var(--accent-color); text-align: center;">Step 3: Resume</h3>
-                    <div style="margin-bottom: 15px;">
-                        <label for="resume">Upload Resume (PDF/Doc)</label>
+                <!-- Step 3: Resume Upload -->
+                <div class="form-section" data-section="3">
+                    <div class="form-group">
+                        <label for="resume">Upload Your Resume/CV *</label>
+                        <div class="file-upload-area" id="file-upload-area">
+                            <div id="upload-prompt">
+                                <p style="font-size: 2rem; margin-bottom: 10px;">📄</p>
+                                <p style="font-weight: 600; margin-bottom: 5px;">Click to upload or drag and drop</p>
+                                <p style="font-size: 0.9rem; color: var(--text-muted);">PDF or DOC (Max 5MB)</p>
+                            </div>
+                            <div id="file-info" style="display: none;">
+                                <p style="font-size: 2rem; margin-bottom: 10px;">✓</p>
+                                <p style="font-weight: 600; color: #28a745;" id="file-name"></p>
+                                <p style="font-size: 0.9rem; color: var(--text-muted);" id="file-size"></p>
+                            </div>
+                        </div>
                         <input type="file" id="resume" name="resume" accept=".pdf,.doc,.docx" required
-                            style="width: 100%;">
+                            style="display: none;">
                     </div>
+
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="consent" required style="width: auto; margin-right: 8px;">
+                            I consent to the processing of my personal data for recruitment purposes
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Navigation Buttons -->
+                <div class="button-group">
+                    <button type="button" class="btn btn-secondary" id="prev-btn" style="display: none;">
+                        Previous
+                    </button>
+                    <button type="button" class="btn btn-primary" id="next-btn">
+                        Next
+                    </button>
+                    <button type="submit" class="btn btn-primary" id="submit-btn" style="display: none;">
+                        Submit Application
+                    </button>
                 </div>
 
                 <div id="message" style="margin-top: 20px;"></div>
-
-                <div style="margin-top: 30px; text-align: center;">
-                    <button type="submit" class="btn" style="width: 100%;">Submit Application</button>
-                </div>
             </form>
+
+            <!-- Success Message (hidden initially) -->
+            <div id="success-message" class="success-message" style="display: none;">
+                <div class="success-icon">✓</div>
+                <h2 style="color: #28a745; margin-bottom: 15px;">Application Submitted!</h2>
+                <p style="color: var(--text-muted); margin-bottom: 25px;">
+                    Thank you for applying. We'll review your application and get back to you soon.
+                </p>
+                <a href="/jobs.html" class="btn btn-primary" style="display: inline-block; text-decoration: none;">
+                    Browse More Jobs
+                </a>
+            </div>
         </div>
     </main>
 
@@ -87,84 +412,216 @@
 
         // Get Job Title and ID from URL
         const params = new URLSearchParams(window.location.search);
-        const jobTitle = params.get('jobTitle') || 'a Role';
-        const jobId = params.get('jobId'); // Expecting jobId in URL now
+        const jobTitle = params.get('jobTitle') || 'a Position';
+        const jobId = params.get('jobId');
 
         document.getElementById('job-title-display').innerText = jobTitle;
         document.getElementById('position').value = jobTitle;
+        if (jobId) {
+            document.getElementById('job-id').value = jobId;
+        }
 
-        // Form Submit
+        // Multi-step form logic
+        let currentStep = 1;
+        const totalSteps = 3;
+
+        const nextBtn = document.getElementById('next-btn');
+        const prevBtn = document.getElementById('prev-btn');
+        const submitBtn = document.getElementById('submit-btn');
+
+        function updateStep() {
+            // Hide all sections
+            document.querySelectorAll('.form-section').forEach(section => {
+                section.classList.remove('active');
+            });
+
+            // Show current section
+            document.querySelector(`[data-section="${currentStep}"]`).classList.add('active');
+
+            // Update progress bar
+            document.querySelectorAll('.progress-step').forEach((step, index) => {
+                const stepNum = index + 1;
+                step.classList.remove('active', 'completed');
+                if (stepNum < currentStep) {
+                    step.classList.add('completed');
+                } else if (stepNum === currentStep) {
+                    step.classList.add('active');
+                }
+            });
+
+            // Update buttons
+            prevBtn.style.display = currentStep === 1 ? 'none' : 'block';
+            nextBtn.style.display = currentStep === totalSteps ? 'none' : 'block';
+            submitBtn.style.display = currentStep === totalSteps ? 'block' : 'none';
+        }
+
+        function validateCurrentStep() {
+            const currentSection = document.querySelector(`[data-section="${currentStep}"]`);
+            const inputs = currentSection.querySelectorAll('input[required], select[required], textarea[required]');
+            let isValid = true;
+
+            inputs.forEach(input => {
+                if (!input.value.trim()) {
+                    isValid = false;
+                    input.style.borderColor = '#dc3545';
+                } else {
+                    input.style.borderColor = '#e9ecef';
+                }
+            });
+
+            return isValid;
+        }
+
+        nextBtn.addEventListener('click', () => {
+            if (validateCurrentStep()) {
+                currentStep++;
+                updateStep();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else {
+                alert('Please fill in all required fields');
+            }
+        });
+
+        prevBtn.addEventListener('click', () => {
+            currentStep--;
+            updateStep();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        // File upload handling
+        const fileInput = document.getElementById('resume');
+        const fileUploadArea = document.getElementById('file-upload-area');
+        const uploadPrompt = document.getElementById('upload-prompt');
+        const fileInfo = document.getElementById('file-info');
+        const fileName = document.getElementById('file-name');
+        const fileSize = document.getElementById('file-size');
+
+        fileUploadArea.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                fileName.textContent = file.name;
+                fileSize.textContent = `${(file.size / 1024 / 1024).toFixed(2)} MB`;
+                uploadPrompt.style.display = 'none';
+                fileInfo.style.display = 'block';
+                fileUploadArea.classList.add('has-file');
+            }
+        });
+
+        // Drag and drop
+        fileUploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            fileUploadArea.style.borderColor = 'var(--accent-color)';
+        });
+
+        fileUploadArea.addEventListener('dragleave', () => {
+            fileUploadArea.style.borderColor = '#e9ecef';
+        });
+
+        fileUploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            const file = e.dataTransfer.files[0];
+            if (file && (file.type === 'application/pdf' || file.type.includes('document'))) {
+                fileInput.files = e.dataTransfer.files;
+                fileName.textContent = file.name;
+                fileSize.textContent = `${(file.size / 1024 / 1024).toFixed(2)} MB`;
+                uploadPrompt.style.display = 'none';
+                fileInfo.style.display = 'block';
+                fileUploadArea.classList.add('has-file');
+            }
+            fileUploadArea.style.borderColor = '#e9ecef';
+        });
+
+        // Form submission
         const form = document.getElementById('application-form');
         const messageDiv = document.getElementById('message');
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const btn = form.querySelector('button');
-            btn.disabled = true;
-            btn.innerText = 'Validating...';
 
-            const formData = new FormData(form);
-            const file = formData.get('resume');
-            const name = formData.get('name');
-            const email = formData.get('email');
-            const reason = formData.get('reason');
-            const position = formData.get('position');
+            if (!validateCurrentStep()) {
+                alert('Please fill in all required fields');
+                return;
+            }
+
+            const resumeFile = fileInput.files[0];
+            if (!resumeFile) {
+                messageDiv.innerHTML = '<p style="color: red;">Please upload your resume</p>';
+                return;
+            }
+
+            // Validate file
+            const validation = validateResumeFile(resumeFile);
+            if (!validation.isValid) {
+                displayValidationErrors(validation.errors, messageDiv);
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Submitting...';
+            messageDiv.innerHTML = '<p style="color: var(--accent-color);">Uploading your application...</p>';
 
             try {
-                // 🔒 SECURITY: Validate resume file
-                messageDiv.innerHTML = '<p style="color: #666;">🔍 Validating file security...</p>';
-                messageDiv.style.display = 'block';
+                const formData = new FormData(form);
+                const applicantName = formData.get('name');
+                const applicantEmail = formData.get('email');
+                const phone = formData.get('phone');
+                const location = formData.get('location');
+                const desiredPosition = formData.get('desired_position');
+                const experience = formData.get('experience');
+                const coverLetter = formData.get('cover_letter');
+                const position = formData.get('position');
+                const job_id = formData.get('job_id');
 
-                const validation = await validateResumeFile(file);
+                // Upload resume
+                const timestamp = Date.now();
+                const sanitizedName = applicantName.replace(/[^a-zA-Z0-9]/g, '_');
+                const fileExt = resumeFile.name.split('.').pop();
+                const filePath = `resumes/${sanitizedName}_${timestamp}.${fileExt}`;
 
-                if (!validation.valid) {
-                    displayValidationErrors(validation.errors, 'message');
-                    btn.disabled = false;
-                    btn.innerText = 'Submit Application';
-                    return;
-                }
-
-                // File is valid, proceed with upload
-                btn.innerText = 'Uploading...';
-                messageDiv.innerHTML = '<p style="color: #666;">📤 Uploading resume...</p>';
-
-                // Use secure filename generated by validator
                 const { data: uploadData, error: uploadError } = await supabase.storage
-                    .from('resumes')
-                    .upload(validation.secureFilename, file);
-
-                if (uploadError) throw new Error('Resume upload failed: ' + uploadError.message);
-
-                // 3. Insert Application
-                btn.innerText = 'Saving application...';
-                const { error: dbError } = await supabase
                     .from('applications')
-                    .insert({
-                        job_id: jobId || null, // Handle general applications if jobId is missing
-                        name,
-                        email,
-                        position,
-                        reason,
-                        resume_url: uploadData.path, // Storing the path is enough
-                        status: 'new'
-                    });
+                    .upload(filePath, resumeFile);
 
-                if (dbError) throw new Error('Database insertion failed: ' + dbError.message);
+                if (uploadError) throw uploadError;
 
+                // Insert application
+                const { error: insertError } = await supabase
+                    .from('applications')
+                    .insert([{
+                        name: applicantName,
+                        email: applicantEmail,
+                        phone: phone,
+                        location: location,
+                        position: position,
+                        desired_position: desiredPosition,
+                        experience: experience,
+                        cover_letter: coverLetter,
+                        resume_url: filePath,
+                        job_id: job_id || null,
+                        status: 'pending'
+                    }]);
+
+                if (insertError) throw insertError;
+
+                // Show success message
                 form.style.display = 'none';
-                messageDiv.style.display = 'block';
-                messageDiv.style.color = 'var(--success-color)';
-                messageDiv.innerHTML = `<h3>✅ Thank you!</h3><p>Your application has been received successfully.</p><p><a href="/jobs.html">View more jobs</a></p>`;
+                document.querySelector('.progress-bar').style.display = 'none';
+                document.getElementById('success-message').style.display = 'block';
 
             } catch (error) {
-                console.error(error);
-                messageDiv.style.display = 'block';
-                messageDiv.style.color = 'red';
-                messageDiv.innerHTML = `<strong>❌ Error:</strong> ${error.message || 'Something went wrong. Please try again.'}`;
-                btn.disabled = false;
-                btn.innerText = 'Submit Application';
+                console.error('Error:', error);
+                messageDiv.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit Application';
             }
         });
+
+        // Initialize
+        updateStep();
     </script>
 </body>
 
