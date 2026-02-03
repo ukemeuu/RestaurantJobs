@@ -97,8 +97,17 @@
             <a href="/waiter-jobs-mombasa.html" class="tag-pill">Waiter Jobs Mombasa</a>
             <a href="/manager-jobs-nairobi.html" class="tag-pill">Manager Jobs Nairobi</a>
             <a href="/barista-jobs-kisumu.html" class="tag-pill">Barista Jobs Kisumu</a>
-            <a href="/blog-top-restaurants-2026.html" class="tag-pill highlight">Top 10 Restaurants 2026</a>
+            <a href="/blog-top-restaurants-2026.html" class="tag-pill highlight" id="blog-link">Top 10 Restaurants <span
+                    id="popular-search-month"></span> 2026</a>
         </div>
+
+        <script>
+            // Dynamically set current month in Popular Searches
+            const months = ['January', 'February', 'March', 'April', 'May', 'June', 
+                           'July', 'August', 'September', 'October', 'November', 'December'];
+            const currentMonth = months[new Date().getMonth()];
+            document.getElementById('popular-search-month').textContent = currentMonth;
+        </script>
     </section>
 
     <!-- Footer -->
