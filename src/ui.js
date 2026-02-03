@@ -80,19 +80,9 @@ export function toggleSaveJob(id) {
 // Auth State Management
 export async function updateNavAuth() {
     const { data: { session } } = await supabase.auth.getSession();
-    const savedJobsLink = document.getElementById('nav-saved-jobs');
     const authBtn = document.getElementById('nav-auth-btn');
 
-    // 1. Toggle "Saved Jobs" link visibility
-    if (savedJobsLink) {
-        if (session) {
-            savedJobsLink.style.display = 'inline-block';
-        } else {
-            savedJobsLink.style.display = 'none';
-        }
-    }
-
-    // 2. Toggle Sign In / Sign Out button
+    // Toggle Sign In / Sign Out button
     if (authBtn) {
         if (session) {
             authBtn.innerText = 'Sign Out';
@@ -100,8 +90,7 @@ export async function updateNavAuth() {
             authBtn.onclick = async (e) => {
                 e.preventDefault();
                 await supabase.auth.signOut();
-                // Optional: redirect to home or reload
-                window.location.reload();
+                window.location.href = '/'; // Redirect to home after sign out
             };
         } else {
             authBtn.innerText = 'Sign In';

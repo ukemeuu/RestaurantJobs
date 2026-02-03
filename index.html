@@ -43,7 +43,6 @@
         <div id="nav-links" class="nav-links">
             <a href="/">Home</a>
             <a href="/jobs.html">Find Jobs</a>
-            <a href="/saved-jobs.html" id="nav-saved-jobs" style="display: none;">Saved Jobs</a>
             <a href="/employer-register.html">Submit Job</a>
             <a href="/apply.html" style="color: var(--accent-color);">Submit CV</a>
             <a href="/auth.html" id="nav-auth-btn">Sign In</a>
@@ -159,27 +158,26 @@
                 grid.innerHTML = '';
                 jobs.forEach(job => {
                     const card = document.createElement('div');
-                    card.className = 'card';
-                    card.style.textAlign = 'left';
-                    card.style.display = 'flex';
-                    card.style.flexDirection = 'column';
-                    card.style.position = 'relative'; // For heart icon
+                    card.className = 'featured-card';
 
-                    const isSaved = isJobSaved(job.id);
-                    const heartIcon = isSaved ? '♥' : '♡';
-                    const heartColor = isSaved ? 'var(--error-color)' : 'var(--text-muted)';
+                    // Logo or placeholder
+                    const logoHtml = job.logo_url
+                        ? `<img src="${job.logo_url}" alt="${job.title}" class="featured-logo">`
+                        : `<div class="featured-logo-placeholder">🏢</div>`;
 
                     card.innerHTML = `
-                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 15px;">
-                            <h3 style="font-size: 1.25rem;">${job.title}</h3>
-                            <span style="background: var(--accent-color); color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem;">Featured</span>
+                        <div class="featured-card-header">
+                            ${logoHtml}
+                            <span class="featured-badge">Featured</span>
                         </div>
-                        <div style="margin-bottom: 10px; color: var(--text-muted); font-size: 0.9rem;">
-                            <span>📍 ${job.location}</span> • <span>💰 ${job.salary_max ? (job.salary_max / 1000) + 'k' : 'Competitive'}</span>
+                        <h3 class="featured-title">${job.title}</h3>
+                        <div class="featured-meta">
+                            <span class="meta-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg> ${job.location}</span>
+                            ${job.salary_max ? `<span class="meta-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg> KES ${(job.salary_max / 1000)}k</span>` : ''}
+                            <span class="meta-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg> ${job.type}</span>
                         </div>
-                        <p style="font-size: 0.9rem; margin-bottom: 20px; flex-grow: 1;">${job.description.substring(0, 100)}...</p>
-                        <a href="/job-details.html?id=${job.id}" style="color: var(--accent-color); font-weight: 600;">Apply Now &rarr;</a>
-                        <button onclick="toggleSave('${job.id}', this)" style="position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 1.5rem; color: ${heartColor}; cursor: pointer; transition: transform 0.2s;">${heartIcon}</button>
+                        <p class="featured-description">${job.description.substring(0, 120)}...</p>
+                        <a href="/job-details.html?id=${job.id}" class="featured-cta">View Details →</a>
                     `;
                     grid.appendChild(card);
                 });
