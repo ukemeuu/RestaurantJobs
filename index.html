@@ -160,15 +160,8 @@
                     const card = document.createElement('div');
                     card.className = 'featured-card';
 
-                    // Logo or placeholder - use initials
-                    const initials = job.title.split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase();
-                    const logoHtml = job.logo_url
-                        ? `<img src="${job.logo_url}" alt="${job.title}" class="featured-logo">`
-                        : `<div class="featured-logo-placeholder">${initials}</div>`;
-
                     card.innerHTML = `
                         <div class="featured-card-header">
-                            ${logoHtml}
                             <span class="featured-badge">Featured</span>
                         </div>
                         <h3 class="featured-title">${job.title}</h3>

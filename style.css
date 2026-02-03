@@ -476,8 +476,9 @@ footer .container {
 
 .featured-card-header {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
+  margin-bottom: 8px;
 }
 
 .featured-logo {
