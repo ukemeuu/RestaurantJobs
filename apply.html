@@ -582,8 +582,8 @@
                 return;
             }
 
-            const validation = validateResumeFile(resumeFile);
-            if (!validation.isValid) {
+            const validation = await validateResumeFile(resumeFile);
+            if (!validation.valid) {
                 errorDiv.textContent = validation.errors.join(', ');
                 errorDiv.classList.add('show');
                 return;
@@ -612,7 +612,7 @@
                 const filePath = `resumes/${sanitizedName}_${timestamp}.${fileExt}`;
 
                 const { data: uploadData, error: uploadError } = await supabase.storage
-                    .from('applications')
+                    .from('resumes')
                     .upload(filePath, resumeFile);
 
                 if (uploadError) throw uploadError;

@@ -22,6 +22,7 @@
         <div id="nav-links" class="nav-links">
             <a href="/">Home</a>
             <a href="/jobs.html">Find Jobs</a>
+            <a href="/blog.html">Blog</a>
             <a href="/employer-register.html">Submit Job</a>
             <a href="/apply.html">Submit CV</a>
         </div>
@@ -37,12 +38,12 @@
 
         <script>
             // Dynamically set current month
-            const months = ['January', 'February', 'March', 'April', 'May', 'June', 
-                           'July', 'August', 'September', 'October', 'November', 'December'];
+            const months = ['January', 'February', 'March', 'April', 'May', 'June',
+                'July', 'August', 'September', 'October', 'November', 'December'];
             const currentMonth = months[new Date().getMonth()];
             document.getElementById('current-month').textContent = currentMonth;
             document.getElementById('current-month-2').textContent = currentMonth;
-            
+
             // Update page title as well
             document.title = `Top 10 Restaurants Hiring in ${currentMonth} 2026 | RestaurantJobs Kenya`;
         </script>
