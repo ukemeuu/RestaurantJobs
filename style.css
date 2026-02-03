@@ -516,6 +516,7 @@ footer .container {
   margin: 0;
   color: var(--text-main);
   font-family: 'Playfair Display', serif;
+  text-align: left;
 }
 
 .featured-meta {
