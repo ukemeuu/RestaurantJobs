@@ -43,7 +43,7 @@
         <div id="nav-links" class="nav-links">
             <a href="/">Home</a>
             <a href="/jobs.html">Find Jobs</a>
-            <a href="/blog.html">Blog</a>
+
             <a id="nav-saved-jobs" href="/saved-jobs.html" style="display: none;">Saved Jobs</a>
             <a href="/employer-register.html">Submit Job</a>
             <a href="/apply.html">Submit CV</a>
@@ -90,128 +90,9 @@
         </div>
     </section>
 
-    <!-- Latest Blog Section -->
-    <section class="container fade-in" style="margin-top: 80px;">
-        <div style="display: flex; justify-content: space-between; align-items: end; margin-bottom: 30px;">
-            <div>
-                <h2 style="font-size: 2.5rem; margin-bottom: 10px;">Latest from Our Blog</h2>
-                <p style="color: var(--text-muted); max-width: 600px;">Insights and career advice for hospitality
-                    professionals.</p>
-            </div>
-            <a href="/blog.html" class="btn-secondary mobile-hidden" style="display: none;">View All Posts</a>
-        </div>
 
-        <div style="max-width: 800px;">
-            <article class="card fade-in" onclick="window.location.href='/blog-top-restaurants-2026.html'"
-                style="padding: 0; overflow: hidden; border: 2px solid var(--accent-color); cursor: pointer; transition: transform 0.2s ease;">
-                <div style="background: linear-gradient(135deg, var(--accent-color), #ff8c42); padding: 10px 20px;">
-                    <span style="color: white; font-weight: 700; font-size: 0.85rem;">⭐ FEATURED</span>
-                </div>
-                <div style="padding: 30px;">
-                    <h3 style="font-size: 1.5rem; margin-bottom: 15px;">
-                        <a href="/blog-top-restaurants-2026.html"
-                            style="color: var(--text-main); text-decoration: none;">
-                            Top 10 Restaurants Hiring in <span class="current-month-display"></span> 2026
-                        </a>
-                    </h3>
-                    <p style="color: var(--text-muted); margin-bottom: 15px; line-height: 1.6;">
-                        Discover the best restaurants and hotels to work for in Kenya. From Nairobi's fine dining to
-                        Mombasa's beach resorts.
-                    </p>
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
-                        <span style="color: var(--text-muted); font-size: 0.9rem;">
-                            <span class="current-month-display"></span> 2026
-                        </span>
-                        <span class="btn-secondary" style="padding: 8px 20px; font-size: 0.9rem;">Read More →</span>
-                    </div>
-                </div>
-            </article>
-        </div>
 
-        <div style="margin-top: 30px; text-align: center;" class="desktop-hidden">
-            <a href="/blog.html" class="btn-secondary">View All Posts</a>
-        </div>
 
-        <style>
-            @media (min-width: 769px) {
-                .mobile-hidden {
-                    display: block !important;
-                }
-
-                .desktop-hidden {
-                    display: none !important;
-                }
-            }
-        </style>
-
-        <script>
-            // Set current month for blog post
-            const blogDateElements = document.querySelectorAll('.current-month-display');
-            const blogMonth = new Date().toLocaleString('default', { month: 'long' });
-            blogDateElements.forEach(el => el.textContent = blogMonth);
-        </script>
-    </section>
-
-    <!-- SEO Links Section -->
-    <section class="container" style="margin-top: 80px; padding: 60px 20px; background: #f8f9fa; border-radius: 16px;">
-        <div style="text-align: center; margin-bottom: 40px;">
-            <h2 style="font-size: 2rem; margin-bottom: 10px; font-family: 'Playfair Display', serif;">Popular Job
-                Searches</h2>
-            <p style="color: var(--text-muted); font-size: 1.1rem;">Top opportunities across Kenya</p>
-        </div>
-
-        <div
-            style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; max-width: 900px; margin: 0 auto;">
-            <a href="/chef-jobs-nairobi.html" class="tag-pill"
-                style="padding: 15px 20px; background: white; border: 2px solid #e9ecef; transition: all 0.3s ease;">
-                Chef Jobs Nairobi
-            </a>
-            <a href="/waiter-jobs-nairobi.html" class="tag-pill"
-                style="padding: 15px 20px; background: white; border: 2px solid #e9ecef; transition: all 0.3s ease;">
-                Waiter Jobs Nairobi
-            </a>
-            <a href="/waiter-jobs-mombasa.html" class="tag-pill"
-                style="padding: 15px 20px; background: white; border: 2px solid #e9ecef; transition: all 0.3s ease;">
-                Waiter Jobs Mombasa
-            </a>
-            <a href="/manager-jobs-nairobi.html" class="tag-pill"
-                style="padding: 15px 20px; background: white; border: 2px solid #e9ecef; transition: all 0.3s ease;">
-                Manager Jobs Nairobi
-            </a>
-            <a href="/barista-jobs-kisumu.html" class="tag-pill"
-                style="padding: 15px 20px; background: white; border: 2px solid #e9ecef; transition: all 0.3s ease;">
-                Barista Jobs Kisumu
-            </a>
-            <a href="/blog-top-restaurants-2026.html" class="tag-pill highlight" id="blog-link"
-                style="padding: 15px 20px; background: var(--accent-color); color: white; border: none; box-shadow: 0 4px 15px rgba(255, 107, 0, 0.3); transition: all 0.3s ease;">
-                Top 10 Restaurants Hiring in <span id="popular-search-month"></span> 2026
-            </a>
-        </div>
-
-        <script>
-            // Dynamically set current month in Popular Searches
-            const months = ['January', 'February', 'March', 'April', 'May', 'June',
-                'July', 'August', 'September', 'October', 'November', 'December'];
-            const currentMonth = months[new Date().getMonth()];
-            document.getElementById('popular-search-month').textContent = currentMonth;
-
-            // Add hover effects
-            document.querySelectorAll('.tag-pill').forEach(pill => {
-                if (!pill.classList.contains('highlight')) {
-                    pill.addEventListener('mouseenter', function () {
-                        this.style.borderColor = 'var(--accent-color)';
-                        this.style.transform = 'translateY(-2px)';
-                        this.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
-                    });
-                    pill.addEventListener('mouseleave', function () {
-                        this.style.borderColor = '#e9ecef';
-                        this.style.transform = 'translateY(0)';
-                        this.style.boxShadow = 'none';
-                    });
-                }
-            });
-        </script>
-    </section>
 
     <!-- Footer -->
     <footer style="background-color: var(--text-main); color: white; padding: 40px 0; margin-top: 40px;">
@@ -254,7 +135,7 @@
     <script type="module" src="/src/ui.js"></script>
     <script type="module">
         import { supabase } from './src/supabaseClient.js';
-        import { isJobSaved, toggleSaveJob } from './src/ui.js';
+        import { isJobSaved, toggleSaveJob, openShareModal } from './src/ui.js';
 
         // Expose toggle to window
         window.toggleSave = function (id, btn) {
@@ -267,30 +148,7 @@
             }
         };
 
-        window.shareJob = async function (title, id) {
-            const url = window.location.origin + '/job-details.html?id=' + id;
-            const shareData = {
-                title: title,
-                text: `Check out this ${title} job on RestaurantJobs Kenya!`,
-                url: url
-            };
-
-            if (navigator.share) {
-                try {
-                    await navigator.share(shareData);
-                } catch (err) {
-                    console.log('Share canceled');
-                }
-            } else {
-                // Fallback: Copy to clipboard
-                try {
-                    await navigator.clipboard.writeText(url);
-                    alert('Job link copied to clipboard!');
-                } catch (err) {
-                    prompt('Copy this link:', url);
-                }
-            }
-        };
+        window.shareJob = openShareModal;
 
         async function loadFeaturedJobs() {
             const grid = document.getElementById('featured-grid');

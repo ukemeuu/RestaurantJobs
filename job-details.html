@@ -86,6 +86,7 @@
     <script type="module" src="/src/ui.js"></script>
     <script type="module">
         import { supabase } from './src/supabaseClient.js';
+        import { openShareModal } from './src/ui.js';
 
         async function loadJobDetails() {
             const params = new URLSearchParams(window.location.search);
@@ -204,22 +205,9 @@
                 document.getElementById('job-content').style.display = 'block';
                 
                 // Bind Share Button
-                document.getElementById('share-btn').onclick = async function() {
-                    const shareData = {
-                        title: job.title,
-                        text: `Check out this ${job.title} position at ${job.location}`,
-                        url: window.location.href
-                    };
-                    if (navigator.share) {
-                        try { await navigator.share(shareData); } catch (e) {}
-                    } else {
-                        try {
-                            await navigator.clipboard.writeText(window.location.href);
-                            alert('Link copied to clipboard');
-                        } catch (e) {
-                             prompt('Copy link:', window.location.href);
-                        }
-                    }
+                // Bind Share Button
+                document.getElementById('share-btn').onclick = function() {
+                    openShareModal(job.title, job.id);
                 };
 
             } catch (err) {

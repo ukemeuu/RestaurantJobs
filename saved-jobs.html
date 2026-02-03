@@ -61,7 +61,7 @@
 
         // Supabase Integration
         import { supabase } from './src/supabaseClient.js';
-        import { isJobSaved, toggleSaveJob, getSavedJobs } from './src/ui.js';
+        import { isJobSaved, toggleSaveJob, getSavedJobs, openShareModal } from './src/ui.js';
 
         // Expose toggle to window
         window.toggleSave = function (id, btn) {
@@ -74,34 +74,9 @@
             }
             btn.innerText = isNowSaved ? '♥' : '♡';
             btn.style.color = isNowSaved ? 'var(--error-color)' : 'var(--text-muted)';
-            btn.innerText = isNowSaved ? '♥' : '♡';
-            btn.style.color = isNowSaved ? 'var(--error-color)' : 'var(--text-muted)';
         };
 
-        window.shareJob = async function (title, id) {
-            const url = window.location.origin + '/job-details.html?id=' + id;
-            const shareData = {
-                title: title,
-                text: `Check out this ${title} job on RestaurantJobs Kenya!`,
-                url: url
-            };
-
-            if (navigator.share) {
-                try {
-                    await navigator.share(shareData);
-                } catch (err) {
-                    console.log('Share canceled');
-                }
-            } else {
-                // Fallback: Copy to clipboard
-                try {
-                    await navigator.clipboard.writeText(url);
-                    alert('Job link copied to clipboard!');
-                } catch (err) {
-                    prompt('Copy this link:', url);
-                }
-            }
-        };
+        window.shareJob = openShareModal;
 
         window.loadJobs = async function () {
             try {
