@@ -1,5 +1,6 @@
 
 // UI Utilities for RestaurantJobs
+import { supabase } from './supabaseClient.js';
 
 /**
  * Initializes the mobile menu functionality.
@@ -76,9 +77,44 @@ export function toggleSaveJob(id) {
     return saved.includes(id);
 }
 
+// Auth State Management
+export async function updateNavAuth() {
+    const { data: { session } } = await supabase.auth.getSession();
+    const savedJobsLink = document.getElementById('nav-saved-jobs');
+    const authBtn = document.getElementById('nav-auth-btn');
+
+    // 1. Toggle "Saved Jobs" link visibility
+    if (savedJobsLink) {
+        if (session) {
+            savedJobsLink.style.display = 'inline-block';
+        } else {
+            savedJobsLink.style.display = 'none';
+        }
+    }
+
+    // 2. Toggle Sign In / Sign Out button
+    if (authBtn) {
+        if (session) {
+            authBtn.innerText = 'Sign Out';
+            authBtn.href = '#'; // Prevent navigation
+            authBtn.onclick = async (e) => {
+                e.preventDefault();
+                await supabase.auth.signOut();
+                // Optional: redirect to home or reload
+                window.location.reload();
+            };
+        } else {
+            authBtn.innerText = 'Sign In';
+            authBtn.href = '/auth.html';
+            authBtn.onclick = null; // Remove previous handler if any
+        }
+    }
+}
+
 // Auto-initialize if running in browser
 if (typeof window !== 'undefined') {
     document.addEventListener('DOMContentLoaded', () => {
         setupMobileMenu();
+        updateNavAuth(); // Check auth on load
     });
 }
