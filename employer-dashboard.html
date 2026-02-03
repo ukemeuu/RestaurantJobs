@@ -153,7 +153,15 @@
         // Modal Logic
         const modal = document.getElementById('job-modal');
         document.getElementById('post-job-btn').onclick = () => modal.style.display = 'flex';
-        window.closeModal = function () { modal.style.display = 'none'; }
+        window.closeModal = function () {
+            modal.style.display = 'none';
+            // Reset form state
+            form.reset();
+            quill.root.innerHTML = '';
+            delete form.dataset.editMode;
+            delete form.dataset.jobId;
+            document.querySelector('#job-modal h2').innerText = 'Post a Job';
+        }
         document.querySelector('button[onclick="closeModal()"]').onclick = window.closeModal;
 
 
@@ -175,8 +183,80 @@
                 return;
             }
 
-            // Direct Post or Agency -> Submit directly (No Payment)
+            // Check if we're in edit mode
+            if (form.dataset.editMode === 'true') {
+                await updateJob(form.dataset.jobId, data);
+            } else {
+                await submitJob(data);
+            }
         });
+
+
+        // Update Job Function
+        async function updateJob(jobId, data) {
+            try {
+                // 1. Upload new logo if provided
+                let logoUrl = null;
+                const fileInput = document.getElementById('logo');
+                if (fileInput.files.length > 0) {
+                    const file = fileInput.files[0];
+
+                    // 🔒 SECURITY: Validate and sanitize image
+                    const { validateImageFile } = await import('./src/fileValidator.js');
+                    const validation = await validateImageFile(file);
+
+                    if (!validation.valid) {
+                        alert('❌ Logo validation failed:\n\n' + validation.errors.join('\n'));
+                        return;
+                    }
+
+                    // Use sanitized file
+                    const { data: uploadData, error: uploadError } = await supabase.storage
+                        .from('logos')
+                        .upload(validation.secureFilename, validation.sanitizedFile);
+
+                    if (uploadError) throw new Error('Logo upload failed: ' + uploadError.message);
+
+                    const { data: { publicUrl } } = supabase.storage.from('logos').getPublicUrl(validation.secureFilename);
+                    logoUrl = publicUrl;
+                }
+
+                // 2. Update job in database
+                const updateData = {
+                    title: data.title,
+                    type: data.type,
+                    location: data.location,
+                    description: data.description
+                };
+
+                // Only update logo if new one was uploaded
+                if (logoUrl) {
+                    updateData.logo_url = logoUrl;
+                }
+
+                const { error } = await supabase
+                    .from('jobs')
+                    .update(updateData)
+                    .eq('id', jobId);
+
+                if (error) throw error;
+
+                alert('✅ Job updated successfully!');
+
+                // Reset form
+                form.reset();
+                quill.root.innerHTML = '';
+                delete form.dataset.editMode;
+                delete form.dataset.jobId;
+                document.querySelector('#job-modal h2').innerText = 'Post a Job';
+
+                window.closeModal();
+                loadActivity();
+            } catch (err) {
+                console.error(err);
+                alert('An error occurred: ' + err.message);
+            }
+        }
 
         async function submitJob(data) {
             try {
@@ -255,8 +335,6 @@
 
         async function loadActivity() {
             // Load jobs posted by this employer
-            // And maybe hiring requests?
-            // For now just jobs
             const { data: jobs, error } = await supabase
                 .from('jobs')
                 .select('*')
@@ -264,13 +342,8 @@
                 .order('created_at', { ascending: false });
 
             if (jobs && jobs.length > 0) {
-                // Simple list render
-                // In a real app we'd have a nicer container
-                // For now, replacing the "No active job postings yet" text
-                // But the HTML structure for activity feed is just a card
                 const card = document.querySelector('.card:last-of-type');
                 if (card.querySelector('h3').innerText === 'Recent Activity') {
-                    // Clear previous content after header
                     const header = card.querySelector('h3');
                     card.innerHTML = '';
                     card.appendChild(header);
@@ -279,12 +352,78 @@
                         const p = document.createElement('p');
                         p.style.padding = '10px 0';
                         p.style.borderBottom = '1px solid #eee';
-                        p.innerHTML = `<strong>${job.title}</strong> - ${job.location} <span style="float:right; color:var(--success-color); font-size:0.8rem;">${job.status}</span>`;
+                        p.style.display = 'flex';
+                        p.style.justifyContent = 'space-between';
+                        p.style.alignItems = 'center';
+                        p.innerHTML = `
+                            <div>
+                                <strong>${job.title}</strong> - ${job.location} 
+                                <span style="color:var(--success-color); font-size:0.8rem; margin-left: 10px;">${job.status}</span>
+                            </div>
+                            <div style="display: flex; gap: 10px;">
+                                <button onclick="editJob('${job.id}')" style="background: var(--accent-color); color: white; border: none; padding: 5px 15px; border-radius: 4px; cursor: pointer; font-size: 0.85rem;">Edit</button>
+                                <button onclick="deleteJob('${job.id}')" style="background: #ff6b6b; color: white; border: none; padding: 5px 15px; border-radius: 4px; cursor: pointer; font-size: 0.85rem;">Delete</button>
+                            </div>
+                        `;
                         card.appendChild(p);
                     })
                 }
             }
         }
+
+        // Edit Job Function
+        window.editJob = async function (jobId) {
+            try {
+                // Fetch job details
+                const { data: job, error } = await supabase
+                    .from('jobs')
+                    .select('*')
+                    .eq('id', jobId)
+                    .single();
+
+                if (error) throw error;
+
+                // Populate form with existing data
+                document.getElementById('title').value = job.title;
+                document.getElementById('location').value = job.location;
+                document.getElementById('type').value = job.type;
+                quill.root.innerHTML = job.description;
+
+                // Change form submit behavior to update instead of create
+                const form = document.getElementById('job-form');
+                form.dataset.editMode = 'true';
+                form.dataset.jobId = jobId;
+
+                // Update modal title
+                document.querySelector('#job-modal h2').innerText = 'Edit Job';
+
+                // Open modal
+                modal.style.display = 'flex';
+            } catch (err) {
+                console.error(err);
+                alert('Error loading job: ' + err.message);
+            }
+        };
+
+        // Delete Job Function
+        window.deleteJob = async function (jobId) {
+            if (!confirm('Are you sure you want to delete this job posting?')) return;
+
+            try {
+                const { error } = await supabase
+                    .from('jobs')
+                    .delete()
+                    .eq('id', jobId);
+
+                if (error) throw error;
+
+                alert('✅ Job deleted successfully!');
+                loadActivity();
+            } catch (err) {
+                console.error(err);
+                alert('Error deleting job: ' + err.message);
+            }
+        };
 
         loadActivity();
 
