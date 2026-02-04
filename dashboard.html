@@ -25,8 +25,6 @@
 
         <div id="nav-links" class="nav-links">
             <a href="/settings.html" style="font-weight: 600; color: var(--text-color);">Settings</a>
-            <button id="logout-btn" class="btn-secondary"
-                style="border: 1px solid var(--accent-color); color: var(--accent-color);">Logout</button>
         </div>
     </nav>
 
@@ -398,12 +396,7 @@
             }
         };
 
-        // Logout Logic
-        document.getElementById('logout-btn').addEventListener('click', async () => {
-            const { error } = await supabase.auth.signOut();
-            if (error) console.error('Logout error:', error);
-            window.location.href = '/';
-        });
+
 
         loadData();
     </script>
