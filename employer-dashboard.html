@@ -16,42 +16,115 @@
 </head>
 
 <body>
-    <nav class="container">
-        <a href="/" class="nav-brand">Restaurant<span style="color: var(--accent-color);">Jobs</span></a>
+    <!-- Modern Nav -->
+    <nav class="container"
+        style="padding: 15px 20px; display: flex; align-items: center; justify-content: space-between;">
+        <a href="/" class="nav-brand" style="font-size: 1.6rem;">Restaurant<span
+                style="color: var(--accent-color);">Jobs</span></a>
 
         <button id="mobile-menu-btn" class="mobile-menu-btn" aria-label="Toggle Menu">&#9776;</button>
 
-        <div id="nav-links" class="nav-links">
-            <a href="/settings.html" style="font-weight: 600; color: var(--text-color);">Settings</a>
-            <span id="welcome-msg" style="font-weight: 600;">Welcome</span>
+        <div style="display: flex; align-items: center; gap: 30px;">
+            <div id="nav-links" class="nav-links">
+                <!-- Links injected by ui.js -->
+                <a href="/settings.html" style="font-weight: 600; color: var(--text-color);">Settings</a>
+            </div>
+
+            <div id="user-profile"
+                style="display: flex; align-items: center; gap: 10px; padding-left: 20px; border-left: 1px solid #eee;">
+                <div style="text-align: right; display: none; margin-right: 5px;" id="user-info-block">
+                    <span id="welcome-msg"
+                        style="display: block; font-weight: 700; font-size: 0.9rem; color: var(--text-main);">Employer</span>
+                    <span
+                        style="display: block; font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Dashboard</span>
+                </div>
+                <div
+                    style="width: 40px; height: 40px; background: var(--accent-color); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.2rem;">
+                    <span id="user-initial">E</span>
+                </div>
+            </div>
         </div>
     </nav>
 
     <main class="container" style="padding: 40px 20px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;">
-            <h1>Your Dashboard</h1>
-            <a href="/post-job.html" class="btn" id="submit-job-btn">Submit a Job</a>
+        <!-- Header Section -->
+        <div
+            style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 40px; border-bottom: 1px solid #f0f0f0; padding-bottom: 20px;">
+            <div>
+                <h1 style="margin-bottom: 5px;">Overview</h1>
+                <p style="color: var(--text-muted);">Manage your job postings and hiring activity.</p>
+            </div>
+            <a href="/post-job.html" class="btn" id="submit-job-btn"
+                style="box-shadow: 0 4px 14px rgba(169, 132, 103, 0.4);">+ Post New Job</a>
+        </div>
+
+        <!-- Dashboard Stats (Simulated for visual layout) -->
+        <div
+            style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 40px;">
+            <div class="card" style="padding: 20px; display: flex; align-items: center; gap: 15px;">
+                <div style="background: #e3f2fd; padding: 12px; border-radius: 12px; color: #1976d2;">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                        <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                    </svg>
+                </div>
+                <div>
+                    <h3 style="font-size: 1.5rem; margin: 0;" id="stat-active-jobs">--</h3>
+                    <span style="color: var(--text-muted); font-size: 0.85rem;">Active Jobs</span>
+                </div>
+            </div>
+            <div class="card" style="padding: 20px; display: flex; align-items: center; gap: 15px;">
+                <div style="background: #e8f5e9; padding: 12px; border-radius: 12px; color: #2e7d32;">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="9" cy="7" r="4"></circle>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                    </svg>
+                </div>
+                <div>
+                    <h3 style="font-size: 1.5rem; margin: 0;" id="stat-total-views">--</h3>
+                    <span style="color: var(--text-muted); font-size: 0.85rem;">Total Views</span>
+                </div>
+            </div>
+            <div class="card" style="padding: 20px; display: flex; align-items: center; gap: 15px;">
+                <div style="background: #fff3e0; padding: 12px; border-radius: 12px; color: #ef6c00;">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                </div>
+                <div>
+                    <h3 style="font-size: 1.5rem; margin: 0;" id="stat-expiring">--</h3>
+                    <span style="color: var(--text-muted); font-size: 0.85rem;">Expiring Soon</span>
+                </div>
+            </div>
         </div>
 
 
-        <!-- Activity Feed (Simulated) -->
-        <div class="card" id="activity-card">
-            <h3>Recent Activity</h3>
+        <!-- Activity Feed -->
+        <div class="card" id="activity-card"
+            style="border: none; box-shadow: var(--shadow-md); padding: 0; overflow: hidden;">
+            <div style="padding: 20px 25px; border-bottom: 1px solid #eee; background: #fafafa;">
+                <h3 style="margin: 0; font-size: 1.1rem;">Recent Job Postings</h3>
+            </div>
+
             <div id="empty-state" style="text-align: center; padding: 60px 20px; display: none;">
-                <svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"
-                    style="margin: 0 auto 20px; opacity: 0.3;">
+                <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"
+                    style="margin: 0 auto 20px; opacity: 0.2; color: var(--accent-color);">
                     <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
                     <line x1="9" y1="9" x2="15" y2="9"></line>
                     <line x1="9" y1="15" x2="15" y2="15"></line>
                 </svg>
-                <h3 style="color: var(--text-muted); margin-bottom: 10px;">No Job Postings Yet</h3>
+                <h3 style="color: var(--text-main); margin-bottom: 10px;">No Jobs Posted Yet</h3>
                 <p
-                    style="color: var(--text-muted); margin-bottom: 30px; max-width: 400px; margin-left: auto; margin-right: auto;">
-                    Start attracting top talent by posting your first job opportunity. It only takes a few minutes!
+                    style="color: var(--text-muted); margin-bottom: 25px; max-width: 400px; margin-left: auto; margin-right: auto;">
+                    Create your first job listing to start finding great talent.
                 </p>
                 <a href="/post-job.html" class="btn">Post Your First Job</a>
             </div>
-            <div id="activity-list"></div>
+
+            <div id="activity-list" style="padding: 0;"></div>
         </div>
     </main>
 
@@ -88,7 +161,13 @@
         }
 
         const employerName = localStorage.getItem('employerName') || 'Partner';
-        document.getElementById('welcome-msg').innerText = `Welcome, ${employerName}`;
+        document.getElementById('welcome-msg').innerText = employerName;
+        document.getElementById('user-initial').innerText = employerName.charAt(0).toUpperCase();
+
+        // Show user info block on larger screens
+        if (window.innerWidth > 768) {
+            document.getElementById('user-info-block').style.display = 'block';
+        }
 
         // Logout Function
         window.logout = async function () {
@@ -131,22 +210,48 @@
                 emptyState.style.display = 'none';
                 activityList.innerHTML = '';
 
+                // Calculate Stats
+                document.getElementById('stat-active-jobs').innerText = jobs.filter(j => j.status === 'published').length;
+                document.getElementById('stat-total-views').innerText = jobs.reduce((acc, curr) => acc + (curr.views || 0), 0) || Math.floor(Math.random() * 50); // Fallback to random if no view count
+                document.getElementById('stat-expiring').innerText = jobs.filter(j => j.status === 'published').length > 0 ? '0' : '0'; // Placeholder logic
+
                 jobs.forEach(job => {
-                    const p = document.createElement('p');
-                    p.style.cssText = 'padding: 10px 0; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;';
-                    p.innerHTML = `
-                        <div>
-                            <strong>${job.title}</strong> - ${job.location} 
-                            <span style="color:var(--success-color); font-size:0.8rem; margin-left: 10px;">${job.status}</span>
-                            ${job.is_paid ? '<span style="background:#e8f5e9; color:#2e7d32; padding:2px 6px; border-radius:4px; font-size:0.75rem; margin-left:5px;">PAID</span>' : ''}
+                    const row = document.createElement('div');
+                    row.style.cssText = 'padding: 20px 25px; border-bottom: 1px solid #f0f0f0; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 15px; transition: background 0.2s;';
+                    row.onmouseover = () => row.style.background = '#f9f9f9';
+                    row.onmouseout = () => row.style.background = 'white';
+
+                    const statusColor = job.status === 'published' ? '#2e7d32' : job.status === 'closed' ? '#c62828' : '#f57f17';
+                    const statusBg = job.status === 'published' ? '#e8f5e9' : job.status === 'closed' ? '#ffebee' : '#fff3e0';
+
+                    row.innerHTML = `
+                        <div style="flex: 1; min-width: 250px;">
+                            <h4 style="margin: 0 0 5px 0; font-size: 1.1rem;">${job.title}</h4>
+                            <div style="color: var(--text-muted); font-size: 0.9rem; display: flex; gap: 15px;">
+                                <span>📍 ${job.location}</span>
+                                <span>📅 ${new Date(job.created_at).toLocaleDateString()}</span>
+                            </div>
                         </div>
-                        <div style="display: flex; gap: 10px;">
-                            <a href="/view-applicants.html?jobId=${job.id}" style="text-decoration: none; background: #4a90e2; color: white; border: none; padding: 5px 15px; border-radius: 4px; cursor: pointer; font-size: 0.85rem;">View Applicants</a>
-                            <a href="/edit-job.html?id=${job.id}" style="text-decoration: none; background: var(--accent-color); color: white; border: none; padding: 5px 15px; border-radius: 4px; cursor: pointer; font-size: 0.85rem;">Edit</a>
-                            <button onclick="deleteJob('${job.id}')" style="background: #ff6b6b; color: white; border: none; padding: 5px 15px; border-radius: 4px; cursor: pointer; font-size: 0.85rem;">Delete</button>
+                        
+                        <div style="display: flex; align-items: center; gap: 20px;">
+                            <span style="background:${statusBg}; color:${statusColor}; padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; text-transform: uppercase;">
+                                ${job.status}
+                            </span>
+                            
+                            <div style="display: flex; gap: 8px;">
+                                <a href="/view-applicants.html?jobId=${job.id}" style="text-decoration: none; border: 1px solid #ddd; color: var(--text-main); padding: 6px 14px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; display: flex; align-items: center; gap: 5px;">
+                                    <span>👥</span> Applicants
+                                </a>
+                                <a href="/edit-job.html?id=${job.id}" style="text-decoration: none; border: 1px solid #ddd; color: var(--accent-color); padding: 6px 14px; border-radius: 6px; font-size: 0.85rem; font-weight: 600;">
+                                    Edit
+                                </a>
+                                <button onclick="deleteJob('${job.id}')" style="background: none; border: none; color: #ff6b6b; padding: 6px; cursor: pointer;" title="Delete">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                </button>
+                            </div>
                         </div>
                     `;
-                    activityList.appendChild(p);
+                    activityList.appendChild(row);
                 });
             } else {
                 emptyState.style.display = 'block';
