@@ -127,15 +127,28 @@
                     const metaContainer = document.querySelector('#job-date').parentNode;
                     metaContainer.parentNode.insertBefore(salaryContainer, metaContainer.nextSibling);
 
-                    const min = job.salary_min ? job.salary_min.toLocaleString() : 'N/A';
-                    const max = job.salary_max ? job.salary_max.toLocaleString() : 'N/A';
+                    const min = job.salary_min || 0;
+                    const max = job.salary_max || 0;
+
+                    let salaryText = '';
+                    if (min > 0 && max > 0) {
+                        if (min === max) {
+                            salaryText = `KES ${min.toLocaleString()}`; // Fixed
+                        } else {
+                            salaryText = `KES ${min.toLocaleString()} - ${max.toLocaleString()}`; // Range
+                        }
+                    } else if (min > 0) {
+                        salaryText = `From KES ${min.toLocaleString()}`;
+                    } else if (max > 0) {
+                        salaryText = `Up to KES ${max.toLocaleString()}`;
+                    }
 
                     salaryContainer.innerHTML = `
                         <h4 style="margin: 0 0 10px 0; display: flex; align-items: center; gap: 8px;">
-                            <span style="color: green;">💰</span> Salary Range
+                            <span style="color: green;">💰</span> Salary
                         </h4>
                         <div style="font-size: 1.2rem; font-weight: 700; color: #333;">
-                            KES ${min} - ${max} <span style="font-size: 0.9rem; color: #666; font-weight: 400;">/ month</span>
+                            ${salaryText} <span style="font-size: 0.9rem; color: #666; font-weight: 400;">/ month</span>
                         </div>
                     `;
                 }
@@ -185,6 +198,40 @@
                 // --- GOOGLE JOBS SCHEMA (JSON-LD) ---
                 const schemaScript = document.createElement('script');
                 schemaScript.type = 'application/ld+json';
+
+                // Construct Base Salary Schema
+                let baseSalarySchema = {};
+                const sMin = job.salary_min || 0;
+                const sMax = job.salary_max || 0;
+
+                if (sMin > 0 && sMax > 0 && sMin !== sMax) {
+                    // Range
+                    baseSalarySchema = {
+                        "@type": "MonetaryAmount",
+                        "currency": "KES",
+                        "value": {
+                            "@type": "QuantitativeValue",
+                            "minValue": sMin,
+                            "maxValue": sMax,
+                            "unitText": "MONTH"
+                        }
+                    };
+                } else {
+                    // Fixed (or single bound treated as fixed for simplicity in schema)
+                    const val = sMin > 0 ? sMin : sMax;
+                    if (val > 0) {
+                        baseSalarySchema = {
+                            "@type": "MonetaryAmount",
+                            "currency": "KES",
+                            "value": {
+                                "@type": "QuantitativeValue",
+                                "value": val,
+                                "unitText": "MONTH"
+                            }
+                        };
+                    }
+                }
+
                 const schemaData = {
                     "@context": "https://schema.org/",
                     "@type": "JobPosting",
@@ -212,16 +259,7 @@
                         }
                     },
                     "employmentType": mapJobTypeToSchema(job.type),
-                    "baseSalary": {
-                        "@type": "MonetaryAmount",
-                        "currency": "KES",
-                        "value": {
-                            "@type": "QuantitativeValue",
-                            "minValue": job.salary_min || 0,
-                            "maxValue": job.salary_max || 0,
-                            "unitText": "MONTH"
-                        }
-                    }
+                    "baseSalary": baseSalarySchema // Injected dynamic schema
                 };
                 schemaScript.text = JSON.stringify(schemaData);
                 document.head.appendChild(schemaScript);
