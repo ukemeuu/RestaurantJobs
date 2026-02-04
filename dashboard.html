@@ -380,34 +380,9 @@
             }
         };
 
-        window.editJob = async (jobId) => {
-            const title = prompt('Enter new job title (or leave blank to keep current):');
-            const location = prompt('Enter new location (or leave blank to keep current):');
-            const description = prompt('Enter new description (or leave blank to keep current):');
-
-            try {
-                const updates = {};
-                if (title && title.trim()) updates.title = title.trim();
-                if (location && location.trim()) updates.location = location.trim();
-                if (description && description.trim()) updates.description = description.trim();
-
-                if (Object.keys(updates).length === 0) {
-                    alert('No changes made.');
-                    return;
-                }
-
-                const { error } = await supabase
-                    .from('jobs')
-                    .update(updates)
-                    .eq('id', jobId);
-
-                if (error) throw error;
-                alert('Job updated successfully!');
-                loadData();
-            } catch (err) {
-                console.error(err);
-                alert('Error updating job: ' + err.message);
-            }
+        // Edit Job Function - Redirect to edit page
+        window.editJob = function (jobId) {
+            window.location.href = `/edit-job.html?id=${jobId}`;
         };
 
         window.deleteJob = async (jobId) => {

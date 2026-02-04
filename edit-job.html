@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Job | RestaurantJobs Kenya</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&family=Playfair+Display:wght@500;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="./style.css">
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+</head>
+
+<body>
+    <nav class="container">
+        <a href="/employer-dashboard.html" class="nav-brand">Restaurant<span
+                style="color: var(--accent-color);">Jobs</span></a>
+
+        <button id="mobile-menu-btn" class="mobile-menu-btn" aria-label="Toggle Menu">&#9776;</button>
+
+        <div id="nav-links" class="nav-links">
+            <a href="/employer-dashboard.html">← Back to Dashboard</a>
+            <span id="welcome-msg" style="font-weight: 600;">Welcome</span>
+            <button onclick="logout()" class="btn-secondary">Logout</button>
+        </div>
+    </nav>
+
+    <main class="container" style="padding: 40px 20px; max-width: 800px;">
+        <h1 style="margin-bottom: 10px;">Edit Job Posting</h1>
+        <p style="color: var(--text-muted); margin-bottom: 40px;">Update the details below to modify your job posting
+        </p>
+
+        <div id="loading" style="text-align: center; padding: 60px 20px;">
+            <p>Loading job details...</p>
+        </div>
+
+        <form id="edit-job-form" class="card" style="display: none; padding: 30px;">
+            <div class="form-group">
+                <label>Job Title</label>
+                <input type="text" id="job-title" required placeholder="e.g. Head Chef">
+            </div>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Location</label>
+                    <select id="job-location" required>
+                        <option value="Nairobi">Nairobi</option>
+                        <option value="Mombasa">Mombasa</option>
+                        <option value="Kisumu">Kisumu</option>
+                        <option value="Nakuru">Nakuru</option>
+                        <option value="Eldoret">Eldoret</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Job Type</label>
+                    <select id="job-type" required>
+                        <option value="Full-time">Full-time</option>
+                        <option value="Part-time">Part-time</option>
+                        <option value="Contract">Contract</option>
+                        <option value="Casual">Casual</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Min Salary (KES)</label>
+                    <input type="number" id="salary-min" placeholder="20000">
+                </div>
+                <div class="form-group">
+                    <label>Max Salary (KES)</label>
+                    <input type="number" id="salary-max" placeholder="60000">
+                </div>
+            </div>
+
+            <div style="margin-bottom: 15px;">
+                <div style="display: flex; justify-content: space-between; align-items: end; margin-bottom: 5px;">
+                    <label>Job Description</label>
+                    <button type="button" id="ai-gen-btn"
+                        style="background: linear-gradient(135deg, #6366f1, #a855f7); color: white; border: none; padding: 5px 12px; border-radius: 20px; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: transform 0.2s;">
+                        <span>✨</span> Generate with AI
+                    </button>
+                </div>
+                <div id="editor" style="height: 200px; background: white;"></div>
+            </div>
+
+            <div
+                style="display: flex; gap: 15px; justify-content: flex-end; margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
+                <a href="/employer-dashboard.html" class="btn-secondary">Cancel</a>
+                <button type="submit" class="btn" id="save-btn">Save Changes</button>
+            </div>
+        </form>
+    </main>
+
+    <script>
+        var quill = new Quill('#editor', {
+            theme: 'snow',
+            placeholder: 'Describe the role, responsibilities, and requirements...',
+            modules: {
+                toolbar: [
+                    ['bold', 'italic', 'underline'],
+                    [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                    ['clean']
+                ]
+            }
+        });
+    </script>
+
+    <script type="module" src="/src/ui.js"></script>
+    <script type="module">
+        import { supabase } from './src/supabaseClient.js';
+        import { generateJobDescription } from './src/aiGenerator.js';
+
+        // Check Auth
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+            window.location.href = '/employer-login.html';
+        }
+
+        const employerName = localStorage.getItem('employerName') || 'Partner';
+        document.getElementById('welcome-msg').innerText = `Welcome, ${employerName}`;
+
+        window.logout = async function () {
+            await supabase.auth.signOut();
+            localStorage.clear();
+            window.location.href = '/';
+        }
+
+        // Get job ID from URL
+        const params = new URLSearchParams(window.location.search);
+        const jobId = params.get('id');
+
+        if (!jobId) {
+            alert('No job ID provided');
+            window.location.href = '/employer-dashboard.html';
+        }
+
+        // Load job data
+        async function loadJob() {
+            try {
+                const { data: job, error } = await supabase
+                    .from('jobs')
+                    .select('*')
+                    .eq('id', jobId)
+                    .single();
+
+                if (error) throw error;
+
+                // Populate form
+                document.getElementById('job-title').value = job.title;
+                document.getElementById('job-location').value = job.location;
+                document.getElementById('job-type').value = job.type;
+                if (job.salary_min) document.getElementById('salary-min').value = job.salary_min;
+                if (job.salary_max) document.getElementById('salary-max').value = job.salary_max;
+                quill.root.innerHTML = job.description;
+
+                // Show form
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('edit-job-form').style.display = 'block';
+
+            } catch (err) {
+                console.error(err);
+                alert('Error loading job: ' + err.message);
+                window.location.href = '/employer-dashboard.html';
+            }
+        }
+
+        loadJob();
+
+        // AI Generator Logic
+        document.getElementById('ai-gen-btn').addEventListener('click', async function () {
+            const btn = this;
+            const originalText = btn.innerHTML;
+            const title = document.getElementById('job-title').value;
+            const location = document.getElementById('job-location').value;
+            const type = document.getElementById('job-type').value;
+
+            if (!title) {
+                alert('Please enter a Job Title first.');
+                return;
+            }
+
+            btn.innerHTML = '<span>⏳</span> Generating...';
+            btn.disabled = true;
+            btn.style.opacity = '0.6';
+
+            try {
+                const description = await generateJobDescription(title, location, type);
+                quill.root.innerHTML = description;
+            } catch (error) {
+                alert('Failed to generate description. Please try again.');
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                btn.style.opacity = '1';
+            }
+        });
+
+        // Form Submission
+        document.getElementById('edit-job-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('save-btn');
+            btn.innerText = 'Saving...';
+            btn.disabled = true;
+
+            try {
+                const title = document.getElementById('job-title').value;
+                const location = document.getElementById('job-location').value;
+                const type = document.getElementById('job-type').value;
+                const salaryMin = document.getElementById('salary-min').value;
+                const salaryMax = document.getElementById('salary-max').value;
+                const description = quill.root.innerHTML;
+
+                const { error } = await supabase
+                    .from('jobs')
+                    .update({
+                        title,
+                        location,
+                        type,
+                        salary_min: salaryMin || null,
+                        salary_max: salaryMax || null,
+                        description
+                    })
+                    .eq('id', jobId);
+
+                if (error) throw error;
+
+                // Redirect to success page
+                window.location.href = `/job-success.html?id=${jobId}&action=edited`;
+
+            } catch (err) {
+                console.error(err);
+                alert('Error updating job: ' + err.message);
+                btn.innerText = 'Save Changes';
+                btn.disabled = false;
+            }
+        });
+    </script>
+</body>
+
+</html>

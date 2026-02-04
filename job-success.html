@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Success | RestaurantJobs Kenya</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&family=Playfair+Display:wght@500;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="./style.css">
+</head>
+
+<body>
+    <nav class="container">
+        <a href="/" class="nav-brand">Restaurant<span style="color: var(--accent-color);">Jobs</span></a>
+    </nav>
+
+    <main class="container" style="padding: 60px 20px; max-width: 700px; text-align: center;">
+        <div class="card" style="padding: 50px 30px;">
+            <!-- Success Icon -->
+            <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                style="margin: 0 auto 30px; color: var(--success-color);">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </svg>
+
+            <h1 id="success-title" style="color: var(--success-color); margin-bottom: 15px;">Job Posted Successfully!
+            </h1>
+            <p id="success-message" style="color: var(--text-muted); margin-bottom: 40px; font-size: 1.1rem;">
+                Your job posting is now live and visible to thousands of job seekers across Kenya.
+            </p>
+
+            <!-- Job Summary -->
+            <div id="job-summary"
+                style="background: #f9f9f9; padding: 25px; border-radius: 8px; text-align: left; margin-bottom: 30px;">
+                <h3 style="margin-bottom: 15px; color: var(--accent-color);">Job Summary</h3>
+                <div style="display: grid; gap: 10px;">
+                    <div><strong>Title:</strong> <span id="job-title"></span></div>
+                    <div><strong>Location:</strong> <span id="job-location"></span></div>
+                    <div><strong>Type:</strong> <span id="job-type"></span></div>
+                    <div id="salary-display" style="display: none;"><strong>Salary:</strong> <span
+                            id="job-salary"></span></div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+                <a href="/job-details.html" id="view-job-link" class="btn">View Job Posting</a>
+                <a href="/post-job.html" class="btn-secondary">Post Another Job</a>
+                <a href="/employer-dashboard.html" class="btn-secondary">Back to Dashboard</a>
+            </div>
+
+            <!-- Share Section -->
+            <div style="margin-top: 40px; padding-top: 30px; border-top: 1px solid #eee;">
+                <p style="color: var(--text-muted); margin-bottom: 15px;">Share this job posting:</p>
+                <div style="display: flex; gap: 10px; justify-content: center;">
+                    <button onclick="shareJob('twitter')"
+                        style="background: #1DA1F2; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer;">
+                        Twitter
+                    </button>
+                    <button onclick="shareJob('linkedin')"
+                        style="background: #0077B5; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer;">
+                        LinkedIn
+                    </button>
+                    <button onclick="shareJob('whatsapp')"
+                        style="background: #25D366; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer;">
+                        WhatsApp
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script type="module">
+        import { supabase } from './src/supabaseClient.js';
+
+        // Get URL params
+        const params = new URLSearchParams(window.location.search);
+        const jobId = params.get('id');
+        const action = params.get('action'); // 'posted' or 'edited'
+
+        if (action === 'edited') {
+            document.getElementById('success-title').textContent = 'Job Updated Successfully!';
+            document.getElementById('success-message').textContent = 'Your changes have been saved and are now live.';
+        }
+
+        // Load job details
+        if (jobId) {
+            const { data: job, error } = await supabase
+                .from('jobs')
+                .select('*')
+                .eq('id', jobId)
+                .single();
+
+            if (job) {
+                document.getElementById('job-title').textContent = job.title;
+                document.getElementById('job-location').textContent = job.location;
+                document.getElementById('job-type').textContent = job.type;
+
+                if (job.salary_max) {
+                    document.getElementById('salary-display').style.display = 'block';
+                    document.getElementById('job-salary').textContent = `KES ${(job.salary_min || 0).toLocaleString()} - ${job.salary_max.toLocaleString()}`;
+                }
+
+                // Update view job link
+                document.getElementById('view-job-link').href = `/job-details.html?id=${jobId}`;
+            }
+        }
+
+        window.shareJob = function (platform) {
+            const jobUrl = `${window.location.origin}/job-details.html?id=${jobId}`;
+            const title = document.getElementById('job-title').textContent;
+            const text = `Check out this job opportunity: ${title}`;
+
+            let shareUrl;
+            switch (platform) {
+                case 'twitter':
+                    shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(jobUrl)}`;
+                    break;
+                case 'linkedin':
+                    shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(jobUrl)}`;
+                    break;
+                case 'whatsapp':
+                    shareUrl = `https://wa.me/?text=${encodeURIComponent(text + ' ' + jobUrl)}`;
+                    break;
+            }
+
+            window.open(shareUrl, '_blank');
+        };
+    </script>
+</body>
+
+</html>
