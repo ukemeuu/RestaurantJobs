@@ -111,15 +111,17 @@
             localStorage.clear();
             window.location.href = '/';
         }
-        document.querySelector('button[onclick="logout()"]').onclick = window.logout;
 
 
-        // Modal Logic
+
+
+        // Modal code commented out - using dedicated post-job.html page instead
+        /*
         const modal = document.getElementById('job-modal');
         document.getElementById('post-job-btn').onclick = () => {
             modal.style.display = 'flex';
-            goToStep(1); // Reset to step 1
-        };
+            goToStep(1); // Reset to step 1\n        };
+        */
 
         window.closeModal = function () {
             modal.style.display = 'none';
@@ -327,6 +329,9 @@
                 activityList.innerHTML = '';
             }
         }
+
+        // Load jobs on page load
+        loadActivity();
 
     </script>
 </body>
