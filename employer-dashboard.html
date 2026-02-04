@@ -31,7 +31,7 @@
     <main class="container" style="padding: 40px 20px;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;">
             <h1>Your Dashboard</h1>
-            <a href="/post-job.html" class="btn">Submit a Job</a>
+            <a href="/post-job.html" class="btn" id="submit-job-btn">Submit a Job</a>
         </div>
 
 
@@ -66,46 +66,32 @@
 
         if (!user) {
             window.location.href = '/employer-login.html';
+            throw new Error('Not authenticated');
         }
 
-        import { generateJobDescription } from './src/aiGenerator.js';
+        // Check user role
+        const { data: roleData } = await supabase
+            .from('user_roles')
+            .select('role')
+            .eq('id', user.id)
+            .single();
 
-        // AI Generator Logic
-        document.getElementById('ai-gen-btn').addEventListener('click', async function () {
-            const btn = this;
-            const originalText = btn.innerHTML;
-            const title = document.getElementById('job-title').value;
-            const location = document.getElementById('job-location').value;
-            const type = document.getElementById('job-type').value;
+        // Redirect candidates to their dashboard
+        if (roleData && roleData.role === 'candidate') {
+            window.location.href = '/candidate-dashboard.html';
+            throw new Error('Candidates should use candidate dashboard');
+        }
 
-            if (!title) {
-                alert('Please enter a Job Title first.');
-                document.getElementById('job-title').focus();
-                return;
-            }
-
-            // Loading State
-            btn.disabled = true;
-            btn.innerHTML = '✨ Thinking...';
-            btn.style.opacity = '0.7';
-
-            try {
-                const description = await generateJobDescription(title, location, type);
-                // Typewriter effect or just insert? Let's just insert for now, maybe with a flash effect
-                quill.clipboard.dangerouslyPasteHTML(description);
-            } catch (error) {
-                console.error(error);
-                alert('Could not generate description.');
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = originalText;
-                btn.style.opacity = '1';
-            }
-        });
+        // Hide Submit Job button for non-employers/non-admins
+        if (!roleData || (roleData.role !== 'employer' && roleData.role !== 'admin')) {
+            const submitBtn = document.getElementById('submit-job-btn');
+            if (submitBtn) submitBtn.style.display = 'none';
+        }
 
         const employerName = localStorage.getItem('employerName') || 'Partner';
         document.getElementById('welcome-msg').innerText = `Welcome, ${employerName}`;
 
+        // Logout Function
         window.logout = async function () {
             await supabase.auth.signOut();
             localStorage.clear();
