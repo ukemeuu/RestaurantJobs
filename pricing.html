@@ -4,92 +4,199 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Services & Pricing | RestaurantJobs Kenya</title>
+    <title>Post a Job - Pricing | RestaurantJobs Kenya</title>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
         href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&family=Playfair+Display:wght@500;700&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="./style.css">
+    <style>
+        .pricing-hero {
+            text-align: center;
+            padding: 60px 20px;
+            background: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)), url('/kitchen-color.png') center/cover;
+        }
+
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin: 40px 0;
+        }
+
+        .pricing-card {
+            background: white;
+            border: 1px solid #eee;
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .pricing-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .pricing-card.featured {
+            border: 2px solid var(--accent-color);
+            position: relative;
+            background: #fff9f0;
+        }
+
+        .popular-badge {
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--accent-color);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+
+        .price {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--text-color);
+            margin: 15px 0;
+        }
+
+        .price span {
+            font-size: 1rem;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        .feature-list {
+            list-style: none;
+            padding: 0;
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .feature-list li {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text-muted);
+        }
+
+        .feature-list li.active-feature {
+            color: var(--text-color);
+            font-weight: 600;
+        }
+
+        .check-icon {
+            color: var(--success-color);
+        }
+    </style>
 </head>
 
 <body>
-    <!-- Navigation -->
-    <nav class="container" style="padding: 20px 0; display: flex; justify-content: space-between; align-items: center;">
-        <a href="/" style="font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 700;">Restaurant<span
-                style="color: var(--accent-color);">Jobs</span></a>
-        <div style="display: flex; gap: 20px;">
-            <a href="/" style="font-weight: 600;">Home</a>
-            <a href="/jobs.html" style="font-weight: 600;">Find Jobs</a>
-            <a href="/employer-register.html" style="font-weight: 600;">Submit Job</a>
-            <a href="/apply.html" style="font-weight: 600; color: var(--accent-color);">Submit CV</a>
+    <nav class="container">
+        <a href="/" class="nav-brand">Restaurant<span style="color: var(--accent-color);">Jobs</span></a>
+
+        <button id="mobile-menu-btn" class="mobile-menu-btn" aria-label="Toggle Menu">&#9776;</button>
+
+        <div id="nav-links" class="nav-links">
+            <a href="/">Home</a>
+            <a href="/jobs.html">Find Jobs</a>
+            <a href="/employer-register.html" class="btn">Post a Job</a>
+            <a href="/employer-login.html">Login</a>
         </div>
     </nav>
 
-    <header style="background-color: var(--bg-color); padding: 60px 20px; text-align: center; margin-bottom: 40px;">
-        <h1 style="font-size: 3rem; margin-bottom: 20px;">Simple, Transparent Pricing</h1>
-        <p style="font-size: 1.2rem; color: var(--text-muted); max-width: 600px; margin: 0 auto;">
-            Whether you are hiring or getting hired, we have a plan for you.
-        </p>
-    </header>
+    <div class="container pricing-hero">
+        <h1 style="font-size: 3rem; margin-bottom: 20px;">Hire Top Hospitality Talent</h1>
+        <p style="font-size: 1.2rem; color: var(--text-muted); max-width: 600px; margin: 0 auto;">Reach thousands of
+            experienced chefs, waiters, and managers in Kenya. Choose the plan that fits your hiring needs.</p>
+    </div>
 
-    <!-- Services Section -->
-    <section class="container"
-        style="padding: 60px 20px; text-align: center; background-color: #fff; border-radius: 10px; margin-bottom: 60px; box-shadow: var(--shadow-sm);">
-        <span style="color: var(--accent-color); font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Our
-            Services</span>
-        <h2 style="font-size: 2.5rem; margin-top: 10px; margin-bottom: 40px;">Hiring Made Simple</h2>
-
-        <div style="display: flex; gap: 30px; justify-content: center; flex-wrap: wrap; text-align: left;">
-            <!-- Direct Post -->
-            <div class="card" style="flex: 1; min-width: 300px; border: 1px solid var(--border-color);">
-                <h3 style="font-size: 1.5rem; margin-bottom: 15px;">Self-Service</h3>
-                <h4 style="font-size: 1.5rem; margin-bottom: 20px; color: var(--accent-color);">Post a Job Directly</h4>
-                <p style="margin-bottom: 20px; color: #666;">Create an employer account and post your vacancy directly
-                    to our feed for candidates to apply.</p>
-                <ul style="list-style: none; padding: 0; margin-bottom: 30px; line-height: 1.8;">
-                    <li>✔ Instant Publication</li>
-                    <li>✔ Manage Candidates in Dashboard</li>
-                    <li>✔ Direct Contact</li>
+    <main class="container">
+        <div class="pricing-grid">
+            <!-- Standard Post -->
+            <div class="pricing-card">
+                <h3>Standard Post</h3>
+                <div class="price">KES 1,000<span>/post</span></div>
+                <p style="color: var(--text-muted); margin-bottom: 20px;">Perfect for filling a single opening quickly.
+                </p>
+                <ul class="feature-list">
+                    <li class="active-feature"><span class="check-icon">✓</span> Live for 30 Days</li>
+                    <li class="active-feature"><span class="check-icon">✓</span> Standard Visibility</li>
+                    <li class="active-feature"><span class="check-icon">✓</span> Candidate Dashboard Access</li>
+                    <li><span class="check-icon" style="color: #ddd;">✓</span> Highlighted in Yellow</li>
+                    <li><span class="check-icon" style="color: #ddd;">✓</span> Pinned to Top (Sticky)</li>
+                    <li><span class="check-icon" style="color: #ddd;">✓</span> Company Logo Display</li>
                 </ul>
-                <a href="/employer-register.html" class="btn-secondary"
-                    style="width: 100%; text-align: center; display: block;">Post a Job</a>
+                <a href="/employer-register.html" class="btn-secondary" style="width: 100%; display: block;">Get
+                    Started</a>
             </div>
 
-            <!-- Agency Managed -->
-            <div class="card"
-                style="flex: 1; min-width: 300px; border: 2px solid var(--accent-color); position: relative; overflow: hidden;">
-                <h3 style="font-size: 1.5rem; margin-bottom: 15px;">Agency Managed</h3>
-                <h4 style="font-size: 1.5rem; margin-bottom: 20px; color: var(--accent-color);">We Vet For You</h4>
-                <p style="margin-bottom: 20px; color: #666;">Let us handle the headache. We source, interview, and vet
-                    candidates to give you the top 1%.</p>
-                <ul style="list-style: none; padding: 0; margin-bottom: 30px; line-height: 1.8;">
-                    <li><strong>✔ Fully Vetted Candidates</strong></li>
-                    <li>✔ Replacement Guarantee</li>
-                    <li>✔ Interview Coordination</li>
+            <!-- Featured Post -->
+            <div class="pricing-card featured">
+                <div class="popular-badge">Most Popular</div>
+                <h3>Featured Post</h3>
+                <div class="price">KES 1,700<span>/post</span></div>
+                <p style="color: var(--text-muted); margin-bottom: 20px;">Stand out and get up to 3x more applicants.
+                </p>
+                <ul class="feature-list">
+                    <li class="active-feature"><span class="check-icon">✓</span> Live for 30 Days</li>
+                    <li class="active-feature"><span class="check-icon">✓</span> <strong>Highlighted in Yellow</strong>
+                    </li>
+                    <li class="active-feature"><span class="check-icon">✓</span> <strong>Company Logo Display</strong>
+                    </li>
+                    <li class="active-feature"><span class="check-icon">✓</span> Candidate Dashboard Access</li>
+                    <li><span class="check-icon" style="color: #ddd;">✓</span> Pinned to Top (Sticky)</li>
+                    <li style="margin-top: 15px; font-size: 0.9rem; color: var(--accent-color);">Start with Base + Add
+                        upgrades</li>
                 </ul>
-                <a href="/employer-register.html" class="btn"
-                    style="width: 100%; text-align: center; display: block;">Request Staff</a>
+                <a href="/employer-register.html" class="btn" style="width: 100%; display: block;">Post Featured Job</a>
+            </div>
+
+            <!-- Premium Reach -->
+            <div class="pricing-card">
+                <h3>Premium Reach</h3>
+                <div class="price">KES 4,700<span>/post</span></div>
+                <p style="color: var(--text-muted); margin-bottom: 20px;">Maximum visibility for urgent or senior roles.
+                </p>
+                <ul class="feature-list">
+                    <li class="active-feature"><span class="check-icon">✓</span> Live for 30 Days</li>
+                    <li class="active-feature"><span class="check-icon">✓</span> <strong>Pinned to Top (7 Days)</strong>
+                    </li>
+                    <li class="active-feature"><span class="check-icon">✓</span> <strong>Highlighted in Yellow</strong>
+                    </li>
+                    <li class="active-feature"><span class="check-icon">✓</span> <strong>Company Logo Display</strong>
+                    </li>
+                    <li class="active-feature"><span class="check-icon">✓</span> Email Blast to Candidates</li>
+                </ul>
+                <a href="/employer-register.html" class="btn-secondary" style="width: 100%; display: block;">Select
+                    Premium</a>
             </div>
         </div>
-    </section>
 
-    <!-- Footer -->
-    <footer style="background-color: var(--text-main); color: white; padding: 40px 0; margin-top: 40px;">
-        <div class="container" style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 40px;">
-            <div>
-                <h4 style="color: white; margin-bottom: 10px;">RestaurantJobs</h4>
-                <p style="color: #999; font-size: 0.9rem;">Kenya's Premier Hospitality Recruitment Agency.</p>
-            </div>
-            <div>
-                <h5 style="color: white; margin-bottom: 10px; font-family: 'Nunito', sans-serif;">Contact</h5>
-                <p style="color: #999; font-size: 0.9rem;">Westlands, Nairobi, Kenya</p>
-                <p style="color: #999; font-size: 0.9rem;"><a href="mailto:info@restaurantjobs.co.ke"
-                        style="color: #999;">info@restaurantjobs.co.ke</a></p>
-                <p style="color: #999; font-size: 0.9rem;">+254 700 123 456</p>
-            </div>
+        <div style="text-align: center; margin: 60px 0; padding: 40px; background: #f9f9f9; border-radius: 12px;">
+            <h2>Bulk Hiring?</h2>
+            <p style="margin-bottom: 20px; color: var(--text-muted);">Contact us for custom packages if you're hiring
+                for multiple locations or roles.</p>
+            <a href="mailto:sales@restaurantjobs.co.ke"
+                style="color: var(--accent-color); font-weight: 700; text-decoration: none;">sales@restaurantjobs.co.ke</a>
+        </div>
+    </main>
+
+    <footer style="background-color: var(--text-main); color: white; padding: 40px 0; margin-top: 80px;">
+        <div class="container">
+            <p style="text-align: center; color: #999; font-size: 0.9rem;">&copy; 2026 RestaurantJobs Kenya. All rights
+                reserved.</p>
         </div>
     </footer>
+
+    <script type="module" src="./src/ui.js"></script>
 </body>
 
 </html>

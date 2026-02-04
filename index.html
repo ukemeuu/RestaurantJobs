@@ -153,13 +153,13 @@
         async function loadFeaturedJobs() {
             const grid = document.getElementById('featured-grid');
             try {
-                // Fetch top 3 paying jobs
+                // Fetch top jobs, prioritizing Sticky/Pinned ones
                 const { data: jobs, error } = await supabase
                     .from('jobs')
                     .select('*')
                     .eq('status', 'published')
-                    // .gt('salary_max', 40000) // Temporarily removed to prevent "column does not exist" error
-                    .order('created_at', { ascending: false })
+                    .order('sticky_until', { ascending: false, nullsFirst: false }) // Prioritize sticky
+                    .order('created_at', { ascending: false }) // Then newest
                     .limit(3);
 
                 if (error) throw error;
@@ -175,9 +175,15 @@
                     card.className = 'featured-card';
                     card.style.position = 'relative';
 
+                    // Highlight Logic
+                    if (job.features && job.features.highlight) {
+                        card.style.background = '#fff9e6'; // Light yellow
+                        card.style.border = '1px solid #ffd54f';
+                    }
+
                     card.innerHTML = `
                         <div class="featured-card-header">
-                            <span class="featured-badge">Featured</span>
+                            <span class="featured-badge" style="${job.sticky_until && new Date(job.sticky_until) > new Date() ? 'background:var(--accent-color);' : ''}">${job.sticky_until && new Date(job.sticky_until) > new Date() ? 'Pinned' : 'Featured'}</span>
                             <button onclick="shareJob('${job.title.replace(/'/g, "\\'")}', '${job.id}')" style="background: white; border: 1px solid #eee; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; color: var(--text-muted); cursor: pointer; transition: all 0.2s;" title="Share" onmouseover="this.style.color='var(--accent-color)'" onmouseout="this.style.color='var(--text-muted)'">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
                             </button>

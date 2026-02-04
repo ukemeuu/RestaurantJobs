@@ -157,6 +157,8 @@
                     .from('jobs')
                     .select('*')
                     .eq('status', 'published')
+                    // Sort by sticky first (nulls last), then newest
+                    .order('sticky_until', { ascending: false, nullsFirst: false })
                     .order('created_at', { ascending: false });
 
                 // Apply Filters
@@ -193,6 +195,13 @@
                 jobs.forEach(job => {
                     const card = document.createElement('div');
                     card.className = 'card fade-in';
+
+                    // Apply Highlight Styles
+                    if (job.features && job.features.highlight) {
+                        card.style.background = '#fff9e6'; // Light yellow
+                        card.style.border = '1px solid #ffd54f';
+                    }
+
                     card.style.display = 'flex';
                     card.style.flexDirection = 'column';
                     card.style.position = 'relative'; // For heart icon
@@ -201,16 +210,29 @@
                     const heartIcon = isSaved ? '♥' : '♡';
                     const heartColor = isSaved ? 'var(--error-color)' : 'var(--text-muted)';
 
+                    // Check Sticky/Pinned status for badge
+                    const isSticky = job.sticky_until && new Date(job.sticky_until) > new Date();
+                    const pinnedBadge = isSticky ? '<span style="background:var(--accent-color); color:white; padding:2px 6px; border-radius:4px; font-size:0.7rem; margin-right:5px; vertical-align:middle;">📌 Pinned</span>' : '';
+
+                    // Logic for Logo (Paid Feature check)
+                    // If show_logo is false/undefined, show placeholder? 
+                    // RemoteOK logic says pay to show. We'll default to showing if present for now unless strict enforcement needed.
+                    // Let's rely on the plan: "Show Logo: +KES 200". 
+                    // So if job.features.show_logo represents paying for it...
+                    // But legacy jobs have no features. We should probably show logos for all for now to avoid breaking legacy, 
+                    // or only hide if explicitly paid=false?
+                    // Let's just show it if `logo_url` exists, as legacy behavior. 
+                    // The "upgrade" in dashboard just ensures it's checked/paid for future. 
 
                     const logoHtml = job.logo_url
                         ? `<img src="${job.logo_url}" alt="${job.title}" loading="lazy" onerror="this.onerror=null; this.src='/images/company-logo.png';" style="width: 50px; height: 50px; object-fit: contain; border-radius: 6px; border: 1px solid #eee;">`
-                        : `<img src="/images/company-logo.png" alt="RestaurantJobs" loading="lazy" style="width: 50px; height: 50px; object-fit: contain; border-radius: 6px; border: 1px solid #eee;">`;
+                        : `<img src="/images/company-logo.png" alt="${job.title}" loading="lazy" style="width: 50px; height: 50px; object-fit: contain; border-radius: 6px; border: 1px solid #eee;">`;
 
                     card.innerHTML = `
                         <div style="display: flex; gap: 15px; margin-bottom: 10px;">
                             ${logoHtml}
                             <div>
-                                <h3 style="margin-bottom: 5px;">${job.title}</h3>
+                                <h3 style="margin-bottom: 5px;">${pinnedBadge}${job.title}</h3>
                                 <div style="font-size: 0.9rem; color: var(--text-muted);">
                                     <span>📍 ${job.location}</span>
                                 </div>

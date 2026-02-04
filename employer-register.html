@@ -296,8 +296,13 @@
                     <input type="text" id="jobTitle" name="jobTitle" class="typeform-input" style="border-radius: 50px;"
                         placeholder="e.g. Head Chef" required>
 
-                    <label style="font-size: 0.9rem; color: #999; margin-bottom: 5px; display: block;">Job
-                        Description</label>
+                    <div style="display: flex; justify-content: space-between; align-items: end; margin-bottom: 5px;">
+                        <label style="font-size: 0.9rem; color: #999; display: block;">Job Description</label>
+                        <button type="button" id="ai-gen-btn"
+                            style="background: linear-gradient(135deg, #6366f1, #a855f7); color: white; border: none; padding: 5px 12px; border-radius: 20px; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: transform 0.2s;">
+                            <span>✨</span> Generate with AI
+                        </button>
+                    </div>
                     <textarea id="jobDesc" name="jobDesc" class="typeform-input"
                         placeholder="Describe the responsibilities, requirements, and any other details..." rows="6"
                         required></textarea>
@@ -496,6 +501,59 @@
 
     <script type="module">
         import { supabase } from './src/supabaseClient.js';
+        import { generateJobDescription } from './src/aiGenerator.js';
+
+        // AI Generator Logic
+        document.getElementById('ai-gen-btn').addEventListener('click', async function () {
+            const btn = this;
+            const originalText = btn.innerHTML;
+            const title = document.getElementById('jobTitle').value;
+            // Map simple inputs or defaults if step 2/3 not reached yet. 
+            // The form is multi-step, so location isn't asked explicitly in this form (Wait, looking at the code, location isn't in the form?! 
+            // Ah, step 6 has Org Name. Step 1 has Title. Location is NOT in this simplified Typeform? 
+            // Let's check... I don't see a location field in the file content provided earlier!
+            // That's a separate issue potentially. For now, let's use a default location or prompt.
+            // Actually, for this 'Leads' form, maybe we don't need location for the AI to simple work.
+
+            const location = "Kenya"; // Default context
+            const type = "Full-time";
+
+            if (!title) {
+                alert('Please enter a Job Title first.');
+                document.getElementById('jobTitle').focus();
+                return;
+            }
+
+            // Loading State
+            btn.disabled = true;
+            btn.innerHTML = '✨ Thinking...';
+            btn.style.opacity = '0.7';
+
+            try {
+                const descriptionHtml = await generateJobDescription(title, location, type);
+                // Convert HTML to plain text for textarea since this form uses a simple textarea
+                // Or... smart move: just strip tags or keep simple.
+                // The aiGenerator returns HTML <ul> etc. Textarea can't render that.
+                // Let's strip tags for this textarea version.
+
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = descriptionHtml;
+                const plainText = tempDiv.innerText; // Gets text content
+
+                const textarea = document.getElementById('jobDesc');
+                textarea.value = plainText;
+
+                // Trigger auto-resize if needed?
+
+            } catch (error) {
+                console.error(error);
+                alert('Could not generate description.');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+                btn.style.opacity = '1';
+            }
+        });
 
         let currentStep = 0;
         const totalSteps = 8;
