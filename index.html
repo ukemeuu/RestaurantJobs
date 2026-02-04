@@ -220,24 +220,12 @@
 
 
         // Check auth state and update navigation
-        async function updateNavigation() {
-            const { data: { session } } = await supabase.auth.getSession();
-
-            if (session) {
-                // User is logged in - show Dashboard and Sign Out
-                document.getElementById('nav-submit-job').style.display = 'none';
-                document.getElementById('nav-dashboard').style.display = 'inline-block';
-                document.getElementById('nav-auth-btn').style.display = 'none';
-                document.getElementById('nav-signout-btn').style.display = 'inline-block';
-            }
-        }
-
+        // updateNavigation handled by src/ui.js
         window.handleSignOut = async function () {
             await supabase.auth.signOut();
             window.location.href = '/';
         };
 
-        updateNavigation();
         loadFeaturedJobs();
     </script>
 </body>

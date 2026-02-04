@@ -84,40 +84,61 @@ export async function updateNavigation() {
     const user = session?.user;
 
     // 2. Get Elements
-    const authBtn = document.getElementById('nav-auth-btn'); // Some pages might use this ID
+    const authBtn = document.getElementById('nav-auth-btn'); // Link: "Sign In"
+    const signOutBtn = document.getElementById('nav-signout-btn'); // Button: "Sign Out"
     const navLinks = document.getElementById('nav-links');
 
-    // 3. Clear existing role-based links first (optional, but safer to re-render)
-    // For this static site, we'll just toggle visibility of known links if they exist,
-    // or inject them if they don't.
-
+    // 3. Update UI based on User State
     if (!user) {
         // --- GUEST STATE ---
         if (authBtn) {
+            authBtn.style.display = 'inline-block';
             authBtn.innerText = 'Sign In';
             authBtn.href = '/auth.html';
-            authBtn.onclick = null;
         }
+        if (signOutBtn) signOutBtn.style.display = 'none';
 
-        // Ensure guest links are visible, auth links hidden
-        toggleLink(navLinks, '/auth.html', true, 'Sign In');
+        // Hide Dashboard links
         toggleLink(navLinks, '/employer-dashboard.html', false);
         toggleLink(navLinks, '/candidate-dashboard.html', false);
-        toggleLink(navLinks, '/post-job.html', false);
         toggleLink(navLinks, '/settings.html', false);
-        // "Find Jobs" is always visible
+
+        // Guest: specific formatting
+        toggleLink(navLinks, '/employer-register.html', true, 'Submit Job');
+        toggleLink(navLinks, '/post-job.html', false);
         return;
     }
 
     // --- AUTHENTICATED STATE ---
-    if (authBtn) {
-        authBtn.innerText = 'Sign Out';
-        authBtn.href = '#';
-        authBtn.onclick = async (e) => {
-            e.preventDefault();
+
+    // Hide "Sign In" link
+    if (authBtn) authBtn.style.display = 'none';
+
+    // Hide Guest Submit Job link
+    toggleLink(navLinks, '/employer-register.html', false);
+
+    // Show "Sign Out" button
+    // Check for either ID to avoid duplicates
+    let activeSignOutBtn = signOutBtn || document.getElementById('nav-logout-btn');
+
+    if (activeSignOutBtn) {
+        activeSignOutBtn.style.display = 'inline-block';
+        // Attach handler just in case (idempotent)
+        activeSignOutBtn.onclick = async () => {
             await supabase.auth.signOut();
             window.location.href = '/';
         };
+    } else if (navLinks) {
+        // Create Button if missing
+        const btn = document.createElement('button');
+        btn.id = 'nav-signout-btn';
+        btn.className = 'btn-secondary';
+        btn.innerText = 'Sign Out';
+        btn.onclick = async () => {
+            await supabase.auth.signOut();
+            window.location.href = '/';
+        };
+        navLinks.appendChild(btn);
     }
 
     // 4. Check Role
@@ -127,72 +148,48 @@ export async function updateNavigation() {
         .eq('id', user.id)
         .single();
 
-    const role = roleData?.role || 'candidate'; // Default to candidate if missing
+    const role = roleData?.role || 'candidate';
 
     // 5. Update UI based on Role
     if (role === 'employer' || role === 'admin') {
-        // Show Employer Links
         toggleLink(navLinks, '/employer-dashboard.html', true, 'Dashboard');
         toggleLink(navLinks, '/post-job.html', true, 'Post a Job');
         toggleLink(navLinks, '/settings.html', true, 'Settings');
-
-        // Hide Candidate Links
         toggleLink(navLinks, '/candidate-dashboard.html', false);
-        toggleLink(navLinks, '/auth.html', false); // Hide "Sign In" link if redundant
-
     } else {
-        // Show Candidate Links
         toggleLink(navLinks, '/candidate-dashboard.html', true, 'Dashboard');
         toggleLink(navLinks, '/settings.html', true, 'Settings');
-
-        // Hide Employer Links
         toggleLink(navLinks, '/employer-dashboard.html', false);
         toggleLink(navLinks, '/post-job.html', false);
-        toggleLink(navLinks, '/auth.html', false);
     }
-
-    // Add Logout Button if not present in nav-links (some mobile menus need it inside)
-    addLogoutButton(navLinks);
 }
 
 // Helper to toggle link visibility or add it
 function toggleLink(container, href, shouldShow, text) {
     if (!container) return;
 
-    // Try to find existing link
     let link = container.querySelector(`a[href="${href}"]`);
 
     if (shouldShow) {
         if (link) {
             link.style.display = 'inline-block';
-            link.innerText = text || link.innerText;
+            if (text) link.innerText = text;
         } else {
-            // Create it
-            link = document.createElement('a');
-            link.href = href;
-            link.innerText = text;
-            // Insert before the last item (usually logout or CTA) or at end
-            container.insertBefore(link, container.firstChild);
+            // Only create if necessary and structure allows
+            if (text === 'Dashboard' || text === 'Saved Jobs' || text === 'Settings' || (text && text.includes('Job'))) {
+                link = document.createElement('a');
+                link.href = href;
+                link.innerText = text;
+                if (text === 'Dashboard') link.id = 'nav-dashboard';
+
+                // Insert logic:
+                const lastItem = container.lastElementChild;
+                container.insertBefore(link, lastItem);
+            }
         }
     } else {
         if (link) link.style.display = 'none';
     }
-}
-
-function addLogoutButton(container) {
-    if (!container) return;
-    if (container.querySelector('#nav-logout-btn')) return; // Already exists
-
-    const btn = document.createElement('button');
-    btn.id = 'nav-logout-btn';
-    btn.className = 'btn-secondary';
-    btn.innerText = 'Logout';
-    btn.style.marginLeft = '10px';
-    btn.onclick = async () => {
-        await supabase.auth.signOut();
-        window.location.href = '/';
-    };
-    container.appendChild(btn);
 }
 
 // Auto-initialize if running in browser
