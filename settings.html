@@ -41,6 +41,22 @@
                         <input type="text" id="org_name" name="org_name" class="input"
                             style="width:100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px;">
                     </div>
+
+                    <div style="margin-bottom: 20px;">
+                        <label style="display:block; margin-bottom:8px; font-weight:600;">Company Logo</label>
+                        <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 10px;">
+                            <img id="logo-preview" src="/company-logo.png" alt="Logo"
+                                style="width: 80px; height: 80px; object-fit: contain; border: 1px solid #ddd; border-radius: 8px; padding: 5px;">
+                            <div style="flex: 1;">
+                                <input type="file" id="logo-upload" accept="image/*" style="display: none;">
+                                <button type="button" onclick="document.getElementById('logo-upload').click()"
+                                    class="btn-secondary" style="margin-bottom: 5px;">Choose Logo</button>
+                                <p id="logo-filename" style="font-size: 0.85rem; color: #666; margin: 0;"></p>
+                            </div>
+                        </div>
+                        <small style="color: #999;">Recommended: Square image, at least 200x200px</small>
+                    </div>
+
                     <div style="margin-bottom: 20px;">
                         <label style="display:block; margin-bottom:8px; font-weight:600;">Contact Person</label>
                         <input type="text" id="poc_name" name="poc_name" class="input"
@@ -123,7 +139,35 @@
                 if (profile) {
                     document.getElementById('org_name').value = profile.org_name || '';
                     document.getElementById('poc_name').value = profile.poc_name || '';
+
+                    // Set logo preview if exists
+                    if (profile.logo_url) {
+                        document.getElementById('logo-preview').src = profile.logo_url;
+                    }
                 }
+
+                // Logo upload preview
+                let selectedLogoFile = null;
+                document.getElementById('logo-upload').addEventListener('change', (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        selectedLogoFile = file;
+                        document.getElementById('logo-filename').textContent = file.name;
+
+                        // Preview
+                        const reader = new FileReader();
+                        reader.onload = (event) => {
+                            document.getElementById('logo-preview').src = event.target.result;
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+
+                // Store the file for form submission
+                window.selectedLogoFile = null;
+                document.getElementById('logo-upload').addEventListener('change', (e) => {
+                    window.selectedLogoFile = e.target.files[0];
+                });
 
             } else if (role === 'admin') {
                 roleDisplay.innerText = 'Admin Account';
@@ -145,11 +189,42 @@
 
                 try {
                     if (role === 'employer') {
+                        let logoUrl = null;
+
+                        // Upload logo if selected
+                        if (window.selectedLogoFile) {
+                            const fileExt = window.selectedLogoFile.name.split('.').pop();
+                            const fileName = `${user.id}-${Date.now()}.${fileExt}`;
+
+                            const { data: uploadData, error: uploadError } = await supabase.storage
+                                .from('logos')
+                                .upload(fileName, window.selectedLogoFile, {
+                                    cacheControl: '3600',
+                                    upsert: true
+                                });
+
+                            if (uploadError) {
+                                console.error('Logo upload error:', uploadError);
+                                throw new Error('Failed to upload logo: ' + uploadError.message);
+                            }
+
+                            // Get public URL
+                            const { data: { publicUrl } } = supabase.storage
+                                .from('logos')
+                                .getPublicUrl(fileName);
+
+                            logoUrl = publicUrl;
+                        }
+
                         const updates = {
                             org_name: document.getElementById('org_name').value,
                             poc_name: document.getElementById('poc_name').value,
                             updated_at: new Date(),
                         };
+
+                        if (logoUrl) {
+                            updates.logo_url = logoUrl;
+                        }
 
                         const { error } = await supabase
                             .from('employers')
