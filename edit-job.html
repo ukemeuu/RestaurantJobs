@@ -170,8 +170,20 @@
 
             } catch (err) {
                 console.error(err);
-                alert('Error loading job: ' + err.message);
-                window.location.href = '/employer-dashboard.html';
+                // Display error on page instead of redirecting immediately
+                const loadingDiv = document.getElementById('loading');
+                loadingDiv.innerHTML = `
+                    <div style="text-align: center; padding: 40px;">
+                        <span style="font-size: 3rem;">⚠️</span>
+                        <h3 style="color: #d32f2f;">Unable to Load Job</h3>
+                        <p style="color: #666; margin-bottom: 20px;">${err.message}</p>
+                        <p style="font-size: 0.9rem; background: #f5f5f5; padding: 10px; display: inline-block;">Job ID: ${jobId}</p>
+                        <div style="margin-top: 20px;">
+                            <a href="/employer-dashboard.html" class="btn">Return to Dashboard</a>
+                        </div>
+                    </div>
+                `;
+                // window.location.href = '/employer-dashboard.html'; // Disabled auto-redirect
             }
         }
 

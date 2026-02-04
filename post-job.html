@@ -259,27 +259,8 @@
         });
     </script>
 
-    <script type="module" src="/src/ui.js"></script>
-    <script type="module">
-        import { supabase } from './src/supabaseClient.js';
-        import { generateJobDescription } from './src/aiGenerator.js';
-
-        // Check Auth
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) {
-            window.location.href = '/employer-login.html';
-        }
-
-        const employerName = localStorage.getItem('employerName') || 'Partner';
-        document.getElementById('welcome-msg').innerText = `Welcome, ${employerName}`;
-
-        window.logout = async function () {
-            await supabase.auth.signOut();
-            localStorage.clear();
-            window.location.href = '/';
-        }
-
-        // Multi-Step Form Logic
+    <script>
+        // UI Logic - Moved out of module to ensure availability
         window.goToStep = function (step) {
             document.querySelectorAll('.form-step').forEach(el => el.style.display = 'none');
             document.getElementById(`step-${step}`).style.display = 'block';
@@ -312,6 +293,28 @@
             document.getElementById('total-price').innerText = `KES ${total.toLocaleString()}`;
             document.getElementById('payment-amount-display').innerText = `KES ${total.toLocaleString()}`;
         }
+    </script>
+    <script type="module" src="/src/ui.js"></script>
+    <script type="module">
+        import { supabase } from './src/supabaseClient.js';
+        import { generateJobDescription } from './src/aiGenerator.js';
+
+        // Check Auth
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+            window.location.href = '/employer-login.html';
+        }
+
+        const employerName = localStorage.getItem('employerName') || 'Partner';
+        document.getElementById('welcome-msg').innerText = `Welcome, ${employerName}`;
+
+        window.logout = async function () {
+            await supabase.auth.signOut();
+            localStorage.clear();
+            window.location.href = '/';
+        }
+
+
 
         // AI Generator Logic
         document.getElementById('ai-gen-btn').addEventListener('click', async function () {

@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account | RestaurantJobs Premium</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&family=Playfair+Display:wght@500;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="./style.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+
+        .auth-container {
+            max-width: 500px;
+            margin: 60px auto;
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #333;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-family: inherit;
+        }
+
+        .premium-banner {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="container">
+        <a href="/" class="nav-brand" style="text-decoration: none; color: #333;">Restaurant<span
+                style="color: var(--accent-color);">Jobs</span></a>
+    </nav>
+
+    <div class="auth-container">
+        <div class="premium-banner">
+            <h3 style="margin: 0; font-size: 1.1rem;">Finish Setting Up Your Account</h3>
+            <p style="margin: 5px 0 0; opacity: 0.9; font-size: 0.9rem;">To activate your Premium Membership</p>
+        </div>
+
+        <form id="register-form">
+            <div class="form-group">
+                <label>Email Address</label>
+                <input type="email" id="email" class="form-control" required>
+            </div>
+
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="password" class="form-control" require minlength="6">
+            </div>
+
+            <div class="form-group">
+                <label>Confirm Password</label>
+                <input type="password" id="confirm-password" class="form-control" required minlength="6">
+            </div>
+
+            <button type="submit" class="btn" style="width: 100%;" id="submit-btn">Create Account & Continue</button>
+            <div id="message" style="margin-top: 15px; text-align: center; font-size: 0.9rem; color: red;"></div>
+
+            <p style="text-align: center; margin-top: 20px; font-size: 0.9rem;">
+                Already have an account? <a href="#" id="login-link">Sign In</a>
+            </p>
+        </form>
+    </div>
+
+    <script type="module">
+        import { supabase } from './src/supabaseClient.js';
+
+        // Get URL params
+        const params = new URLSearchParams(window.location.search);
+        const plan = params.get('plan');
+        const amount = params.get('amount');
+
+        // Update login link to preserve params
+        const loginLink = document.getElementById('login-link');
+        loginLink.href = `/auth.html?redirect=/premium-checkout.html?plan=${plan}&amount=${amount}`;
+
+        const form = document.getElementById('register-form');
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const btn = document.getElementById('submit-btn');
+            const msg = document.getElementById('message');
+            const originalText = btn.innerText;
+
+            msg.innerText = '';
+
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+
+            if (password !== confirmPassword) {
+                msg.innerText = "Passwords do not match";
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerText = 'Creating Account...';
+
+            try {
+                // 1. Sign Up
+                const { data: { user }, error: authError } = await supabase.auth.signUp({
+                    email,
+                    password
+                });
+
+                if (authError) throw authError;
+
+                if (user) {
+                    // 2. Insert Candidate Role
+                    const { error: roleError } = await supabase
+                        .from('user_roles')
+                        .insert({ id: user.id, role: 'candidate' });
+
+                    if (roleError) console.error('Role Error:', roleError);
+
+                    // 3. Create Basic Profile
+                    const { error: profileError } = await supabase
+                        .from('candidate_profiles')
+                        .insert({ id: user.id });
+
+                    if (profileError) console.error('Profile Error:', profileError);
+
+                    // 4. Redirect to Checkout
+                    window.location.href = `/premium-checkout.html?plan=${plan}&amount=${amount}`;
+                }
+
+            } catch (error) {
+                console.error(error);
+                msg.innerText = error.message;
+            } finally {
+                btn.disabled = false;
+                btn.innerText = originalText;
+            }
+        });
+    </script>
+</body>
+
+</html>

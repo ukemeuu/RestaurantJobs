@@ -77,34 +77,129 @@ export function toggleSaveJob(id) {
     return saved.includes(id);
 }
 
-// Auth State Management
-export async function updateNavAuth() {
+// Auth & Navigation State Management
+export async function updateNavigation() {
+    // 1. Check Session
     const { data: { session } } = await supabase.auth.getSession();
-    const authBtn = document.getElementById('nav-auth-btn');
+    const user = session?.user;
 
-    // Toggle Sign In / Sign Out button
-    if (authBtn) {
-        if (session) {
-            authBtn.innerText = 'Sign Out';
-            authBtn.href = '#'; // Prevent navigation
-            authBtn.onclick = async (e) => {
-                e.preventDefault();
-                await supabase.auth.signOut();
-                window.location.href = '/'; // Redirect to home after sign out
-            };
-        } else {
+    // 2. Get Elements
+    const authBtn = document.getElementById('nav-auth-btn'); // Some pages might use this ID
+    const navLinks = document.getElementById('nav-links');
+
+    // 3. Clear existing role-based links first (optional, but safer to re-render)
+    // For this static site, we'll just toggle visibility of known links if they exist,
+    // or inject them if they don't.
+
+    if (!user) {
+        // --- GUEST STATE ---
+        if (authBtn) {
             authBtn.innerText = 'Sign In';
             authBtn.href = '/auth.html';
-            authBtn.onclick = null; // Remove previous handler if any
+            authBtn.onclick = null;
         }
+
+        // Ensure guest links are visible, auth links hidden
+        toggleLink(navLinks, '/auth.html', true, 'Sign In');
+        toggleLink(navLinks, '/employer-dashboard.html', false);
+        toggleLink(navLinks, '/candidate-dashboard.html', false);
+        toggleLink(navLinks, '/post-job.html', false);
+        toggleLink(navLinks, '/settings.html', false);
+        // "Find Jobs" is always visible
+        return;
     }
+
+    // --- AUTHENTICATED STATE ---
+    if (authBtn) {
+        authBtn.innerText = 'Sign Out';
+        authBtn.href = '#';
+        authBtn.onclick = async (e) => {
+            e.preventDefault();
+            await supabase.auth.signOut();
+            window.location.href = '/';
+        };
+    }
+
+    // 4. Check Role
+    const { data: roleData } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+
+    const role = roleData?.role || 'candidate'; // Default to candidate if missing
+
+    // 5. Update UI based on Role
+    if (role === 'employer' || role === 'admin') {
+        // Show Employer Links
+        toggleLink(navLinks, '/employer-dashboard.html', true, 'Dashboard');
+        toggleLink(navLinks, '/post-job.html', true, 'Post a Job');
+        toggleLink(navLinks, '/settings.html', true, 'Settings');
+
+        // Hide Candidate Links
+        toggleLink(navLinks, '/candidate-dashboard.html', false);
+        toggleLink(navLinks, '/auth.html', false); // Hide "Sign In" link if redundant
+
+    } else {
+        // Show Candidate Links
+        toggleLink(navLinks, '/candidate-dashboard.html', true, 'Dashboard');
+        toggleLink(navLinks, '/settings.html', true, 'Settings');
+
+        // Hide Employer Links
+        toggleLink(navLinks, '/employer-dashboard.html', false);
+        toggleLink(navLinks, '/post-job.html', false);
+        toggleLink(navLinks, '/auth.html', false);
+    }
+
+    // Add Logout Button if not present in nav-links (some mobile menus need it inside)
+    addLogoutButton(navLinks);
+}
+
+// Helper to toggle link visibility or add it
+function toggleLink(container, href, shouldShow, text) {
+    if (!container) return;
+
+    // Try to find existing link
+    let link = container.querySelector(`a[href="${href}"]`);
+
+    if (shouldShow) {
+        if (link) {
+            link.style.display = 'inline-block';
+            link.innerText = text || link.innerText;
+        } else {
+            // Create it
+            link = document.createElement('a');
+            link.href = href;
+            link.innerText = text;
+            // Insert before the last item (usually logout or CTA) or at end
+            container.insertBefore(link, container.firstChild);
+        }
+    } else {
+        if (link) link.style.display = 'none';
+    }
+}
+
+function addLogoutButton(container) {
+    if (!container) return;
+    if (container.querySelector('#nav-logout-btn')) return; // Already exists
+
+    const btn = document.createElement('button');
+    btn.id = 'nav-logout-btn';
+    btn.className = 'btn-secondary';
+    btn.innerText = 'Logout';
+    btn.style.marginLeft = '10px';
+    btn.onclick = async () => {
+        await supabase.auth.signOut();
+        window.location.href = '/';
+    };
+    container.appendChild(btn);
 }
 
 // Auto-initialize if running in browser
 if (typeof window !== 'undefined') {
     document.addEventListener('DOMContentLoaded', () => {
         setupMobileMenu();
-        updateNavAuth(); // Check auth on load
+        updateNavigation(); // Run the new robust function
     });
 }
 

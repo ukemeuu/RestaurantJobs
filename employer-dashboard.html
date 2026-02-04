@@ -50,8 +50,7 @@
                     style="color: var(--text-muted); margin-bottom: 30px; max-width: 400px; margin-left: auto; margin-right: auto;">
                     Start attracting top talent by posting your first job opportunity. It only takes a few minutes!
                 </p>
-                <button onclick="document.getElementById('post-job-btn').click()" class="btn">Post Your First
-                    Job</button>
+                <a href="/post-job.html" class="btn">Post Your First Job</a>
             </div>
             <div id="activity-list"></div>
         </div>
@@ -79,7 +78,8 @@
         // Redirect candidates to their dashboard
         if (roleData && roleData.role === 'candidate') {
             window.location.href = '/candidate-dashboard.html';
-            throw new Error('Candidates should use candidate dashboard');
+            // Stop execution
+            throw new Error('Redirecting to candidate dashboard');
         }
 
         // Hide Submit Job button for non-employers/non-admins
@@ -101,165 +101,7 @@
 
 
 
-        // Modal code commented out - using dedicated post-job.html page instead
-        /*
-        const modal = document.getElementById('job-modal');
-        document.getElementById('post-job-btn').onclick = () => {
-            modal.style.display = 'flex';
-            goToStep(1); // Reset to step 1\n        };
-        */
 
-        window.closeModal = function () {
-            modal.style.display = 'none';
-            form.reset();
-            quill.root.innerHTML = '';
-            delete form.dataset.editMode;
-            delete form.dataset.jobId;
-            document.querySelector('#job-modal h2').innerText = 'Post a Job';
-            goToStep(1); // Reset step
-        }
-        document.querySelector('button[onclick="closeModal()"]').onclick = window.closeModal;
-
-        // Multi-Step Form Logic
-        window.goToStep = function (step) {
-            document.querySelectorAll('.form-step').forEach(el => el.style.display = 'none');
-            document.getElementById(`step-${step}`).style.display = 'block';
-
-            // Update modal title
-            const titles = ['Post a Job - Details', 'Enhance Visibility', 'Payment'];
-            document.querySelector('#job-modal h2').innerText = titles[step - 1];
-        }
-
-        window.updateTotal = function () {
-            let total = 1000; // Base fee
-            const upgrades = [];
-
-            if (document.getElementById('upgrade-highlight').checked) {
-                total += 500;
-            }
-
-            const sticky = document.getElementById('upgrade-sticky').value;
-            if (sticky === '24h') total += 1000;
-            if (sticky === '7d') total += 3000;
-
-            if (document.getElementById('upgrade-logo').checked) {
-                total += 200;
-            }
-
-            // Update displays
-            document.getElementById('total-price').innerText = `KES ${total.toLocaleString()}`;
-            document.getElementById('payment-amount-display').innerText = `KES ${total.toLocaleString()}`;
-        }
-
-
-        // Form Logic
-        const form = document.getElementById('post-job-form'); // Updated ID
-
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            // Populate hidden field (if using one, or just grab from quill)
-            // document.getElementById('hidden-desc').value = quill.root.innerHTML;
-
-            // Validate description
-            if (quill.getText().trim().length === 0) {
-                alert('Please enter a job description.');
-                goToStep(1);
-                return;
-            }
-
-            // Calculate final data
-            const paymentRef = document.getElementById('payment-ref').value;
-            if (!paymentRef) {
-                alert('Please enter the M-Pesa transaction code.');
-                return;
-            }
-
-            const jobData = {
-                title: document.getElementById('job-title').value,
-                location: document.getElementById('job-location').value,
-                type: document.getElementById('job-type').value,
-                salary_min: document.getElementById('salary-min').value || null,
-                salary_max: document.getElementById('salary-max').value || null,
-                description: quill.root.innerHTML,
-                employer_id: user.id,
-                status: 'published', // Or 'pending_payment' if we had backend verification
-                is_paid: true, // Assuming manual verification for now
-                payment_ref: paymentRef.toUpperCase(),
-                features: {
-                    highlight: document.getElementById('upgrade-highlight').checked,
-                    sticky: document.getElementById('upgrade-sticky').value,
-                    show_logo: document.getElementById('upgrade-logo').checked
-                }
-            };
-
-            // Handle Sticky Logic (calculate date)
-            if (jobData.features.sticky !== 'none') {
-                const now = new Date();
-                if (jobData.features.sticky === '24h') now.setHours(now.getHours() + 24);
-                if (jobData.features.sticky === '7d') now.setDate(now.getDate() + 7);
-                jobData.sticky_until = now.toISOString();
-            }
-
-            // Handle Edit Mode (Simplified: Upgrade flow usually for new posts, but preserving mostly)
-            if (form.dataset.editMode === 'true') {
-                await updateJob(form.dataset.jobId, jobData);
-            } else {
-                await submitJob(jobData);
-            }
-        });
-
-
-        async function submitJob(data) {
-            try {
-                // Ideally upload logo here too if we kept that input, but simplified form removed it in Step 1 for simplicity of the multi-step demo. 
-                // If logo logic needed, would re-add file input to Step 1 and upload here.
-
-                // For now, let's assume logo comes from profile or is skipped in this quick implementation unless re-added.
-                // Re-adding logo input is complex in this diff, assuming user ok with text-based or profile logo for now.
-
-                const { error } = await supabase
-                    .from('jobs')
-                    .insert(data);
-
-                if (error) throw error;
-
-                alert('✅ Job posted successfully! Pending admin verification of payment.');
-                window.closeModal();
-                loadActivity();
-
-            } catch (err) {
-                console.error(err);
-                alert('An error occurred: ' + err.message);
-            }
-        }
-
-
-
-        // Update Job Function
-        async function updateJob(jobId, data) {
-            try {
-                const { error } = await supabase
-                    .from('jobs')
-                    .update({
-                        title: data.title,
-                        location: data.location,
-                        type: data.type,
-                        salary_min: data.salary_min,
-                        salary_max: data.salary_max,
-                        description: data.description
-                        // Don't update payment/features on simple edit unless we re-process payment
-                    })
-                    .eq('id', jobId);
-
-                if (error) throw error;
-                alert('✅ Job updated successfully!');
-                window.closeModal();
-                loadActivity();
-            } catch (err) {
-                alert('Error: ' + err.message);
-            }
-        }
 
 
         // Delete Job Function
@@ -300,6 +142,7 @@
                             ${job.is_paid ? '<span style="background:#e8f5e9; color:#2e7d32; padding:2px 6px; border-radius:4px; font-size:0.75rem; margin-left:5px;">PAID</span>' : ''}
                         </div>
                         <div style="display: flex; gap: 10px;">
+                            <a href="/view-applicants.html?jobId=${job.id}" style="text-decoration: none; background: #4a90e2; color: white; border: none; padding: 5px 15px; border-radius: 4px; cursor: pointer; font-size: 0.85rem;">View Applicants</a>
                             <a href="/edit-job.html?id=${job.id}" style="text-decoration: none; background: var(--accent-color); color: white; border: none; padding: 5px 15px; border-radius: 4px; cursor: pointer; font-size: 0.85rem;">Edit</a>
                             <button onclick="deleteJob('${job.id}')" style="background: #ff6b6b; color: white; border: none; padding: 5px 15px; border-radius: 4px; cursor: pointer; font-size: 0.85rem;">Delete</button>
                         </div>

@@ -92,9 +92,9 @@
                 .single();
 
             if (!roleData || roleData.role !== 'candidate') {
-                // strict check? or allow?
-                // alert('Access Restricted: Candidates Only');
-                // window.location.href = '/'; 
+                // strict check
+                alert('Access Restricted: Candidates Only');
+                window.location.href = '/';
             }
 
             // Check Premium Status

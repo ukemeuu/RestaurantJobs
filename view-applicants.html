@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Applicants | RestaurantJobs Kenya</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&family=Playfair+Display:wght@500;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="./style.css">
+    <style>
+        .applicant-card {
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            background: white;
+            transition: all 0.3s;
+        }
+
+        .applicant-card:hover {
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .applicant-card.premium {
+            border-left: 4px solid var(--accent-color);
+            background: #fdfbff;
+        }
+
+        .premium-badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="container">
+        <a href="/" class="nav-brand">Restaurant<span style="color: var(--accent-color);">Jobs</span></a>
+
+        <div id="nav-links" class="nav-links">
+            <a href="/employer-dashboard.html">← Back to Dashboard</a>
+        </div>
+    </nav>
+
+    <main class="container" style="padding: 40px 20px; max-width: 900px;">
+        <h1 id="job-title" style="margin-bottom: 20px;">Applicants</h1>
+
+        <div id="loading" style="text-align: center; padding: 40px;">Loading applicants...</div>
+
+        <div id="applicants-list" style="display: none;"></div>
+
+        <div id="empty-state" style="display: none; text-align: center; padding: 60px;">
+            <p style="color: #888;">No applicants yet for this job.</p>
+        </div>
+    </main>
+
+    <script type="module" src="/src/ui.js"></script>
+    <script type="module">
+        import { supabase } from './src/supabaseClient.js';
+
+        async function loadApplicants() {
+            const params = new URLSearchParams(window.location.search);
+            const jobId = params.get('jobId');
+
+            if (!jobId) {
+                window.location.href = '/employer-dashboard.html';
+                return;
+            }
+
+            // check auth
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) {
+                window.location.href = '/employer-login.html';
+                return;
+            }
+
+            try {
+                // Get Job Details
+                const { data: job } = await supabase
+                    .from('jobs')
+                    .select('title, employer_id')
+                    .eq('id', jobId)
+                    .single();
+
+                if (job.employer_id !== user.id) {
+                    alert('Unauthorized');
+                    window.location.href = '/employer-dashboard.html';
+                    return;
+                }
+
+                document.getElementById('job-title').innerText = `Applicants for: ${job.title}`;
+
+                // Get Applicants with Profile
+                // Note: We need to join with profiles. Assuming 'applications' has 'candidate_id'
+                // and 'candidate_profiles' has 'id' matching auth user id.
+
+                const { data: applications, error } = await supabase
+                    .from('applications')
+                    .select(`
+                        id,
+                        created_at,
+                        status,
+                        candidate_id,
+                        candidate_profiles (
+                            full_name,
+                            phone,
+                            experience_years,
+                            is_premium,
+                            resume_url
+                        )
+                    `)
+                    .eq('job_id', jobId)
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                document.getElementById('loading').style.display = 'none';
+
+                if (!applications || applications.length === 0) {
+                    document.getElementById('empty-state').style.display = 'block';
+                    return;
+                }
+
+                // SORTING: Premium candidates first
+                const sortedApps = applications.sort((a, b) => {
+                    const isPremiumA = a.candidate_profiles?.is_premium ? 1 : 0;
+                    const isPremiumB = b.candidate_profiles?.is_premium ? 1 : 0;
+                    return isPremiumB - isPremiumA; // Descending order (1 comes before 0)
+                });
+
+                const list = document.getElementById('applicants-list');
+                list.style.display = 'block';
+
+                sortedApps.forEach(app => {
+                    const profile = app.candidate_profiles || {};
+                    const isPremium = profile.is_premium;
+                    const name = profile.full_name || 'Anonymous Candidate';
+                    const appliedDate = new Date(app.created_at).toLocaleDateString();
+
+                    const el = document.createElement('div');
+                    el.className = `applicant-card ${isPremium ? 'premium' : ''}`;
+                    el.innerHTML = `
+                        <div style="display: flex; justify-content: space-between; align-items: start;">
+                            <div>
+                                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">
+                                    <h3 style="margin: 0;">${name}</h3>
+                                    ${isPremium ? '<span class="premium-badge">✓ Verified Premium</span>' : ''}
+                                </div>
+                                <p style="margin: 5px 0 0; color: #666;">
+                                    ${profile.experience_years ? `${profile.experience_years} years experience` : 'Experience not specified'}
+                                </p>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="font-size: 0.85rem; color: #888; margin-bottom: 10px;">Applied: ${appliedDate}</div>
+                                ${profile.resume_url ?
+                            `<a href="${profile.resume_url}" target="_blank" class="btn-secondary" style="font-size: 0.85rem; padding: 5px 12px;">View Resume</a>` :
+                            '<span style="color: #999; font-size: 0.85rem;">No Resume</span>'
+                        }
+                            </div>
+                        </div>
+                        <div style="margin-top: 15px; border-top: 1px solid #eee; padding-top: 10px; display: flex; gap: 15px; align-items: center;">
+                            <span style="font-size: 0.9rem; font-weight: 600;">Status: ${app.status}</span>
+                            <!-- Actions could go here (e.g. Mark as Viewed, Reject, Interview) -->
+                        </div>
+                    `;
+                    list.appendChild(el);
+                });
+
+            } catch (err) {
+                console.error(err);
+                document.getElementById('loading').innerHTML = `<span style="color:red">Error loading applicants: ${err.message}</span>`;
+            }
+        }
+
+        loadApplicants();
+    </script>
+</body>
+
+</html>
