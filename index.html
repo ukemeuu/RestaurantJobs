@@ -191,9 +191,6 @@
                             <div style="display: flex; gap: 12px; align-items: start; flex: 1;">
                                 ${logoHtml}
                                 <div style="flex: 1;">
-                                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
-                                        <span class="featured-badge" style="${job.sticky_until && new Date(job.sticky_until) > new Date() ? 'background:var(--accent-color);' : ''}">${job.sticky_until && new Date(job.sticky_until) > new Date() ? 'Pinned' : 'Featured'}</span>
-                                    </div>
                                     <h3 class="featured-title" style="margin: 0 0 8px 0;">${job.title}</h3>
                                     <div class="featured-meta">
                                         <span class="meta-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg> ${job.location}</span>
