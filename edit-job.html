@@ -119,6 +119,7 @@
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) {
             window.location.href = '/employer-login.html';
+            throw new Error('Not authenticated'); // Stop execution
         }
 
         const employerName = localStorage.getItem('employerName') || 'Partner';
@@ -135,8 +136,9 @@
         const jobId = params.get('id');
 
         if (!jobId) {
-            alert('No job ID provided');
-            window.location.href = '/employer-dashboard.html';
+            console.error('No job ID provided in URL');
+            document.getElementById('loading').innerHTML = '<p style="color: red;">Error: No job ID provided</p><a href="/employer-dashboard.html" class="btn" style="margin-top: 20px;">Back to Dashboard</a>';
+            throw new Error('No job ID'); // Stop execution
         }
 
         // Load job data
