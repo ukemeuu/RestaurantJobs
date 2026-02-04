@@ -234,11 +234,7 @@
             }
         }
 
-        // Edit Job Function
-        // Edit Job Function - Redirect to edit page
-        window.editJob = function (jobId) {
-            window.location.href = `/edit-job.html?id=${jobId}`;
-        };
+
 
         // Update Job Function
         async function updateJob(jobId, data) {
@@ -304,7 +300,7 @@
                             ${job.is_paid ? '<span style="background:#e8f5e9; color:#2e7d32; padding:2px 6px; border-radius:4px; font-size:0.75rem; margin-left:5px;">PAID</span>' : ''}
                         </div>
                         <div style="display: flex; gap: 10px;">
-                            <button onclick="editJob('${job.id}')" style="background: var(--accent-color); color: white; border: none; padding: 5px 15px; border-radius: 4px; cursor: pointer; font-size: 0.85rem;">Edit</button>
+                            <a href="/edit-job.html?id=${job.id}" style="text-decoration: none; background: var(--accent-color); color: white; border: none; padding: 5px 15px; border-radius: 4px; cursor: pointer; font-size: 0.85rem;">Edit</a>
                             <button onclick="deleteJob('${job.id}')" style="background: #ff6b6b; color: white; border: none; padding: 5px 15px; border-radius: 4px; cursor: pointer; font-size: 0.85rem;">Delete</button>
                         </div>
                     `;
