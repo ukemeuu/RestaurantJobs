@@ -45,9 +45,12 @@
             <a href="/jobs.html">Find Jobs</a>
 
             <a id="nav-saved-jobs" href="/saved-jobs.html" style="display: none;">Saved Jobs</a>
-            <a href="/employer-register.html">Submit Job</a>
+            <a id="nav-submit-job" href="/employer-register.html">Submit Job</a>
+            <a id="nav-dashboard" href="/employer-dashboard.html" style="display: none; font-weight: 600;">Dashboard</a>
             <a href="/apply.html">Submit CV</a>
             <a href="/auth.html" id="nav-auth-btn">Sign In</a>
+            <button id="nav-signout-btn" onclick="handleSignOut()" class="btn-secondary" style="display: none;">Sign
+                Out</button>
         </div>
     </nav>
 
@@ -215,6 +218,26 @@
             }
         }
 
+
+        // Check auth state and update navigation
+        async function updateNavigation() {
+            const { data: { session } } = await supabase.auth.getSession();
+
+            if (session) {
+                // User is logged in - show Dashboard and Sign Out
+                document.getElementById('nav-submit-job').style.display = 'none';
+                document.getElementById('nav-dashboard').style.display = 'inline-block';
+                document.getElementById('nav-auth-btn').style.display = 'none';
+                document.getElementById('nav-signout-btn').style.display = 'inline-block';
+            }
+        }
+
+        window.handleSignOut = async function () {
+            await supabase.auth.signOut();
+            window.location.href = '/';
+        };
+
+        updateNavigation();
         loadFeaturedJobs();
     </script>
 </body>
