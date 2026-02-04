@@ -155,12 +155,30 @@ export async function updateNavigation() {
         toggleLink(navLinks, '/employer-dashboard.html', true, 'Dashboard');
         toggleLink(navLinks, '/post-job.html', true, 'Post a Job');
         toggleLink(navLinks, '/settings.html', true, 'Settings');
+
         toggleLink(navLinks, '/candidate-dashboard.html', false);
+        toggleLink(navLinks, '/apply.html', false);
     } else {
         toggleLink(navLinks, '/candidate-dashboard.html', true, 'Dashboard');
         toggleLink(navLinks, '/settings.html', true, 'Settings');
         toggleLink(navLinks, '/employer-dashboard.html', false);
         toggleLink(navLinks, '/post-job.html', false);
+
+        // Check if CV already submitted
+        const { count } = await supabase
+            .from('applications')
+            .select('*', { count: 'exact', head: true })
+            .eq('candidate_id', user.id);
+
+        if (count && count > 0) {
+            // Already has CV -> Show "Apply for Jobs"
+            toggleLink(navLinks, '/apply.html', false);
+            toggleLink(navLinks, '/jobs.html', true, 'Apply for Jobs');
+        } else {
+            // No CV -> Show "Submit CV"
+            toggleLink(navLinks, '/apply.html', true, 'Submit CV');
+            toggleLink(navLinks, '/jobs.html', true, 'Find Jobs');
+        }
     }
 }
 
