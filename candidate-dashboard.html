@@ -26,7 +26,35 @@
     </nav>
 
     <main class="container" style="padding: 40px 20px;">
-        <h1 style="margin-bottom: 30px;">My Applications</h1>
+        <div
+            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 15px;">
+            <h1 style="margin: 0;">My Applications</h1>
+            <span id="premium-badge"
+                style="display: none; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 8px 20px; border-radius: 20px; font-weight: 600; font-size: 0.9rem;">✓
+                Premium Member</span>
+        </div>
+
+        <!-- Premium Status Card -->
+        <div id="premium-card" class="card"
+            style="display: none; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 25px; margin-bottom: 30px;">
+            <div style="display: flex; justify-content: space-between; align-items: start; flex-wrap: wrap; gap: 20px;">
+                <div>
+                    <h3 style="margin: 0 0 10px 0;">Premium Subscription Active</h3>
+                    <p style="opacity: 0.9; margin: 0;" id="subscription-info">-</p>
+                </div>
+                <a href="/candidate-premium.html" class="btn-secondary"
+                    style="background: white; color: var(--accent-color);">Manage</a>
+            </div>
+        </div>
+
+        <!-- Upgrade CTA for Free Users -->
+        <div id="upgrade-cta" class="card"
+            style="display: none; background: #f9f9f9; padding: 25px; margin-bottom: 30px; text-align: center;">
+            <h3 style="margin: 0 0 10px 0;">Unlock Premium Features</h3>
+            <p style="color: var(--text-muted); margin: 0 0 15px 0;">Apply first, see salary data, and get a verified
+                badge</p>
+            <a href="/candidate-premium.html" class="btn">Upgrade to Premium</a>
+        </div>
 
         <div
             style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 40px;">
@@ -67,6 +95,37 @@
                 // strict check? or allow?
                 // alert('Access Restricted: Candidates Only');
                 // window.location.href = '/'; 
+            }
+
+            // Check Premium Status
+            const { data: subscription } = await supabase
+                .from('candidate_subscriptions')
+                .select('*')
+                .eq('user_id', user.id)
+                .eq('status', 'active')
+                .gte('end_date', new Date().toISOString())
+                .order('end_date', { ascending: false })
+                .limit(1)
+                .single();
+
+            if (subscription) {
+                document.getElementById('premium-badge').style.display = 'inline-block';
+                document.getElementById('premium-card').style.display = 'block';
+                document.getElementById('upgrade-cta').style.display = 'none';
+
+                const planNames = {
+                    'monthly': 'Monthly Plan',
+                    'quarterly': 'Quarterly Plan',
+                    'yearly': 'Annual Plan'
+                };
+
+                const endDate = new Date(subscription.end_date);
+                document.getElementById('subscription-info').textContent =
+                    `${planNames[subscription.plan_type]} • Valid until ${endDate.toLocaleDateString('en-KE', { year: 'numeric', month: 'long', day: 'numeric' })}`;
+            } else {
+                document.getElementById('premium-badge').style.display = 'none';
+                document.getElementById('premium-card').style.display = 'none';
+                document.getElementById('upgrade-cta').style.display = 'block';
             }
 
             // Load Applications
