@@ -116,11 +116,14 @@
         import { generateJobDescription } from './src/aiGenerator.js';
 
         // Check Auth
+        console.log('Checking auth...');
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) {
+            console.log('No user, redirecting to login');
             window.location.href = '/employer-login.html';
             throw new Error('Not authenticated'); // Stop execution
         }
+        console.log('User authenticated:', user.id);
 
         const employerName = localStorage.getItem('employerName') || 'Partner';
         document.getElementById('welcome-msg').innerText = `Welcome, ${employerName}`;
@@ -134,6 +137,7 @@
         // Get job ID from URL
         const params = new URLSearchParams(window.location.search);
         const jobId = params.get('id');
+        console.log('Job ID from URL:', jobId);
 
         if (!jobId) {
             console.error('No job ID provided in URL');
