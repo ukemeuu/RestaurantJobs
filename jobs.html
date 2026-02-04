@@ -225,8 +225,8 @@
                     // The "upgrade" in dashboard just ensures it's checked/paid for future. 
 
                     const logoHtml = job.logo_url
-                        ? `<img src="${job.logo_url}" alt="${job.title}" loading="lazy" onerror="this.onerror=null; this.src='/images/company-logo.png';" style="width: 50px; height: 50px; object-fit: contain; border-radius: 6px; border: 1px solid #eee;">`
-                        : `<img src="/images/company-logo.png" alt="${job.title}" loading="lazy" style="width: 50px; height: 50px; object-fit: contain; border-radius: 6px; border: 1px solid #eee;">`;
+                        ? `<img src="${job.logo_url}" alt="${job.title}" loading="lazy" onerror="this.onerror=null; this.src='/company-logo.png';" style="width: 50px; height: 50px; object-fit: contain; border-radius: 6px; border: 1px solid #eee;">`
+                        : `<img src="/company-logo.png" alt="${job.title}" loading="lazy" style="width: 50px; height: 50px; object-fit: contain; border-radius: 6px; border: 1px solid #eee;">`;
 
                     card.innerHTML = `
                         <div style="display: flex; gap: 15px; margin-bottom: 10px;">

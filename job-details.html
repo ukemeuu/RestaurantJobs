@@ -118,7 +118,7 @@
                 if (job.logo_url) {
                     const logoImg = document.createElement('img');
                     logoImg.src = job.logo_url;
-                    logoImg.onerror = function() { this.src = '/images/company-logo.png'; };
+                    logoImg.onerror = function() { this.src = '/company-logo.png'; };
                     logoImg.style.width = '80px';
                     logoImg.style.height = '80px';
                     logoImg.style.objectFit = 'contain';
