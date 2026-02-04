@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to Premium! | RestaurantJobs Kenya</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&family=Playfair+Display:wght@500;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="./style.css">
+</head>
+
+<body>
+    <nav class="container">
+        <a href="/" class="nav-brand">Restaurant<span style="color: var(--accent-color);">Jobs</span></a>
+    </nav>
+
+    <main class="container" style="padding: 60px 20px; max-width: 700px; text-align: center;">
+        <div class="card" style="padding: 50px 30px;">
+            <!-- Success Icon -->
+            <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                style="margin: 0 auto 30px; color: var(--success-color);">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </svg>
+
+            <h1 style="color: var(--success-color); margin-bottom: 15px;">Welcome to Premium!</h1>
+            <p style="color: var(--text-muted); margin-bottom: 40px; font-size: 1.1rem;">
+                Your subscription is now active. You have full access to all premium features.
+            </p>
+
+            <!-- Subscription Details -->
+            <div style="background: #f9f9f9; padding: 25px; border-radius: 8px; text-align: left; margin-bottom: 30px;">
+                <h3 style="margin-bottom: 15px; color: var(--accent-color);">Subscription Details</h3>
+                <div style="display: grid; gap: 10px;">
+                    <div><strong>Plan:</strong> <span id="plan-name">Quarterly</span></div>
+                    <div><strong>Status:</strong> <span style="color: var(--success-color);">Active</span></div>
+                    <div><strong>Valid Until:</strong> <span id="end-date">-</span></div>
+                </div>
+            </div>
+
+            <!-- Premium Features -->
+            <div
+                style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; border-radius: 8px; color: white; margin-bottom: 30px; text-align: left;">
+                <h3 style="margin-bottom: 20px;">Your Premium Benefits</h3>
+                <ul style="list-style: none; padding: 0; line-height: 2;">
+                    <li>✓ Premium badge on your profile</li>
+                    <li>✓ Apply to jobs before free users</li>
+                    <li>✓ View salary data for all jobs</li>
+                    <li>✓ Advanced job filters</li>
+                    <li>✓ Track your applications</li>
+                    <li>✓ Priority placement in searches</li>
+                    <li>✓ Instant job alerts</li>
+                    <li>✓ Ad-free experience</li>
+                </ul>
+            </div>
+
+            <!-- Action Buttons -->
+            <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+                <a href="/jobs.html" class="btn">Browse Premium Jobs</a>
+                <a href="/candidate-dashboard.html" class="btn-secondary">Go to Dashboard</a>
+            </div>
+        </div>
+    </main>
+
+    <script type="module">
+        import { supabase } from './src/supabaseClient.js';
+
+        // Get subscription ID from URL
+        const params = new URLSearchParams(window.location.search);
+        const subscriptionId = params.get('id');
+
+        if (subscriptionId) {
+            // Load subscription details
+            const { data: subscription, error } = await supabase
+                .from('candidate_subscriptions')
+                .select('*')
+                .eq('id', subscriptionId)
+                .single();
+
+            if (subscription) {
+                const planNames = {
+                    'monthly': 'Monthly Plan',
+                    'quarterly': 'Quarterly Plan',
+                    'yearly': 'Annual Plan'
+                };
+
+                document.getElementById('plan-name').textContent = planNames[subscription.plan_type];
+
+                const endDate = new Date(subscription.end_date);
+                document.getElementById('end-date').textContent = endDate.toLocaleDateString('en-KE', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+            }
+        }
+    </script>
+</body>
+
+</html>
