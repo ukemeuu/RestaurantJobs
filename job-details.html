@@ -114,64 +114,32 @@
                 document.getElementById('job-date').innerText = '📅 Posted: ' + new Date(job.created_at).toLocaleDateString();
                 document.getElementById('job-description').innerHTML = job.description;
 
-                // --- SALARY DISPLAY LOGIC ---
-                const salaryContainer = document.createElement('div');
-                salaryContainer.style.marginBottom = '30px';
-                salaryContainer.style.padding = '20px';
-                salaryContainer.style.borderRadius = '8px';
-                salaryContainer.style.background = '#f8f9fa';
-                salaryContainer.style.border = '1px solid #e9ecef';
+                // --- SALARY DISPLAY LOGIC (OPEN) ---
+                if (job.salary_min || job.salary_max) {
+                    const salaryContainer = document.createElement('div');
+                    salaryContainer.style.marginBottom = '30px';
+                    salaryContainer.style.padding = '20px';
+                    salaryContainer.style.borderRadius = '8px';
+                    salaryContainer.style.background = '#f8f9fa';
+                    salaryContainer.style.border = '1px solid #e9ecef';
 
-                // insert after meta info
-                const metaContainer = document.querySelector('#job-date').parentNode;
-                metaContainer.parentNode.insertBefore(salaryContainer, metaContainer.nextSibling);
+                    // insert after meta info
+                    const metaContainer = document.querySelector('#job-date').parentNode;
+                    metaContainer.parentNode.insertBefore(salaryContainer, metaContainer.nextSibling);
 
-                // Check for User & Premium Status
-                const { data: { user } } = await supabase.auth.getUser();
-                let isPremium = false;
-
-                if (user) {
-                    const { data: subscription } = await supabase
-                        .from('candidate_subscriptions')
-                        .select('status, end_date')
-                        .eq('user_id', user.id)
-                        .eq('status', 'active')
-                        .gt('end_date', new Date().toISOString())
-                        .maybeSingle(); // Use maybeSingle to avoid 406 error if multiple (should be unique though)
-
-                    isPremium = !!subscription;
-                }
-
-                if (isPremium) {
-                    // Show Salary
                     const min = job.salary_min ? job.salary_min.toLocaleString() : 'N/A';
                     const max = job.salary_max ? job.salary_max.toLocaleString() : 'N/A';
 
                     salaryContainer.innerHTML = `
                         <h4 style="margin: 0 0 10px 0; display: flex; align-items: center; gap: 8px;">
-                            <span style="color: green;">💰</span> Salary Range (Premium)
+                            <span style="color: green;">💰</span> Salary Range
                         </h4>
-                        <div style="font-size: 1.2rem; font-weight: 700; color: #2e7d32;">
+                        <div style="font-size: 1.2rem; font-weight: 700; color: #333;">
                             KES ${min} - ${max} <span style="font-size: 0.9rem; color: #666; font-weight: 400;">/ month</span>
                         </div>
                     `;
-                } else {
-                    // Show Locked State
-                    salaryContainer.innerHTML = `
-                        <h4 style="margin: 0 0 10px 0; display: flex; align-items: center; gap: 8px;">
-                            <span style="filter: grayscale(1);">💰</span> Salary Range
-                        </h4>
-                        <div style="filter: blur(5px); opacity: 0.5; user-select: none;">
-                            KES 40,000 - 60,000 <span style="font-size: 0.9rem;">/ month</span>
-                        </div>
-                        <div style="margin-top: 15px;">
-                            <a href="/candidate-premium.html" style="text-decoration: none; font-weight: 600; color: var(--accent-color); font-size: 0.9rem;">
-                                🔒 Unlock Salary Data with Premium &rarr;
-                            </a>
-                        </div>
-                    `;
                 }
-                // -----------------------------
+                // --------------------------------
 
                 // Render Logo if exists (Insert before Title)
                 if (job.logo_url) {
