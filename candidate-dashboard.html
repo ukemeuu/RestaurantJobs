@@ -147,7 +147,13 @@
             list.innerHTML = '';
 
             if (apps.length === 0) {
-                list.innerHTML = '<p>You haven\'t applied to any jobs yet. <a href="/jobs.html" style="color:var(--accent-color);">Start looking!</a></p>';
+                list.innerHTML = `
+                    <div style="text-align: center; padding: 40px; background: #f9f9f9; border-radius: 8px;">
+                        <h3>No Application History</h3>
+                        <p style="color: #666; margin-bottom: 20px;">You haven't applied to any jobs yet.</p>
+                        <a href="/jobs.html" class="btn">Search for Jobs</a>
+                    </div>
+                `;
                 return;
             }
 

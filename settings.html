@@ -64,11 +64,21 @@
                     </div>
                 </div>
 
-                <!-- Candidate Only Fields -->
+                // Candidate - Resume Upload
                 <div id="candidate-fields" style="display: none;">
-                    <!-- Add specific candidate fields if needed later, e.g. Phone -->
-                    <p style="color: #666; font-size: 0.9rem;">To update your Resume, please apply to a new job with the
-                        updated file.</p>
+                    <div style="margin-bottom: 20px;">
+                        <label style="display:block; margin-bottom:8px; font-weight:600;">Your Resume (PDF)</label>
+                        <div style="display: flex; align-items: center; gap: 15px;">
+                            <div style="flex: 1;">
+                                <input type="file" id="resume-upload" accept="application/pdf" style="display: none;">
+                                <button type="button" onclick="document.getElementById('resume-upload').click()"
+                                    class="btn-secondary" style="margin-bottom: 5px;">Choose File</button>
+                                <span id="resume-filename"
+                                    style="font-size: 0.85rem; color: #666; margin-left:10px;"></span>
+                                <p id="current-resume-link" style="font-size: 0.9rem; margin-top: 5px;"></p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div style="margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px;">
@@ -146,38 +156,51 @@
                     }
                 }
 
-                // Logo upload preview
-                let selectedLogoFile = null;
-                document.getElementById('logo-upload').addEventListener('change', (e) => {
-                    const file = e.target.files[0];
-                    if (file) {
-                        selectedLogoFile = file;
-                        document.getElementById('logo-filename').textContent = file.name;
-
-                        // Preview
-                        const reader = new FileReader();
-                        reader.onload = (event) => {
-                            document.getElementById('logo-preview').src = event.target.result;
-                        };
-                        reader.readAsDataURL(file);
-                    }
-                });
-
-                // Store the file for form submission
+                // Logo Input Handler
                 window.selectedLogoFile = null;
                 document.getElementById('logo-upload').addEventListener('change', (e) => {
-                    window.selectedLogoFile = e.target.files[0];
+                     const file = e.target.files[0];
+                     if(file) {
+                        window.selectedLogoFile = file;
+                        document.getElementById('logo-filename').innerText = file.name;
+                        const reader = new FileReader();
+                        reader.onload = (ev) => { document.getElementById('logo-preview').src = ev.target.result; };
+                        reader.readAsDataURL(file);
+                     }
                 });
 
             } else if (role === 'admin') {
                 roleDisplay.innerText = 'Admin Account';
                 backLink.href = '/dashboard.html';
-                // Admins share employer fields technically, or just skip
-                // For now hide specific fields
             } else {
                 roleDisplay.innerText = 'Candidate Account';
                 backLink.href = '/candidate-dashboard.html';
                 document.getElementById('candidate-fields').style.display = 'block';
+                
+                // Fetch Candidate Profile (Resume)
+                const { data: profile } = await supabase
+                    .from('candidate_profiles')
+                    .select('*')
+                    .eq('id', user.id)
+                    .single();
+                    
+                if (profile && profile.resume_url) {
+                    const url = profile.resume_url.startsWith('http') 
+                        ? profile.resume_url 
+                        : supabase.storage.from('resumes').getPublicUrl(profile.resume_url).data.publicUrl;
+                        
+                    document.getElementById('current-resume-link').innerHTML = `Current: <a href="${url}" target="_blank" style="color:var(--accent-color);">View Resume</a>`;
+                }
+                
+                // Resume Input Handler
+                window.selectedResumeFile = null;
+                document.getElementById('resume-upload').addEventListener('change', (e) => {
+                     const file = e.target.files[0];
+                     if(file) {
+                        window.selectedResumeFile = file;
+                        document.getElementById('resume-filename').innerText = file.name;
+                     }
+                });
             }
 
             // 3. Save Handler
@@ -189,31 +212,15 @@
 
                 try {
                     if (role === 'employer') {
+                        // Employer Save Logic (Existing + Logo)
                         let logoUrl = null;
-
-                        // Upload logo if selected
                         if (window.selectedLogoFile) {
                             const fileExt = window.selectedLogoFile.name.split('.').pop();
                             const fileName = `${user.id}-${Date.now()}.${fileExt}`;
-
-                            const { data: uploadData, error: uploadError } = await supabase.storage
-                                .from('logos')
-                                .upload(fileName, window.selectedLogoFile, {
-                                    cacheControl: '3600',
-                                    upsert: true
-                                });
-
-                            if (uploadError) {
-                                console.error('Logo upload error:', uploadError);
-                                throw new Error('Failed to upload logo: ' + uploadError.message);
-                            }
-
-                            // Get public URL
-                            const { data: { publicUrl } } = supabase.storage
-                                .from('logos')
-                                .getPublicUrl(fileName);
-
-                            logoUrl = publicUrl;
+                            const { error: uploadError } = await supabase.storage.from('logos').upload(fileName, window.selectedLogoFile, { upsert: true });
+                            if (uploadError) throw uploadError;
+                            const { data } = supabase.storage.from('logos').getPublicUrl(fileName);
+                            logoUrl = data.publicUrl;
                         }
 
                         const updates = {
@@ -221,33 +228,50 @@
                             poc_name: document.getElementById('poc_name').value,
                             updated_at: new Date(),
                         };
+                        if (logoUrl) updates.logo_url = logoUrl;
 
-                        if (logoUrl) {
-                            updates.logo_url = logoUrl;
-                        }
-
-                        const { error } = await supabase
-                            .from('employers')
-                            .update(updates)
-                            .eq('id', user.id); // RLS allows this
-
+                        const { error } = await supabase.from('employers').update(updates).eq('id', user.id);
                         if (error) throw error;
+                    } 
+                    else if (role === 'candidate') {
+                         // Candidate Save Logic (Resume)
+                         if (window.selectedResumeFile) {
+                             const fileExt = window.selectedResumeFile.name.split('.').pop();
+                             const fileName = `${user.id}-resume-${Date.now()}.${fileExt}`;
+                             
+                             const { error: uploadError } = await supabase.storage
+                                .from('resumes')
+                                .upload(fileName, window.selectedResumeFile, { upsert: true });
+                                
+                             if (uploadError) throw new Error('Resume upload failed: ' + uploadError.message);
+                             
+                             // Save to profile
+                             // Check if profile exists first? Or upsert.
+                             const { error: profileError } = await supabase
+                                .from('candidate_profiles')
+                                .upsert({ 
+                                    id: user.id,
+                                    resume_url: fileName,
+                                    updated_at: new Date()
+                                });
+                                
+                             if (profileError) throw profileError;
+                         }
                     }
 
-                    // Candidates don't have a profile table yet (besides auth metadata), 
-                    // so nothing to save unless we add a profiles table.
-
                     showToast('Settings updated successfully!');
+                    setTimeout(() => location.reload(), 1000); // Reload to show new state
 
                 } catch (error) {
                     console.error(error);
-                    showToast('Error saving settings: ' + error.message, 'error');
+                    showToast('Error saving: ' + error.message, 'error');
                 } finally {
                     btn.innerText = 'Save Changes';
                     btn.disabled = false;
                 }
             });
         }
+
 
         init();
     </script>
