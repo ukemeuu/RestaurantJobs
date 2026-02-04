@@ -17,15 +17,13 @@
 
 <body>
     <nav class="container">
-        <a href="/employer-dashboard.html" class="nav-brand">Restaurant<span
-                style="color: var(--accent-color);">Jobs</span></a>
+        <a href="/" class="nav-brand">Restaurant<span style="color: var(--accent-color);">Jobs</span></a>
 
         <button id="mobile-menu-btn" class="mobile-menu-btn" aria-label="Toggle Menu">&#9776;</button>
 
         <div id="nav-links" class="nav-links">
-            <a href="/employer-dashboard.html">← Back to Dashboard</a>
-            <span id="welcome-msg" style="font-weight: 600;">Welcome</span>
-            <button onclick="logout()" class="btn-secondary">Logout</button>
+            <a href="javascript:history.back()" style="font-weight: 600; color: var(--text-color);">← Back to
+                Dashboard</a>
         </div>
     </nav>
 
@@ -77,25 +75,35 @@
                 </div>
             </div>
 
-            <div style="margin-bottom: 15px;">
-                <div style="display: flex; justify-content: space-between; align-items: end; margin-bottom: 5px;">
-                    <label>Job Description</label>
+            <div class="form-group">
+                <label>Job Description</label>
+                <div style="display: flex; justify-content: flex-end; margin-bottom: 5px;">
                     <button type="button" id="ai-gen-btn"
-                        style="background: linear-gradient(135deg, #6366f1, #a855f7); color: white; border: none; padding: 5px 12px; border-radius: 20px; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: transform 0.2s;">
-                        <span>✨</span> Generate with AI
+                        style="background: linear-gradient(135deg, #6366f1, #a855f7); color: white; border: none; padding: 5px 12px; border-radius: 20px; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                        <span>✨</span> Improve with AI
                     </button>
                 </div>
                 <div id="editor" style="height: 200px; background: white;"></div>
             </div>
 
+            <div class="form-group">
+                <label>Status</label>
+                <select id="job-status" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+                    <option value="published">Published</option>
+                    <option value="closed">Closed</option>
+                    <option value="draft">Draft</option>
+                </select>
+            </div>
+
             <div
                 style="display: flex; gap: 15px; justify-content: flex-end; margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
-                <a href="/employer-dashboard.html" class="btn-secondary">Cancel</a>
+                <button type="button" onclick="history.back()" class="btn-secondary">Cancel</button>
                 <button type="submit" class="btn" id="save-btn">Save Changes</button>
             </div>
         </form>
     </main>
 
+    <script type="module" src="/src/ui.js"></script>
     <script>
         var quill = new Quill('#editor', {
             theme: 'snow',
@@ -109,154 +117,145 @@
             }
         });
     </script>
-
-    <script type="module" src="/src/ui.js"></script>
     <script type="module">
         import { supabase } from './src/supabaseClient.js';
         import { generateJobDescription } from './src/aiGenerator.js';
 
-        // Check Auth
-        console.log('Checking auth...');
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) {
-            console.log('No user, redirecting to login');
-            window.location.href = '/employer-login.html';
-            throw new Error('Not authenticated'); // Stop execution
-        }
-        console.log('User authenticated:', user.id);
+        // Check Auth and Load Data
+        async function init() {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) {
+                window.location.href = '/auth.html';
+                return;
+            }
 
-        const employerName = localStorage.getItem('employerName') || 'Partner';
-        document.getElementById('welcome-msg').innerText = `Welcome, ${employerName}`;
+            // Get job ID
+            const params = new URLSearchParams(window.location.search);
+            const jobId = params.get('id');
 
-        window.logout = async function () {
-            await supabase.auth.signOut();
-            localStorage.clear();
-            window.location.href = '/';
-        }
+            if (!jobId) {
+                document.getElementById('loading').innerHTML = '<p style="color:red;">Error: No Job ID specified.</p><a href="/" class="btn">Back Home</a>';
+                return;
+            }
 
-        // Get job ID from URL
-        const params = new URLSearchParams(window.location.search);
-        const jobId = params.get('id');
-        console.log('Job ID from URL:', jobId);
-
-        if (!jobId) {
-            console.error('No job ID provided in URL');
-            document.getElementById('loading').innerHTML = '<p style="color: red;">Error: No job ID provided</p><a href="/employer-dashboard.html" class="btn" style="margin-top: 20px;">Back to Dashboard</a>';
-            throw new Error('No job ID'); // Stop execution
-        }
-
-        // Load job data
-        async function loadJob() {
             try {
+                // Fetch Job
                 const { data: job, error } = await supabase
                     .from('jobs')
                     .select('*')
                     .eq('id', jobId)
                     .single();
 
-                if (error) throw error;
+                if (error || !job) {
+                    throw new Error(error ? error.message : 'Job not found');
+                }
 
-                // Populate form
+                // Verify Ownership (Allow if Admin or Employer matches)
+                const { data: roleData } = await supabase.from('user_roles').select('role').eq('id', user.id).single();
+                const isAdmin = roleData?.role === 'admin';
+
+                if (job.employer_id !== user.id && !isAdmin) {
+                    throw new Error('Unauthorized to edit this job.');
+                }
+
+                // Populate Form
                 document.getElementById('job-title').value = job.title;
                 document.getElementById('job-location').value = job.location;
                 document.getElementById('job-type').value = job.type;
-                if (job.salary_min) document.getElementById('salary-min').value = job.salary_min;
-                if (job.salary_max) document.getElementById('salary-max').value = job.salary_max;
-                quill.root.innerHTML = job.description;
+                document.getElementById('salary-min').value = job.salary_min || '';
+                document.getElementById('salary-max').value = job.salary_max || '';
+                document.getElementById('job-status').value = job.status || 'published';
+                quill.root.innerHTML = job.description || '';
 
-                // Show form
+                // Show Form
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('edit-job-form').style.display = 'block';
 
+                // Store navigation context
+                const backLink = document.querySelector('.nav-links a');
+                if (isAdmin) {
+                    backLink.href = '/dashboard.html';
+                } else {
+                    backLink.href = '/employer-dashboard.html';
+                }
+
             } catch (err) {
                 console.error(err);
-                // Display error on page instead of redirecting immediately
-                const loadingDiv = document.getElementById('loading');
-                loadingDiv.innerHTML = `
-                    <div style="text-align: center; padding: 40px;">
-                        <span style="font-size: 3rem;">⚠️</span>
-                        <h3 style="color: #d32f2f;">Unable to Load Job</h3>
-                        <p style="color: #666; margin-bottom: 20px;">${err.message}</p>
-                        <p style="font-size: 0.9rem; background: #f5f5f5; padding: 10px; display: inline-block;">Job ID: ${jobId}</p>
-                        <div style="margin-top: 20px;">
-                            <a href="/employer-dashboard.html" class="btn">Return to Dashboard</a>
-                        </div>
+                document.getElementById('loading').innerHTML = `
+                    <div style="color: #721c24; background-color: #f8d7da; border-color: #f5c6cb; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                        <h3>Unable to Load Job</h3>
+                        <p>${err.message}</p>
                     </div>
+                    <a href="/" class="btn">Return Home</a>
                 `;
-                // window.location.href = '/employer-dashboard.html'; // Disabled auto-redirect
-            }
-        }
-
-        loadJob();
-
-        // AI Generator Logic
-        document.getElementById('ai-gen-btn').addEventListener('click', async function () {
-            const btn = this;
-            const originalText = btn.innerHTML;
-            const title = document.getElementById('job-title').value;
-            const location = document.getElementById('job-location').value;
-            const type = document.getElementById('job-type').value;
-
-            if (!title) {
-                alert('Please enter a Job Title first.');
-                return;
             }
 
-            btn.innerHTML = '<span>⏳</span> Generating...';
-            btn.disabled = true;
-            btn.style.opacity = '0.6';
-
-            try {
-                const description = await generateJobDescription(title, location, type);
-                quill.root.innerHTML = description;
-            } catch (error) {
-                alert('Failed to generate description. Please try again.');
-            } finally {
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-                btn.style.opacity = '1';
-            }
-        });
-
-        // Form Submission
-        document.getElementById('edit-job-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const btn = document.getElementById('save-btn');
-            btn.innerText = 'Saving...';
-            btn.disabled = true;
-
-            try {
+            // AI Generator Logic
+            document.getElementById('ai-gen-btn').addEventListener('click', async function () {
+                const btn = this;
+                const originalText = btn.innerHTML;
                 const title = document.getElementById('job-title').value;
                 const location = document.getElementById('job-location').value;
                 const type = document.getElementById('job-type').value;
-                const salaryMin = document.getElementById('salary-min').value;
-                const salaryMax = document.getElementById('salary-max').value;
-                const description = quill.root.innerHTML;
 
-                const { error } = await supabase
-                    .from('jobs')
-                    .update({
-                        title,
-                        location,
-                        type,
-                        salary_min: salaryMin || null,
-                        salary_max: salaryMax || null,
-                        description
-                    })
-                    .eq('id', jobId);
+                if (!title) {
+                    alert('Please enter a Job Title first.');
+                    return;
+                }
 
-                if (error) throw error;
+                btn.innerHTML = '<span>⏳</span> Generating...';
+                btn.disabled = true;
 
-                // Redirect to success page
-                window.location.href = `/job-success.html?id=${jobId}&action=edited`;
+                try {
+                    const description = await generateJobDescription(title, location, type);
+                    quill.root.innerHTML = description;
+                } catch (error) {
+                    alert('Failed to generate description. Please try again.');
+                } finally {
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }
+            });
 
-            } catch (err) {
-                console.error(err);
-                alert('Error updating job: ' + err.message);
-                btn.innerText = 'Save Changes';
-                btn.disabled = false;
-            }
-        });
+            // Form Submission
+            document.getElementById('edit-job-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const btn = document.getElementById('save-btn');
+                btn.innerText = 'Saving...';
+                btn.disabled = true;
+
+                try {
+                    const updates = {
+                        title: document.getElementById('job-title').value,
+                        location: document.getElementById('job-location').value,
+                        type: document.getElementById('job-type').value,
+                        salary_min: document.getElementById('salary-min').value || null,
+                        salary_max: document.getElementById('salary-max').value || null,
+                        description: quill.root.innerHTML,
+                        status: document.getElementById('job-status').value,
+                        updated_at: new Date()
+                    };
+
+                    const { error } = await supabase
+                        .from('jobs')
+                        .update(updates)
+                        .eq('id', jobId);
+
+                    if (error) throw error;
+
+                    alert('Job updated successfully!');
+                    history.back(); // Go back to dashboard
+
+                } catch (err) {
+                    console.error(err);
+                    alert('Error updating job: ' + err.message);
+                    btn.innerText = 'Save Changes';
+                    btn.disabled = false;
+                }
+            });
+        }
+
+        init();
     </script>
 </body>
 

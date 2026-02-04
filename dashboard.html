@@ -15,16 +15,13 @@
 
 <body>
     <nav class="container">
-        <div style="display: flex; align-items: center; gap: 20px;">
-            <a href="/" class="nav-brand" style="text-decoration: none; color: #333;">Restaurant<span
-                    style="color: var(--accent-color);">Jobs</span> <span
-                    style="font-size: 0.9rem; color: #666; font-weight: 400; margin-left: 5px;">Admin</span></a>
-        </div>
+        <a href="/" class="nav-brand">Restaurant<span style="color: var(--accent-color);">Jobs</span></a>
 
         <button id="mobile-menu-btn" class="mobile-menu-btn" aria-label="Toggle Menu">&#9776;</button>
 
         <div id="nav-links" class="nav-links">
             <a href="/settings.html" style="font-weight: 600; color: var(--text-color);">Settings</a>
+            <span id="welcome-msg" style="font-weight: 600;">Welcome</span>
         </div>
     </nav>
 
@@ -165,6 +162,9 @@
                 .replace(/"/g, "&quot;")
                 .replace(/'/g, "&#039;");
         }
+
+        // Set Welcome Message
+        document.getElementById('welcome-msg').innerText = 'Welcome, Admin';
 
         async function loadData() {
             try {
