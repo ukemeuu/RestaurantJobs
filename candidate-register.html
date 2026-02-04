@@ -129,29 +129,21 @@
             btn.innerText = 'Creating Account...';
 
             try {
-                // 1. Sign Up
+                // 1. Sign Up with Metadata
                 const { data: { user }, error: authError } = await supabase.auth.signUp({
                     email,
-                    password
+                    password,
+                    options: {
+                        data: {
+                            role: 'candidate'
+                        }
+                    }
                 });
 
                 if (authError) throw authError;
 
                 if (user) {
-                    // 2. Insert Candidate Role
-                    const { error: roleError } = await supabase
-                        .from('user_roles')
-                        .insert({ id: user.id, role: 'candidate' });
-
-                    if (roleError) console.error('Role Error:', roleError);
-
-                    // 3. Create Basic Profile
-                    const { error: profileError } = await supabase
-                        .from('candidate_profiles')
-                        .insert({ id: user.id });
-
-                    if (profileError) console.error('Profile Error:', profileError);
-
+                    // Trigger handles roles/profiles
                     // 4. Redirect to Checkout
                     window.location.href = `/premium-checkout.html?plan=${plan}&amount=${amount}`;
                 }

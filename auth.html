@@ -208,32 +208,22 @@
 
             try {
                 if (mode === 'signup') {
-                    // 1. Sign Up
+                    // 1. Sign Up with Metadata
                     const { data: { user }, error: authError } = await supabase.auth.signUp({
                         email,
-                        password
+                        password,
+                        options: {
+                            data: {
+                                role: selectedRole,
+                                org_name: selectedRole === 'employer' ? document.getElementById('orgName').value : null
+                            }
+                        }
                     });
+
                     if (authError) throw authError;
 
                     if (user) {
-                        // 2. Insert Role
-                        const { error: roleError } = await supabase
-                            .from('user_roles')
-                            .insert({ id: user.id, role: selectedRole });
-
-                        if (roleError) console.error('Role Error:', roleError); // Non-blocking but bad
-
-                        // 3. Insert Profile (if employer)
-                        if (selectedRole === 'employer') {
-                            const orgName = document.getElementById('orgName').value;
-                            // Ensure employers table exists and has correct columns from schema
-                            await supabase.from('employers').insert({
-                                id: user.id,
-                                org_name: orgName,
-                                poc_email: email
-                            });
-                        }
-
+                        // Success - Trigger handles roles/profiles
                         // Redirect Logic
                         if (selectedRole === 'employer') {
                             window.location.href = '/employer-dashboard.html';
