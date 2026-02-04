@@ -117,29 +117,8 @@ export async function updateNavigation() {
     // Hide Guest Submit Job link
     toggleLink(navLinks, '/employer-register.html', false);
 
-    // Show "Sign Out" button
-    // Check for either ID to avoid duplicates
-    let activeSignOutBtn = signOutBtn || document.getElementById('nav-logout-btn');
-
-    if (activeSignOutBtn) {
-        activeSignOutBtn.style.display = 'inline-block';
-        // Attach handler just in case (idempotent)
-        activeSignOutBtn.onclick = async () => {
-            await supabase.auth.signOut();
-            window.location.href = '/';
-        };
-    } else if (navLinks) {
-        // Create Button if missing
-        const btn = document.createElement('button');
-        btn.id = 'nav-signout-btn';
-        btn.className = 'btn-secondary';
-        btn.innerText = 'Sign Out';
-        btn.onclick = async () => {
-            await supabase.auth.signOut();
-            window.location.href = '/';
-        };
-        navLinks.appendChild(btn);
-    }
+    // Remove Top Nav Sign Out (moved to Settings)
+    if (signOutBtn) signOutBtn.style.display = 'none';
 
     // 4. Check Role
     const { data: roleData } = await supabase
