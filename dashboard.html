@@ -277,6 +277,7 @@
                             <td style="padding: 15px;">${job.location}</td>
                              <td style="padding: 15px;"><span style="background: #e3f2fd; padding: 4px 8px; border-radius: 4px; font-size: 0.85rem;">${job.status}</span></td>
                             <td style="padding: 15px;">
+                                <button onclick="editJob('${job.id}')" style="background: none; border: none; color: var(--accent-color); cursor: pointer; text-decoration: underline; margin-right: 10px;">Edit</button>
                                 <button onclick="deleteJob('${job.id}')" style="background: none; border: none; color: #ff6b6b; cursor: pointer; text-decoration: underline;">Delete</button>
                             </td>
                         </tr>
@@ -376,6 +377,36 @@
             } catch (err) {
                 console.error(err);
                 alert('Error: ' + err.message);
+            }
+        };
+
+        window.editJob = async (jobId) => {
+            const title = prompt('Enter new job title (or leave blank to keep current):');
+            const location = prompt('Enter new location (or leave blank to keep current):');
+            const description = prompt('Enter new description (or leave blank to keep current):');
+
+            try {
+                const updates = {};
+                if (title && title.trim()) updates.title = title.trim();
+                if (location && location.trim()) updates.location = location.trim();
+                if (description && description.trim()) updates.description = description.trim();
+
+                if (Object.keys(updates).length === 0) {
+                    alert('No changes made.');
+                    return;
+                }
+
+                const { error } = await supabase
+                    .from('jobs')
+                    .update(updates)
+                    .eq('id', jobId);
+
+                if (error) throw error;
+                alert('Job updated successfully!');
+                loadData();
+            } catch (err) {
+                console.error(err);
+                alert('Error updating job: ' + err.message);
             }
         };
 
