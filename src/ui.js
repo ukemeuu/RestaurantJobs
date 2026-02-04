@@ -158,11 +158,13 @@ export async function updateNavigation() {
 
         toggleLink(navLinks, '/candidate-dashboard.html', false);
         toggleLink(navLinks, '/apply.html', false);
+        toggleLink(navLinks, '/jobs.html', false);
     } else {
         toggleLink(navLinks, '/candidate-dashboard.html', true, 'Dashboard');
         toggleLink(navLinks, '/settings.html', true, 'Settings');
         toggleLink(navLinks, '/employer-dashboard.html', false);
         toggleLink(navLinks, '/post-job.html', false);
+        toggleLink(navLinks, '/jobs.html', false);
 
         // Check if CV already submitted
         const { count } = await supabase
@@ -177,7 +179,7 @@ export async function updateNavigation() {
         } else {
             // No CV -> Show "Submit CV"
             toggleLink(navLinks, '/apply.html', true, 'Submit CV');
-            toggleLink(navLinks, '/jobs.html', true, 'Find Jobs');
+            // toggleLink(navLinks, '/jobs.html', true, 'Find Jobs');
         }
     }
 }
