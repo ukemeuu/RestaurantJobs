@@ -64,10 +64,23 @@
             <!-- Placeholder for other stats -->
         </div>
 
-        <div class="card">
+        <div style="margin-bottom: 20px;">
+            <button id="tab-apps" class="btn" style="margin-right: 10px;" onclick="switchTab('apps')">My
+                Applications</button>
+            <button id="tab-saved" class="btn-secondary" onclick="switchTab('saved')">Saved Jobs</button>
+        </div>
+
+        <div id="view-apps" class="card">
             <h3>Recent Applications</h3>
             <div id="app-list" style="margin-top: 20px;">
                 <p style="color: #888;">Loading...</p>
+            </div>
+        </div>
+
+        <div id="view-saved" class="card" style="display: none;">
+            <h3>Saved Jobs</h3>
+            <div id="saved-list" style="margin-top: 20px;">
+                <p style="color: #888;">Loading saved jobs...</p>
             </div>
         </div>
     </main>
@@ -127,62 +140,78 @@
                 document.getElementById('upgrade-cta').style.display = 'block';
             }
 
-            // Load Applications
-            const { data: apps, error } = await supabase
-                .from('applications')
+            // Load Saved Jobs
+            const { data: savedJobs, error: savedError } = await supabase
+                .from('saved_jobs')
                 .select(`
-                    *,
-                    jobs ( title, location, type )
+                    job_id,
+                    jobs ( id, title, location, type, salary_min, salary_max, employer_id )
                 `)
-                .eq('candidate_id', user.id)
+                .eq('user_id', user.id)
                 .order('created_at', { ascending: false });
 
-            if (error) {
-                console.error(error);
-                return;
-            }
+            const savedList = document.getElementById('saved-list');
+            savedList.innerHTML = '';
 
-            document.getElementById('total-apps').innerText = apps.length;
-            const list = document.getElementById('app-list');
-            list.innerHTML = '';
-
-            if (apps.length === 0) {
-                list.innerHTML = `
+            if (!savedJobs || savedJobs.length === 0) {
+                savedList.innerHTML = `
                     <div style="text-align: center; padding: 40px; background: #f9f9f9; border-radius: 8px;">
-                        <h3>No Application History</h3>
-                        <p style="color: #666; margin-bottom: 20px;">You haven't applied to any jobs yet.</p>
-                        <a href="/jobs.html" class="btn">Search for Jobs</a>
+                        <h3>No Saved Jobs</h3>
+                        <p style="color: #666; margin-bottom: 20px;">You haven't saved any jobs yet.</p>
+                        <a href="/jobs.html" class="btn">Browse Jobs</a>
                     </div>
                 `;
-                return;
-            }
+            } else {
+                savedJobs.forEach(item => {
+                    const job = item.jobs;
+                    if (!job) return; // Clean up deleted jobs
 
-            apps.forEach(app => {
-                const jobTitle = app.jobs?.title || 'Unknown Job';
-                const statusColors = {
-                    'new': '#eee',
-                    'viewed': '#cce5ff',
-                    'interviewing': '#fff3cd',
-                    'offer': '#d4edda',
-                    'rejected': '#f8d7da'
-                };
-                const statusColor = statusColors[app.status] || '#eee';
-
-                const item = document.createElement('div');
-                item.style.borderBottom = '1px solid #eee';
-                item.style.padding = '15px 0';
-                item.innerHTML = `
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                    const div = document.createElement('div');
+                    div.style.borderBottom = '1px solid #eee';
+                    div.style.padding = '15px 0';
+                    div.style.display = 'flex';
+                    div.style.justifyContent = 'space-between';
+                    div.style.alignItems = 'center';
+                    div.innerHTML = `
                         <div>
-                            <strong>${jobTitle}</strong>
-                            <div style="font-size: 0.9rem; color: #666;">Applied on ${new Date(app.created_at).toLocaleDateString()}</div>
+                            <h4 style="margin: 0 0 5px 0;">
+                                <a href="/job-details.html?id=${job.id}" style="text-decoration: none; color: inherit;">${job.title}</a>
+                            </h4>
+                            <div style="font-size: 0.9rem; color: #666;">
+                                📍 ${job.location} • 💰 ${job.salary_min ? (job.salary_min / 1000) + 'k' : ''}-${(job.salary_max / 1000) + 'k'}
+                            </div>
                         </div>
-                        <span style="padding: 5px 12px; border-radius: 20px; background: ${statusColor}; font-size: 0.85rem;">${app.status.toUpperCase()}</span>
-                    </div>
-                `;
-                list.appendChild(item);
-            });
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <a href="/job-details.html?id=${job.id}" class="btn-secondary" style="font-size: 0.8rem; padding: 5px 10px;">View</a>
+                            <button onclick="removeSavedJob('${item.job_id}', this)" style="background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--error-color);">♥</button>
+                        </div>
+                    `;
+                    savedList.appendChild(div);
+                });
+            }
         }
+
+        window.switchTab = function (tab) {
+            document.getElementById('view-apps').style.display = tab === 'apps' ? 'block' : 'none';
+            document.getElementById('view-saved').style.display = tab === 'saved' ? 'block' : 'none';
+
+            // Update buttons
+            document.getElementById('tab-apps').className = tab === 'apps' ? 'btn' : 'btn-secondary';
+            document.getElementById('tab-saved').className = tab === 'saved' ? 'btn' : 'btn-secondary';
+        };
+
+        window.removeSavedJob = async function (jobId, btn) {
+            if (!confirm('Remove this job from saved?')) return;
+            const { error } = await supabase.from('saved_jobs').delete().eq('user_id', (await supabase.auth.getUser()).data.user.id).eq('job_id', jobId);
+            if (!error) {
+                btn.closest('div[style*="border-bottom"]').remove();
+            }
+        };
+
+        window.logout = async () => {
+            await supabase.auth.signOut();
+            window.location.href = '/';
+        };
 
         window.logout = async () => {
             await supabase.auth.signOut();

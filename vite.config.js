@@ -11,7 +11,7 @@ export default defineConfig({
                 employerLogin: resolve(__dirname, 'employer-login.html'),
                 employerRegister: resolve(__dirname, 'employer-register.html'),
                 employerDashboard: resolve(__dirname, 'employer-dashboard.html'),
-                adminDashboard: resolve(__dirname, 'dashboard.html'),
+                // adminDashboard: resolve(__dirname, 'dashboard.html'), // Consolidated
                 pricing: resolve(__dirname, 'pricing.html'),
                 auth: resolve(__dirname, 'auth.html'),
                 settings: resolve(__dirname, 'settings.html'),

@@ -150,6 +150,11 @@
                 const container = document.getElementById('jobs-container');
                 container.innerHTML = '<p class="fade-in">Loading positions...</p>';
 
+                // Prefetch saved jobs for efficient checking
+                const { getSavedJobs } = await import('./src/ui.js');
+                const savedJobIds = await getSavedJobs();
+                const savedSet = new Set(savedJobIds);
+
                 // Get filter values
                 const searchText = document.getElementById('search-text').value;
                 const location = document.getElementById('filter-location').value;

@@ -54,27 +54,82 @@ export function showToast(message, type = 'success') {
 }
 
 // Saved Jobs Management
-export function getSavedJobs() {
-    const saved = localStorage.getItem('restaurant_saved_jobs');
-    return saved ? JSON.parse(saved) : [];
+export async function getSavedJobs() {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return [];
+
+    const { data, error } = await supabase
+        .from('saved_jobs')
+        .select('job_id')
+        .eq('user_id', session.user.id);
+
+    if (error || !data) return [];
+    return data.map(item => item.job_id);
 }
 
-export function isJobSaved(id) {
-    const saved = getSavedJobs();
+export async function isJobSaved(id) {
+    const saved = await getSavedJobs();
     return saved.includes(id);
 }
 
-export function toggleSaveJob(id) {
-    let saved = getSavedJobs();
-    if (saved.includes(id)) {
-        saved = saved.filter(jobId => jobId !== id);
-        showToast('Job removed from favorites', 'success');
-    } else {
-        saved.push(id);
-        showToast('Job saved to favorites', 'success');
+export async function toggleSaveJob(id, btnElement) {
+    const { data: { session } } = await supabase.auth.getSession();
+
+    // 1. Check Auth
+    if (!session) {
+        showToast('Please sign in to save jobs', 'error');
+        return false;
     }
-    localStorage.setItem('restaurant_saved_jobs', JSON.stringify(saved));
-    return saved.includes(id);
+
+    const startIcon = btnElement ? btnElement.innerText : '';
+
+    // 2. Check Role (Candidate only)
+    const { data: roleData } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('id', session.user.id)
+        .single();
+
+    if (roleData?.role !== 'candidate') {
+        showToast('Only candidates can save jobs', 'error');
+        return false;
+    }
+
+    // 3. Toggle in DB
+    // First, check if already saved
+    const { data: existing } = await supabase
+        .from('saved_jobs')
+        .select('id')
+        .eq('user_id', session.user.id)
+        .eq('job_id', id)
+        .single();
+
+    let isSaved = false;
+
+    if (existing) {
+        // Remove
+        const { error } = await supabase
+            .from('saved_jobs')
+            .delete()
+            .eq('id', existing.id);
+
+        if (!error) {
+            showToast('Job removed from saved', 'success');
+            isSaved = false;
+        }
+    } else {
+        // Add
+        const { error } = await supabase
+            .from('saved_jobs')
+            .insert([{ user_id: session.user.id, job_id: id }]);
+
+        if (!error) {
+            showToast('Job saved successfully', 'success');
+            isSaved = true;
+        }
+    }
+
+    return isSaved;
 }
 
 // Auth & Navigation State Management
@@ -137,13 +192,14 @@ export async function updateNavigation() {
 
         toggleLink(navLinks, '/candidate-dashboard.html', false);
         toggleLink(navLinks, '/apply.html', false);
-        toggleLink(navLinks, '/jobs.html', false);
+        toggleLink(navLinks, '/jobs.html', true, 'Find Jobs'); // Employers can see jobs but not apply via nav
     } else {
+        // CANDIDATE
         toggleLink(navLinks, '/candidate-dashboard.html', true, 'Dashboard');
         toggleLink(navLinks, '/settings.html', true, 'Settings');
         toggleLink(navLinks, '/employer-dashboard.html', false);
         toggleLink(navLinks, '/post-job.html', false);
-        toggleLink(navLinks, '/jobs.html', false);
+        toggleLink(navLinks, '/jobs.html', true, 'Find Jobs');
 
         // Check if CV already submitted
         const { count } = await supabase
@@ -152,13 +208,12 @@ export async function updateNavigation() {
             .eq('candidate_id', user.id);
 
         if (count && count > 0) {
-            // Already has CV -> Show "Apply for Jobs"
+            // Already has CV -> Show "Apply for Jobs" 
+            // Actually, best to just show "Find Jobs" and let the button on job details handle logic
             toggleLink(navLinks, '/apply.html', false);
-            toggleLink(navLinks, '/jobs.html', true, 'Apply for Jobs');
         } else {
             // No CV -> Show "Submit CV"
             toggleLink(navLinks, '/apply.html', true, 'Submit CV');
-            // toggleLink(navLinks, '/jobs.html', true, 'Find Jobs');
         }
     }
 }
@@ -175,15 +230,17 @@ function toggleLink(container, href, shouldShow, text) {
             if (text) link.innerText = text;
         } else {
             // Only create if necessary and structure allows
-            if (text === 'Dashboard' || text === 'Saved Jobs' || text === 'Settings' || (text && text.includes('Job'))) {
-                link = document.createElement('a');
-                link.href = href;
-                link.innerText = text;
-                if (text === 'Dashboard') link.id = 'nav-dashboard';
+            // Support Saved Jobs creation or other dynamic links
+            if (text === 'Dashboard' || text === 'Saved Jobs' || text === 'Settings' || (text && text.includes('Job')) || text === 'Submit CV') {
+                if (!link) { // Double check inside logic
+                    link = document.createElement('a');
+                    link.href = href;
+                    link.innerText = text;
+                    if (text === 'Dashboard') link.id = 'nav-dashboard';
 
-                // Insert logic:
-                const lastItem = container.lastElementChild;
-                container.insertBefore(link, lastItem);
+                    const lastItem = container.lastElementChild;
+                    container.insertBefore(link, lastItem);
+                }
             }
         }
     } else {

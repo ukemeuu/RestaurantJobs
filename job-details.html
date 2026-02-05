@@ -53,6 +53,10 @@
                     </svg>
                     Share
                 </button>
+                <button id="save-btn"
+                    style="background:none; border:none; cursor:pointer; font-size:1rem; color:var(--text-muted); display: flex; align-items: center; gap: 5px;">
+                    ♡ Save Job
+                </button>
             </div>
 
             <div class="card" style="padding: 40px; margin-bottom: 40px;">
@@ -86,7 +90,7 @@
     <script type="module" src="/src/ui.js"></script>
     <script type="module">
         import { supabase } from './src/supabaseClient.js';
-        import { openShareModal } from './src/ui.js';
+        import { openShareModal, isJobSaved, toggleSaveJob } from './src/ui.js';
 
         async function loadJobDetails() {
             const params = new URLSearchParams(window.location.search);
@@ -95,6 +99,24 @@
             if (!jobId) {
                 showError();
                 return;
+            }
+
+            // Check Saved Status
+            try {
+                const isSaved = await isJobSaved(jobId);
+                const saveBtn = document.getElementById('save-btn');
+                if (saveBtn) {
+                    saveBtn.innerHTML = isSaved ? '♥ Saved' : '♡ Save Job';
+                    saveBtn.style.color = isSaved ? 'var(--error-color)' : 'var(--text-muted)';
+
+                    saveBtn.onclick = async () => {
+                        const newStatus = await toggleSaveJob(jobId);
+                        saveBtn.innerHTML = newStatus ? '♥ Saved' : '♡ Save Job';
+                        saveBtn.style.color = newStatus ? 'var(--error-color)' : 'var(--text-muted)';
+                    };
+                }
+            } catch (e) {
+                console.warn('Could not check saved status', e);
             }
 
             try {

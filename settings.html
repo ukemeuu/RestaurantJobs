@@ -64,7 +64,7 @@
                     </div>
                 </div>
 
-                // Candidate - Resume Upload
+                <!-- Candidate - Resume Upload -->
                 <div id="candidate-fields" style="display: none;">
                     <div style="margin-bottom: 20px;">
                         <label style="display:block; margin-bottom:8px; font-weight:600;">Your Resume (PDF)</label>
@@ -159,47 +159,47 @@
                 // Logo Input Handler
                 window.selectedLogoFile = null;
                 document.getElementById('logo-upload').addEventListener('change', (e) => {
-                     const file = e.target.files[0];
-                     if(file) {
+                    const file = e.target.files[0];
+                    if (file) {
                         window.selectedLogoFile = file;
                         document.getElementById('logo-filename').innerText = file.name;
                         const reader = new FileReader();
                         reader.onload = (ev) => { document.getElementById('logo-preview').src = ev.target.result; };
                         reader.readAsDataURL(file);
-                     }
+                    }
                 });
 
             } else if (role === 'admin') {
                 roleDisplay.innerText = 'Admin Account';
-                backLink.href = '/dashboard.html';
+                backLink.href = '/employer-dashboard.html';
             } else {
                 roleDisplay.innerText = 'Candidate Account';
                 backLink.href = '/candidate-dashboard.html';
                 document.getElementById('candidate-fields').style.display = 'block';
-                
+
                 // Fetch Candidate Profile (Resume)
                 const { data: profile } = await supabase
                     .from('candidate_profiles')
                     .select('*')
                     .eq('id', user.id)
                     .single();
-                    
+
                 if (profile && profile.resume_url) {
-                    const url = profile.resume_url.startsWith('http') 
-                        ? profile.resume_url 
+                    const url = profile.resume_url.startsWith('http')
+                        ? profile.resume_url
                         : supabase.storage.from('resumes').getPublicUrl(profile.resume_url).data.publicUrl;
-                        
+
                     document.getElementById('current-resume-link').innerHTML = `Current: <a href="${url}" target="_blank" style="color:var(--accent-color);">View Resume</a>`;
                 }
-                
+
                 // Resume Input Handler
                 window.selectedResumeFile = null;
                 document.getElementById('resume-upload').addEventListener('change', (e) => {
-                     const file = e.target.files[0];
-                     if(file) {
+                    const file = e.target.files[0];
+                    if (file) {
                         window.selectedResumeFile = file;
                         document.getElementById('resume-filename').innerText = file.name;
-                     }
+                    }
                 });
             }
 
@@ -232,31 +232,31 @@
 
                         const { error } = await supabase.from('employers').update(updates).eq('id', user.id);
                         if (error) throw error;
-                    } 
+                    }
                     else if (role === 'candidate') {
-                         // Candidate Save Logic (Resume)
-                         if (window.selectedResumeFile) {
-                             const fileExt = window.selectedResumeFile.name.split('.').pop();
-                             const fileName = `${user.id}-resume-${Date.now()}.${fileExt}`;
-                             
-                             const { error: uploadError } = await supabase.storage
+                        // Candidate Save Logic (Resume)
+                        if (window.selectedResumeFile) {
+                            const fileExt = window.selectedResumeFile.name.split('.').pop();
+                            const fileName = `${user.id}-resume-${Date.now()}.${fileExt}`;
+
+                            const { error: uploadError } = await supabase.storage
                                 .from('resumes')
                                 .upload(fileName, window.selectedResumeFile, { upsert: true });
-                                
-                             if (uploadError) throw new Error('Resume upload failed: ' + uploadError.message);
-                             
-                             // Save to profile
-                             // Check if profile exists first? Or upsert.
-                             const { error: profileError } = await supabase
+
+                            if (uploadError) throw new Error('Resume upload failed: ' + uploadError.message);
+
+                            // Save to profile
+                            // Check if profile exists first? Or upsert.
+                            const { error: profileError } = await supabase
                                 .from('candidate_profiles')
-                                .upsert({ 
+                                .upsert({
                                     id: user.id,
                                     resume_url: fileName,
                                     updated_at: new Date()
                                 });
-                                
-                             if (profileError) throw profileError;
-                         }
+
+                            if (profileError) throw profileError;
+                        }
                     }
 
                     showToast('Settings updated successfully!');
