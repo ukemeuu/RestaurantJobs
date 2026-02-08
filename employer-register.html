@@ -415,63 +415,12 @@
                     </div>
 
                     <div class="nav-buttons">
-                        <button type="button" class="btn-white" onclick="nextStep()">Next</button>
-                        <button type="button" class="btn-text" onclick="prevStep()">Back</button>
-                    </div>
-                </div>
-
-                <!-- Step 8: Select Plan -->
-                <div class="step-container" data-step="8">
-                    <h2 class="step-question">Choose a promotion plan</h2>
-
-                    <div class="plan-grid">
-                        <label class="plan-card" onclick="selectPlan(this)">
-                            <input type="radio" name="planTier" value="Standard" class="plan-radio" required>
-                            <div style="font-weight: 700; color: #fff;">Standard</div>
-                            <div class="plan-price">KES 3,000</div>
-                            <div class="plan-features">
-                                • 30 Days Active<br>
-                                • Standard Listing
-                            </div>
-                        </label>
-                        <label class="plan-card selected-plan" onclick="selectPlan(this)">
-                            <input type="radio" name="planTier" value="Pro" class="plan-radio" checked>
-                            <div style="color: #ff6b00; font-weight: 700;">Pro Post</div>
-                            <div class="plan-price">KES 5,500</div>
-                            <div class="plan-features">
-                                • <b>Urgent Badge</b><br>
-                                • Top of Search (3 Days)<br>
-                                • Social Media Share
-                            </div>
-                        </label>
-                        <label class="plan-card" onclick="selectPlan(this)">
-                            <input type="radio" name="planTier" value="Premium" class="plan-radio">
-                            <div style="font-weight: 700; color: #fff;">Premium</div>
-                            <div class="plan-price">KES 10,000</div>
-                            <div class="plan-features">
-                                • <b>Pinned to Top (7 Days)</b><br>
-                                • SMS Blast (500 candidates)<br>
-                                • 1st 50 CVs Vetted
-                            </div>
-                        </label>
-                    </div>
-
-                    <h3 style="margin-top: 20px; font-size: 1.1rem; color: #999;">Optional Add-ons</h3>
-                    <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
-                        <label
-                            style="display: flex; align-items: center; gap: 15px; cursor: pointer; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 12px; border: 1px solid #333;">
-                            <input type="checkbox" name="addon_sms" value="sms" style="transform: scale(1.2);">
-                            <span style="flex:1;">SMS Blast to Qualified Staff</span>
-                            <span style="font-weight: bold; color: #ff6b00;">+ KES 2,500</span>
-                        </label>
-                    </div>
-
-                    <div class="nav-buttons">
                         <button type="submit" class="btn-white">Finish & Submit</button>
                         <button type="button" class="btn-text" onclick="prevStep()">Back</button>
                     </div>
-                    <div id="message" style="margin-top: 20px; display: none; color: #4effbf;"></div>
                 </div>
+
+
 
             </form>
 
@@ -556,7 +505,7 @@
         });
 
         let currentStep = 0;
-        const totalSteps = 8;
+        const totalSteps = 7;
         const form = document.getElementById('submission-form');
         const progressBar = document.getElementById('progressBar');
 
@@ -641,10 +590,6 @@
                         contact_name: data.pocName,
                         contact_phone: data.pocPhone,
                         org_name: data.orgName,
-
-                        // Monetization
-                        plan_tier: data.planTier,
-                        add_ons: data.addon_sms ? ['sms_blast'] : [],
 
                         status: 'new_lead'
                     });
