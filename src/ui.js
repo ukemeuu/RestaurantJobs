@@ -230,18 +230,16 @@ function toggleLink(container, href, shouldShow, text) {
             link.style.display = 'inline-block';
             if (text) link.innerText = text;
         } else {
-            // Only create if necessary and structure allows
-            // Support Saved Jobs creation or other dynamic links
-            if (text === 'Dashboard' || text === 'Saved Jobs' || text === 'Settings' || (text && text.includes('Job')) || text === 'Submit CV') {
-                if (!link) { // Double check inside logic
-                    link = document.createElement('a');
-                    link.href = href;
-                    link.innerText = text;
-                    if (text === 'Dashboard') link.id = 'nav-dashboard';
+            // Only create specific safe links - never create "Find Jobs" or "Post a Job"
+            const allowedCreations = ['Dashboard', 'Saved Jobs', 'Settings', 'Submit CV'];
+            if (allowedCreations.includes(text)) {
+                link = document.createElement('a');
+                link.href = href;
+                link.innerText = text;
+                if (text === 'Dashboard') link.id = 'nav-dashboard';
 
-                    const lastItem = container.lastElementChild;
-                    container.insertBefore(link, lastItem);
-                }
+                const lastItem = container.lastElementChild;
+                container.insertBefore(link, lastItem);
             }
         }
     } else {
