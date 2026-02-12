@@ -39,6 +39,8 @@
             <a href="/admin-jobs.html" id="admin-jobs-link" class="nav-link" style="display: none;">Manage Jobs</a>
             <a href="/admin-assessment-results.html" id="admin-assess-link" class="nav-link"
                 style="display: none;">Assessments</a>
+            <a href="/admin-employers.html" id="admin-employers-link" class="nav-link"
+                style="display: none;">Employers</a>
 
             <a href="/employer-profile.html" class="nav-link">Company Profile</a>
             <a href="/settings.html" class="nav-link">Settings</a>
@@ -173,6 +175,7 @@
         if (roleData && roleData.role === 'admin') {
             document.getElementById('admin-assess-link').style.display = 'inline';
             document.getElementById('admin-jobs-link').style.display = 'inline';
+            document.getElementById('admin-employers-link').style.display = 'inline';
         }
 
         // AGGRESSIVE NAV CLEANUP: Remove Find Jobs and Post a Job from nav

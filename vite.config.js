@@ -35,6 +35,7 @@ export default defineConfig({
                 subscriptionSuccess: resolve(__dirname, 'subscription-success.html'),
                 candidateAssessment: resolve(__dirname, 'candidate-assessment.html'),
                 adminAssessmentResults: resolve(__dirname, 'admin-assessment-results.html'),
+                adminEmployers: resolve(__dirname, 'admin-employers.html'),
             },
         },
     },
