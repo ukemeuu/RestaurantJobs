@@ -175,6 +175,22 @@
             document.getElementById('admin-jobs-link').style.display = 'inline';
         }
 
+        // AGGRESSIVE NAV CLEANUP: Remove Find Jobs and Post a Job from nav
+        // (Failsafe in case ui.js cached version re-creates them)
+        function cleanupNav() {
+            const navLinks = document.getElementById('nav-links');
+            if (!navLinks) return;
+            navLinks.querySelectorAll('a').forEach(a => {
+                if (a.href.includes('/jobs.html') || (a.href.includes('/post-job.html') && !a.id)) {
+                    a.remove();
+                }
+            });
+        }
+        cleanupNav();
+        // Also run after a delay to catch links created by ui.js
+        setTimeout(cleanupNav, 500);
+        setTimeout(cleanupNav, 1500);
+
         // Get & Display Employer Name from Profile if possible, else localStorage
         let employerName = 'Partner';
 
