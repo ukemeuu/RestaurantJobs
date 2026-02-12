@@ -194,7 +194,6 @@
             employerName = localStorage.getItem('employerName') || 'Partner';
         }
 
-        document.getElementById('welcome-msg').innerText = employerName;
         document.getElementById('user-initial').innerText = employerName.charAt(0).toUpperCase();
 
         // Logout Function
@@ -253,12 +252,26 @@
                 document.getElementById('stat-total-views').innerText = jobs.reduce((acc, curr) => acc + (curr.views || 0), 0);
 
                 // Show Pending Count instead of expiring
-                const expiringCard = document.querySelector('.card:nth-child(3)');
-                if (expiringCard) {
-                    expiringCard.querySelector('h3').innerText = pending.length;
-                    expiringCard.querySelector('span').innerText = 'Pending Approval';
-                    expiringCard.querySelector('div').style.color = '#f57f17'; // Orange
-                    expiringCard.querySelector('div').style.background = '#fff3e0';
+                const statExpiring = document.getElementById('stat-expiring');
+                if (statExpiring) {
+                    statExpiring.innerText = pending.length;
+                    // Update label and color via parent/siblings if needed, or just keep it simple
+                    // The HTML structure is: <div><h3>...</h3><span>Expiring Soon</span></div>
+                    // We want to change "Expiring Soon" to "Pending Approval"
+                    const label = statExpiring.nextElementSibling;
+                    if (label) label.innerText = 'Pending Approval';
+
+                    // Update icon background color contextually (optional, but good for UI)
+                    // The icon container is the previous sibling of the parent's parent? No.
+                    // Structure: <div class="card"> <div class="icon-bg">...</div> <div> <h3 id="stat">...</h3> <span>...</span> </div> </div>
+                    const card = statExpiring.closest('.card');
+                    if (card) {
+                        const iconBg = card.querySelector('div:first-child');
+                        if (iconBg) {
+                            iconBg.style.background = '#fff3e0'; // Orange bg
+                            iconBg.style.color = '#f57f17'; // Orange icon
+                        }
+                    }
                 }
 
                 jobs.forEach(job => {
