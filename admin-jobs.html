@@ -116,6 +116,12 @@
             const list = document.getElementById('jobs-list');
             list.innerHTML = '';
 
+            if (error) {
+                console.error('Error fetching jobs:', error);
+                list.innerHTML = `<div style="padding: 20px; text-align: center; color: #d32f2f;">Error loading jobs: ${error.message}</div>`;
+                return;
+            }
+
             if (jobs && jobs.length > 0) {
                 jobs.forEach(job => {
                     const row = document.createElement('div');
