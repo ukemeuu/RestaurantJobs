@@ -192,13 +192,8 @@ export async function updateNavigation() {
 
         toggleLink(navLinks, '/candidate-dashboard.html', false);
         toggleLink(navLinks, '/apply.html', false);
-
-        // Hide "Find Jobs" for Admins (they don't need to apply)
-        if (role === 'admin') {
-            toggleLink(navLinks, '/jobs.html', false);
-        } else {
-            toggleLink(navLinks, '/jobs.html', true, 'Find Jobs'); // Employers might want to check competition
-        }
+        toggleLink(navLinks, '/jobs.html', false); // Employers/Admins don't need Find Jobs
+        toggleLink(navLinks, '/post-job.html', false); // Post a Job removed from nav
     } else {
         // CANDIDATE
         toggleLink(navLinks, '/candidate-dashboard.html', true, 'Dashboard');
