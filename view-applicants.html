@@ -108,7 +108,15 @@
                     return;
                 }
 
-                document.getElementById('job-title').innerText = `Applicants for: ${job.title}`;
+                const backLink = isAdmin ? '/admin-jobs.html' : '/employer-dashboard.html';
+                const backText = isAdmin ? '← Back to Admin Jobs' : '← Back to Dashboard';
+
+                document.getElementById('job-title').innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span>Applicants for: ${job.title}</span>
+                        <a href="${backLink}" class="btn-secondary" style="font-size: 0.9rem; padding: 6px 15px; text-decoration: none;">${backText}</a>
+                    </div>
+                `;
 
                 // Get Applicants with Profile
                 // Note: We need to join with profiles. Assuming 'applications' has 'candidate_id'
