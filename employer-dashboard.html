@@ -27,36 +27,30 @@
 
 <body>
     <!-- Modern Nav -->
-    <nav class="container"
-        style="padding: 15px 20px; display: flex; align-items: center; justify-content: space-between;">
-        <a href="/" class="nav-brand" style="font-size: 1.6rem;">Restaurant<span
-                style="color: var(--accent-color);">Jobs</span></a>
+    <!-- Modern Nav -->
+    <nav class="container">
+        <a href="/" class="nav-brand">Restaurant<span style="color: var(--accent-color);">Jobs</span></a>
 
         <button id="mobile-menu-btn" class="mobile-menu-btn" aria-label="Toggle Menu">&#9776;</button>
 
-        <div style="display: flex; align-items: center; gap: 30px;">
-            <div id="nav-links" class="nav-links">
-                <!-- Links injected by ui.js -->
-                <a href="/admin-jobs.html" id="admin-jobs-link"
-                    style="display: none; font-weight: 600; color: var(--accent-color); margin-right: 20px;">Manage
-                    Jobs</a>
-                <a href="/admin-assessment-results.html" id="admin-assess-link"
-                    style="display: none; font-weight: 600; color: var(--text-color); margin-right: 20px;">Assessments</a>
-                <a href="/employer-profile.html"
-                    style="font-weight: 600; color: var(--text-color); margin-right: 20px;">Company Profile</a>
-                <a href="/settings.html" style="font-weight: 600; color: var(--text-color);">Settings</a>
+        <div id="nav-links" class="nav-links">
+            <a href="/employer-dashboard.html" class="nav-link active">Dashboard</a>
+
+            <a href="/admin-jobs.html" id="admin-jobs-link" class="nav-link" style="display: none;">Manage Jobs</a>
+            <a href="/admin-assessment-results.html" id="admin-assess-link" class="nav-link"
+                style="display: none;">Assessments</a>
+
+            <a href="/employer-profile.html" class="nav-link">Company Profile</a>
+            <a href="/settings.html" class="nav-link">Settings</a>
+
+            <div style="border-left: 1px solid #ddd; height: 24px; margin: 0 10px; display: none;" id="nav-divider">
             </div>
 
-            <div id="user-profile"
-                style="display: flex; align-items: center; gap: 10px; padding-left: 20px; border-left: 1px solid #eee;">
-                <div style="text-align: right; display: none; margin-right: 5px;" id="user-info-block">
-                    <span id="welcome-msg"
-                        style="display: block; font-weight: 700; font-size: 0.9rem; color: var(--text-main);">Employer</span>
-                    <span
-                        style="display: block; font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Dashboard</span>
-                </div>
+            <a href="/post-job.html" class="btn-sm">Post a Job</a>
+
+            <div id="user-profile-nav" style="display: flex; align-items: center; gap: 10px;">
                 <div
-                    style="width: 40px; height: 40px; background: var(--accent-color); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.2rem;">
+                    style="width: 32px; height: 32px; background: var(--accent-color); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9rem;">
                     <span id="user-initial">E</span>
                 </div>
             </div>
@@ -202,11 +196,6 @@
 
         document.getElementById('welcome-msg').innerText = employerName;
         document.getElementById('user-initial').innerText = employerName.charAt(0).toUpperCase();
-
-        // Show user info block on larger screens
-        if (window.innerWidth > 768) {
-            document.getElementById('user-info-block').style.display = 'block';
-        }
 
         // Logout Function
         window.logout = async function () {
