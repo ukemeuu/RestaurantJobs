@@ -192,7 +192,13 @@ export async function updateNavigation() {
 
         toggleLink(navLinks, '/candidate-dashboard.html', false);
         toggleLink(navLinks, '/apply.html', false);
-        toggleLink(navLinks, '/jobs.html', true, 'Find Jobs'); // Employers can see jobs but not apply via nav
+
+        // Hide "Find Jobs" for Admins (they don't need to apply)
+        if (role === 'admin') {
+            toggleLink(navLinks, '/jobs.html', false);
+        } else {
+            toggleLink(navLinks, '/jobs.html', true, 'Find Jobs'); // Employers might want to check competition
+        }
     } else {
         // CANDIDATE
         toggleLink(navLinks, '/candidate-dashboard.html', true, 'Dashboard');

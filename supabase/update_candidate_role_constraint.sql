@@ -14,6 +14,6 @@ DROP CONSTRAINT IF EXISTS candidate_assessments_role_selected_check;
 -- 2. Add the constraint back with 'top_roles' included
 ALTER TABLE candidate_assessments
 ADD CONSTRAINT candidate_assessments_role_selected_check
-CHECK (role_selected IN ('foh', 'boh', 'manager', 'top_roles'));
+CHECK (role_selected IN ('foh', 'boh', 'manager', 'top_roles', 'smm'));
 
 -- Note: We include 'manager' for legacy records, and 'top_roles' for new ones.
