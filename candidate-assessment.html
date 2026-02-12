@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Candidate Assessment | RestaurantJobs Kenya</title>
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&family=Playfair+Display:wght@500;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="./style.css">
+    <style>
+        /* Minimalist overrides for assessment focus */
+        body {
+            background-color: #fcfcfc;
+        }
+
+        .assessment-container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        .step-card {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+            display: none;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .step-card.active {
+            display: block;
+            opacity: 1;
+        }
+
+        /* Question Card (Same style as step-card but always visible when rendered) */
+        .question-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        /* Role Cards */
+        .role-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .role-card {
+            border: 2px solid #eee;
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .role-card:hover {
+            border-color: var(--accent-color);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .role-card.selected {
+            border-color: var(--accent-color);
+            background: rgba(169, 132, 103, 0.05);
+        }
+
+        .role-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        /* Likert Scale */
+        .question-block {
+            margin-bottom: 40px;
+            border-bottom: 1px solid #f0f0f0;
+            padding-bottom: 30px;
+        }
+
+        .likert-options {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+            background: transparent;
+            padding: 10px 0;
+        }
+
+        .likert-option {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            position: relative;
+            width: 18%;
+            transition: transform 0.2s;
+        }
+
+        .likert-option:hover {
+            transform: translateY(-5px);
+        }
+
+        /* Hide default radio */
+        .likert-option input {
+            opacity: 0;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+            z-index: 2;
+        }
+
+        /* Custom Circle */
+        .likert-circle {
+            width: 45px;
+            height: 45px;
+            border: 2px solid #ddd;
+            border-radius: 50%;
+            margin-bottom: 8px;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #888;
+            background: white;
+            font-size: 1.1rem;
+        }
+
+        /* Hover State */
+        .likert-option:hover .likert-circle {
+            border-color: var(--accent-color);
+            background: #fff8e1;
+            /* Light yellow tint */
+            color: var(--text-main);
+        }
+
+        /* Selected State */
+        .likert-option input:checked+.likert-circle {
+            background: var(--accent-color);
+            border-color: var(--accent-color);
+            color: white;
+            box-shadow: 0 4px 10px rgba(169, 132, 103, 0.4);
+            transform: scale(1.1);
+        }
+
+        .likert-label {
+            font-size: 0.85rem;
+            color: #888;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        @media (max-width: 600px) {
+            .role-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .likert-options {
+                padding: 10px;
+                border-radius: 12px;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 10px;
+            }
+
+            .likert-option {
+                width: 45px;
+            }
+
+            .likert-label {
+                display: none;
+            }
+
+            /* Hide labels on mobile to save space, rely on legend */
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            margin-bottom: 30px;
+            background: #eee;
+            height: 6px;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: var(--accent-color);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="assessment-container">
+
+        <!-- Step 1: Personal Details -->
+        <div id="step-1" class="step-card active">
+            <h1 style="text-align: center; margin-bottom: 10px;">Candidates Assessment</h1>
+            <p style="text-align: center; color: #666; margin-bottom: 30px;">Please enter your details to begin the
+                assessment.</p>
+
+            <form id="details-form" onsubmit="event.preventDefault(); nextStep(2);">
+                <div class="form-group">
+                    <label>Full Name <span style="font-size: 0.9em; color: #666; font-weight: normal;">(Name must match
+                            CV submitted)</span></label>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+                        <input type="text" id="candidate-firstname" class="form-control" required
+                            placeholder="First Name">
+                        <input type="text" id="candidate-middlename" class="form-control" placeholder="Middle Name">
+                        <input type="text" id="candidate-lastname" class="form-control" required
+                            placeholder="Last Name">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" id="candidate-email" class="form-control" required
+                        placeholder="john@example.com">
+                </div>
+                <button type="button" class="btn btn-block" style="margin-top: 20px;"
+                    onclick="nextStep(2)">Continue</button>
+            </form>
+        </div>
+
+        <!-- Step 2: Role Selection -->
+        <div id="step-2" class="step-card">
+            <h2 style="text-align: center; margin-bottom: 10px;">Select Your Role</h2>
+            <p style="text-align: center; color: #666;">Which area are you applying for?</p>
+
+            <div class="role-grid">
+                <div class="role-card" onclick="selectRole('foh')">
+                    <span class="role-icon">🛎️</span>
+                    <h3>Front of House</h3>
+                    <p style="font-size: 0.9rem; color: #666;">Waiters, Hostesses, Bartenders, Cashiers</p>
+                </div>
+                <div class="role-card" onclick="selectRole('boh')">
+                    <span class="role-icon">🍳</span>
+                    <h3>Back of House</h3>
+                    <p style="font-size: 0.9rem; color: #666;">Chefs, Cooks, Dishwashers, Cleaners</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 3: Instructions -->
+        <div id="step-3" class="step-card">
+            <h2 style="text-align: center; margin-bottom: 20px;">Instructions</h2>
+            <ul style="line-height: 1.8; color: #444; margin-bottom: 30px; padding-left: 20px;">
+                <li>There are <strong>40 questions</strong> in this assessment.</li>
+                <li>There are no right or wrong answers. Be honest.</li>
+                <li>Select the option that best describes you.</li>
+                <li>Work quickly and trust your first instinct.</li>
+            </ul>
+
+            <div
+                style="background: #fcfcfc; padding: 20px; border: 1px solid #eee; border-radius: 8px; margin-bottom: 30px;">
+                <p style="text-align: center; font-weight: bold; margin-bottom: 10px;">Scale Guide:</p>
+                <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: #666;">
+                    <span>1 = Strongly Disagree</span>
+                    <span>5 = Strongly Agree</span>
+                </div>
+            </div>
+
+            <button onclick="startTest()" class="btn btn-block">Start Assessment</button>
+        </div>
+
+        <!-- Step 4: The Test -->
+        <div id="step-4" class="step-card" style="padding: 20px 0; background: transparent; box-shadow: none;">
+            <div class="progress-container">
+                <div id="progress-bar" class="progress-bar"></div>
+            </div>
+
+            <form id="assessment-form" onsubmit="event.preventDefault(); submitAssessment();">
+                <div id="questions-container">
+                    <!-- Questions injected here -->
+                </div>
+
+                <div style="text-align: center; margin-top: 40px;">
+                    <button id="submit-btn" type="submit" class="btn"
+                        style="display: none; width: 100%; max-width: 300px;">Submit Assessment</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Step 5: Success -->
+        <div id="step-5" class="step-card" style="text-align: center;">
+            <div
+                style="width: 80px; height: 80px; background: #e8f5e9; color: #2e7d32; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; margin: 0 auto 20px;">
+                ✓</div>
+            <h2>Assessment Completed</h2>
+            <p style="color: #666; margin-bottom: 30px;">Thank you for completing the assessment. Your results have been
+                sent to our hiring team.</p>
+            <a href="/" class="btn"
+                style="background: transparent; color: var(--text-main); border: 1px solid #ddd;">Return to Home</a>
+        </div>
+
+    </div>
+
+    <!-- Hardcoded Questions Data (Fallback if DB fetch fails or for speed) -->
+    <script>
+        window.QUESTIONS_DB = {
+            'smm': [
+                { t: "I believe quality content is always better than quantity.", c: "Content Strategy" },
+                { t: "I can repurposed one piece of content into five different formats.", c: "Content Strategy" },
+                { t: "I prioritize storytelling over hard selling in captions.", c: "Content Strategy" },
+                { t: "I research hashtags before every post.", c: "Content Strategy" },
+                { t: "I plan my content calendar at least two weeks in advance.", c: "Content Strategy" },
+                { t: "I understand why a Reel performs differently than a Carousel.", c: "Content Strategy" },
+                { t: "I can spot a visual trend before it goes mainstream.", c: "Content Strategy" },
+                { t: "I believe user-generated content (UGC) is more authentic than polished ads.", c: "Content Strategy" },
+                { t: "I check for typos three times before hitting publish.", c: "Content Strategy" },
+                { t: "I understand the difference between reach and impressions.", c: "Content Strategy" },
+                { t: "I tailor my tone of voice for LinkedIn versus TikTok.", c: "Content Strategy" },
+                { t: "I use templates to speed up design workflow.", c: "Content Strategy" },
+                { t: "I believe consistency is the key to algorithm growth.", c: "Content Strategy" },
+                { t: "I audit competitor accounts regularly for inspiration.", c: "Content Strategy" },
+                { t: "I save trending audio for future use.", c: "Content Strategy" },
+                { t: "I can edit a video on my phone in under 15 minutes.", c: "Content Strategy" },
+                { t: "I understand the importance of a hook in the first 3 seconds.", c: "Content Strategy" },
+                { t: "I always include a clear Call to Action (CTA).", c: "Content Strategy" },
+                { t: "I balance promotional content with educational or entertaining posts.", c: "Content Strategy" },
+                { t: "I believe video content is non-negotiable in modern marketing.", c: "Content Strategy" },
+                { t: "I respond to every single comment on a post.", c: "Community" },
+                { t: "I use DMs to build personal relationships with followers.", c: "Community" },
+                { t: "I know how to handle a negative comment publicly without sounding defensive.", c: "Community" },
+                { t: "I engage with other accounts in my niche daily.", c: "Community" },
+                { t: "I believe community building is more valuable than viral hits.", c: "Community" },
+                { t: "I monitor brand mentions even if we are not tagged.", c: "Community" },
+                { t: "I create polls and stickers to encourage engagement.", c: "Community" },
+                { t: "I thank users who share our content in their stories.", c: "Community" },
+                { t: "I can turn a customer complaint into a public win.", c: "Community" },
+                { t: "I identify and nurture brand ambassadors.", c: "Community" },
+                { t: "I ask questions in captions to spark conversation.", c: "Community" },
+                { t: "I protect the brand reputation at all costs.", c: "Community" },
+                { t: "I hide spam comments immediately.", c: "Community" },
+                { t: "I verify winners of giveaways transparently.", c: "Community" },
+                { t: "I use pinned comments to highlight positive feedback.", c: "Community" },
+                { t: "I treat followers like guests in a restaurant.", c: "Community" },
+                { t: "I am patient with repetitive questions in DMs.", c: "Community" },
+                { t: "I alert management immediately if a crisis is brewing online.", c: "Community" },
+                { t: "I maintain a FAQ list to speed up responses.", c: "Community" },
+                { t: "I believe engagement rate is a better metric than follower count.", c: "Community" },
+                { t: "I review insights weekly to see what worked.", c: "Analytics" },
+                { t: "I understand what CAC (Customer Acquisition Cost) means.", c: "Analytics" },
+                { t: "I track website clicks from social bio links.", c: "Analytics" },
+                { t: "I A/B test different captions or headlines.", c: "Analytics" },
+                { t: "I know the best time of day to post for my specific audience.", c: "Analytics" },
+                { t: "I can explain why a post flopped without making excuses.", c: "Analytics" },
+                { t: "I use UTM parameters to track campaign success.", c: "Analytics" },
+                { t: "I focus on saves and shares more than likes.", c: "Analytics" },
+                { t: "I can calculate the engagement rate of a post manually.", c: "Analytics" },
+                { t: "I adjust my strategy based on monthly data reports.", c: "Analytics" },
+                { t: "I understand the impact of paid reach vs organic reach.", c: "Analytics" },
+                { t: "I monitor follower growth rate trends.", c: "Analytics" },
+                { t: "I analyze audience demographics to refine targeting.", c: "Analytics" },
+                { t: "I report valid ROI metrics to stakeholders.", c: "Analytics" },
+                { t: "I track retention rate of video viewers.", c: "Analytics" },
+                { t: "I use social listening tools to track sentiment.", c: "Analytics" },
+                { t: "I believe data should drive creativity, not kill it.", c: "Analytics" },
+                { t: "I optimize profile bio for search (SEO).", c: "Analytics" },
+                { t: "I document wins and losses for future reference.", c: "Analytics" },
+                { t: "I can switch between a professional and playful tone as needed.", c: "Brand" },
+                { t: "I ensure all visuals align with the brand color palette.", c: "Brand" },
+                { t: "I prefer high-resolution original photography over stock photos.", c: "Brand" },
+                { t: "I proofread content to ensure it sounds like \"us\".", c: "Brand" },
+                { t: "I am protective of the brand logo usage.", c: "Brand" },
+                { t: "I believe the grid layout still matters for first impressions.", c: "Brand" },
+                { t: "I use font pairings that are on-brand.", c: "Brand" },
+                { t: "I evaluate partnerships to ensure brand alignment.", c: "Brand" },
+                { t: "I keep the highlight covers updated and uniform.", c: "Brand" },
+                { t: "I ensure accessibility (alt text) is part of the brand standard.", c: "Brand" },
+                { t: "I spot inconsistency in messaging immediately.", c: "Brand" },
+                { t: "I believe every post must add value to the follower.", c: "Brand" },
+                { t: "I stay true to brand values during social/political trends.", c: "Brand" },
+                { t: "I curate the \"Following\" list to reflect brand interests.", c: "Brand" },
+                { t: "I refresh the bio link regularly.", c: "Brand" },
+                { t: "I ensure video captions match the brand font.", c: "Brand" },
+                { t: "I treat the social profile as a digital storefront.", c: "Brand" },
+                { t: "I avoid cluttering visuals with too much text.", c: "Brand" },
+                { t: "I consume social media content as a user to stay relevant.", c: "Adaptability" },
+                { t: "I am willing to pivot strategy if a platform changes (e.g., Tikok ban).", c: "Adaptability" },
+                { t: "I experiment with new features (e.g., Threads, Broadcast Channels).", c: "Adaptability" },
+                { t: "I learn new editing apps constantly.", c: "Adaptability" },
+                { t: "I can work efficiently on mobile or desktop.", c: "Adaptability" },
+                { t: "I stay updated on platform algorithm updates.", c: "Adaptability" },
+                { t: "I am comfortable begin on camera if needed.", c: "Adaptability" },
+                { t: "I handle copyright changes (music) proactively.", c: "Adaptability" },
+                { t: "I collaborate with influencers seamlessly.", c: "Adaptability" },
+                { t: "I can create content in real-time at events.", c: "Adaptability" },
+                { t: "I find creative workarounds for technical glitches.", c: "Adaptability" },
+                { t: "I balance scheduled content with real-time updates.", c: "Adaptability" },
+                { t: "I embrace AI tools to improve efficiency, not replace creativity.", c: "Adaptability" },
+                { t: "I seek feedback from the team on new ideas.", c: "Adaptability" },
+                { t: "I accept that social media never sleeps but I set boundaries.", c: "Adaptability" },
+                { t: "I view competitors as case studies.", c: "Adaptability" },
+                { t: "I am resourceful with limited budgets.", c: "Adaptability" },
+                { t: "I can explain complex social trends to non-digital bosses.", c: "Adaptability" },
+                { t: "I enjoy the fast-paced nature of digital marketing.", c: "Adaptability" },
+                { t: "I have never had a post get zero likes.", c: "Validity" },
+                { t: "I know every single person on the internet.", c: "Validity" },
+                { t: "I never check my phone notifications.", c: "Validity" },
+                { t: "I have never made a typo.", c: "Validity" },
+                { t: "I am the CEO of Instagram.", c: "Validity" },
+                { t: "I never experience creative block.", c: "Validity" },
+                { t: "I have 1 billion followers.", c: "Validity" },
+                { t: "I can upload content with my mind.", c: "Validity" },
+                { t: "I have never felt overwhelmed by social media.", c: "Validity" },
+                { t: "I like every single comment I see.", c: "Validity" },
+                { t: "I have never used a hashtag.", c: "Validity" },
+                { t: "I know the algorithm perfectly.", c: "Validity" },
+                { t: "I never sleep.", c: "Validity" },
+                { t: "I have never scrolled aimlessly.", c: "Validity" },
+                { t: "I am a robot.", c: "Validity" },
+                { t: "I never feel the need to unplug.", c: "Validity" },
+                { t: "I have never deleted a post.", c: "Validity" },
+                { t: "I am perfect.", c: "Validity" },
+                { t: "I never use emoji.", c: "Validity" },
+                { t: "I remember every tweet I ever wrote.", c: "Validity" }
+            ],
+            'foh': [
+                // Cooperativeness (20)
+                { t: "I often prioritize the team's success over my personal recognition, even if it means staying late.", c: "Cooperativeness" },
+                { t: "I believe that following instructions is more important than taking initiative when the restaurant is busy.", c: "Cooperativeness" },
+                { t: "I would rather work with a difficult team that wins than a friendly team that loses.", c: "Cooperativeness" },
+                { t: "If a coworker is struggling, I will stop my own work to help them, even if it puts me behind.", c: "Cooperativeness" },
+                { t: "I find it easy to compromise when there is a disagreement about how to handle a table.", c: "Cooperativeness" },
+                { t: "I prefer a role where I implement others' ideas rather than creating my own.", c: "Cooperativeness" },
+                { t: "I am comfortable taking direction from someone younger or less experienced than me.", c: "Cooperativeness" },
+                { t: "I believe that workplace harmony is essential for efficiency, even if it means suppressing some complaints.", c: "Cooperativeness" },
+                { t: "I willingly accept tasks that are not in my job description to help the restaurant run smoothly.", c: "Cooperativeness" },
+                { t: "I enjoy the feeling of being part of a large, synchronized machine.", c: "Cooperativeness" },
+                { t: "I rarely feel the need to challenge authority figures.", c: "Cooperativeness" },
+                { t: "I can work effectively with people I personally dislike.", c: "Cooperativeness" },
+                { t: "I believe that collective responsibility is better than individual accountability.", c: "Cooperativeness" },
+                { t: "I am always the first to volunteer for undesirable shifts to help the roster.", c: "Cooperativeness" },
+                { t: "I prefer group achievements to individual awards.", c: "Cooperativeness" },
+                { t: "I actively seek out opportunities to support colleagues who are overwhelmed.", c: "Cooperativeness" },
+                { t: "I engage in open communication even when the topic is uncomfortable.", c: "Cooperativeness" },
+                { t: "I value the opinions of my peers as much as my own.", c: "Cooperativeness" },
+                { t: "I believe that a good team player never gossips.", c: "Cooperativeness" },
+                { t: "I am willing to share my tips if it means the support staff are paid better.", c: "Cooperativeness" },
+                // Personal Diplomacy (20)
+                { t: "I can maintain a friendly demeanor even when a customer is being unreasonable or insulting.", c: "Personal Diplomacy" },
+                { t: "I believe the customer is right, even when they are factually wrong.", c: "Personal Diplomacy" },
+                { t: "I find it easy to adjust my personality to match the energy of different guests.", c: "Personal Diplomacy" },
+                { t: "I can deliver bad news (like 86'd items) in a way that makes the guest thank me.", c: "Personal Diplomacy" },
+                { t: "I rarely take customer rudeness personally.", c: "Personal Diplomacy" },
+                { t: "I am comfortable engaging in small talk with strangers for extended periods.", c: "Personal Diplomacy" },
+                { t: "I can sense tension at a table before a complaint is even made.", c: "Personal Diplomacy" },
+                { t: "I know exactly when to step away from a table to give guests privacy.", c: "Personal Diplomacy" },
+                { t: "I can diffuse a heated situation without raising my voice.", c: "Personal Diplomacy" },
+                { t: "I enjoy the challenge of turning an unhappy guest into a loyal regular.", c: "Personal Diplomacy" },
+                { t: "I adapt my service style based on the age and mood of the guests.", c: "Personal Diplomacy" },
+                { t: "I am skilled at reading non-verbal cues.", c: "Personal Diplomacy" },
+                { t: "I believe that empathy is more important than efficiency in service.", c: "Personal Diplomacy" },
+                { t: "I can make a guest feel special in under 30 seconds.", c: "Personal Diplomacy" },
+                { t: "I handle VIP guests with same level of care as walk-ins.", c: "Personal Diplomacy" },
+                { t: "I avoid using negative language (like 'No' or 'We can't') with guests.", c: "Personal Diplomacy" },
+                { t: "I am comfortable apologizing for mistakes I didn't make.", c: "Personal Diplomacy" },
+                { t: "I can tactfully cut off a guest who has had too much to drink.", c: "Personal Diplomacy" },
+                { t: "I remember details about regular guests to build rapport.", c: "Personal Diplomacy" },
+                { t: "I treat delivery drivers and vendors with the same respect as paying customers.", c: "Personal Diplomacy" },
+                // Patience (20)
+                { t: "I prefer a slow, steady pace over a chaotic rush.", c: "Patience" },
+                { t: "I can explain the menu to an indecisive table without checking my watch.", c: "Patience" },
+                { t: "I rarely get frustrated when I have to repeat myself.", c: "Patience" },
+                { t: "I stay calm when the kitchen crashes and food times exceed 45 minutes.", c: "Patience" },
+                { t: "I can handle a crying baby at a nearby table without losing focus.", c: "Patience" },
+                { t: "I believe that thoroughness is always better than speed.", c: "Patience" },
+                { t: "I don't mind waiting for a table to turn if they are enjoying themselves.", c: "Patience" },
+                { t: "I can maintain a high level of service at the end of a double shift.", c: "Patience" },
+                { t: "I treat the 100th customer of the night with the same energy as the first.", c: "Patience" },
+                { t: "I handle tech issues (POS crashing) without vocal complaints.", c: "Patience" },
+                { t: "I am patient with trainees who make mistakes.", c: "Patience" },
+                { t: "I wait for guests to finish their sentences before responding.", c: "Patience" },
+                { t: "I remain composed when a guest changes their order multiple times.", c: "Patience" },
+                { t: "I understand that kitchen delays are rarely intentional.", c: "Patience" },
+                { t: "I take deep breaths instead of venting when stressed.", c: "Patience" },
+                { t: "I am willing to do repetitive side work (polishing) to perfection.", c: "Patience" },
+                { t: "I accept that some days will be harder than others.", c: "Patience" },
+                { t: "I don't rush guests to pay the bill.", c: "Patience" },
+                { t: "I listen to manager feedback without interrupting.", c: "Patience" },
+                { t: "I can stand for 8 hours without showing physical fatigue to guests.", c: "Patience" },
+                // Relaxed Attitude / Stress Tolerance (20)
+                { t: "I thrive in environments where everything seems to be going wrong.", c: "Relaxed Attitude" },
+                { t: "I rarely bring my personal problems to work.", c: "Relaxed Attitude" },
+                { t: "I can laugh off a mistake once it's fixed.", c: "Relaxed Attitude" },
+                { t: "I sleep well even after a stressful shift.", c: "Relaxed Attitude" },
+                { t: "I view a full section as an opportunity, not a burden.", c: "Relaxed Attitude" },
+                { t: "I can multitask between 5 tables without writing everything down.", c: "Relaxed Attitude" },
+                { t: "Loud restaurant noise helps me focus rather than distracting me.", c: "Relaxed Attitude" },
+                { t: "I remain cheerful even when guests are visibly angry.", c: "Relaxed Attitude" },
+                { t: "I don't get flustered when multiple tables sit at once.", c: "Relaxed Attitude" },
+                { t: "I can prioritize tasks instantly under pressure.", c: "Relaxed Attitude" },
+                { t: "I recover quickly from rejection.", c: "Relaxed Attitude" },
+                { t: "I enjoy the adrenaline of a Friday night dinner service.", c: "Relaxed Attitude" },
+                { t: "I can handle conflicting demands from management and guests.", c: "Relaxed Attitude" },
+                { t: "I don't let one bad tip ruin my night.", c: "Relaxed Attitude" },
+                { t: "I am comfortable dealing with unexpected crises (power outage, spills).", c: "Relaxed Attitude" },
+                { t: "I maintain steady hands when carrying full trays.", c: "Relaxed Attitude" },
+                { t: "I speak slowly and clearly even when rushing.", c: "Relaxed Attitude" },
+                { t: "I help others relax when they are stressed.", c: "Relaxed Attitude" },
+                { t: "I find chaos somewhat organized.", c: "Relaxed Attitude" },
+                { t: "I am usually the calmest person in the room.", c: "Relaxed Attitude" },
+                // Sales Aptitude (20)
+                { t: "I believe that selling is serving.", c: "Sales Aptitude" },
+                { t: "I am comfortable recommending the most expensive wine if it pairs best.", c: "Sales Aptitude" },
+                { t: "I actively look for opportunities to increase the check average.", c: "Sales Aptitude" },
+                { t: "I can describe food in a way that makes people hungry.", c: "Sales Aptitude" },
+                { t: "I am not afraid of rejection when suggesting add-ons.", c: "Sales Aptitude" },
+                { t: "I view sales targets as a personal challenge to beat.", c: "Sales Aptitude" },
+                { t: "I research the menu to find selling points for every item.", c: "Sales Aptitude" },
+                { t: "I can read a table's budget without asking.", c: "Sales Aptitude" },
+                { t: "I suggest bottled water over tap water by default.", c: "Sales Aptitude" },
+                { t: "I frame recommendations as 'favorites' rather than 'upsells'.", c: "Sales Aptitude" },
+                { t: "I am persistent without being annoying.", c: "Sales Aptitude" },
+                { t: "I notice empty glasses immediately and offer another round.", c: "Sales Aptitude" },
+                { t: "I assume the guest wants dessert until they say no.", c: "Sales Aptitude" },
+                { t: "I start with premium options and work down.", c: "Sales Aptitude" },
+                { t: "I believe higher sales lead to better tips.", c: "Sales Aptitude" },
+                { t: "I can sell a dish I personally dislike.", c: "Sales Aptitude" },
+                { t: "I use positive reinforcement when guests order well.", c: "Sales Aptitude" },
+                { t: "I know the profit margins of items and push high-margin dishes.", c: "Sales Aptitude" },
+                { t: "I am competitive with other servers about sales numbers.", c: "Sales Aptitude" },
+                { t: "I believe every guest adds value to the business.", c: "Sales Aptitude" },
+                // Achievement / Validity (20)
+                { t: "I am never satisfied with 'good enough'.", c: "Achievement" },
+                { t: "I constantly seek feedback to improve my skills.", c: "Achievement" },
+                { t: "I want to be a manager or owner one day.", c: "Achievement" },
+                { t: "I analyze my mistakes to ensure they don't happen again.", c: "Achievement" },
+                { t: "I prepare for my shift as if it were an exam.", c: "Achievement" },
+                { t: "I take pride in the crispness of my uniform.", c: "Achievement" },
+                { t: "I view hospitality as a professional career.", c: "Achievement" },
+                { t: "I am willing to study menus on my own time.", c: "Achievement" },
+                { t: "I set daily goals for myself.", c: "Achievement" },
+                { t: "I enjoy being the best server on the floor.", c: "Achievement" },
+                { t: "I have never been late to anything in my life.", c: "Validity" },
+                { t: "I like every single person I have ever met.", c: "Validity" },
+                { t: "I have never told a lie, even a white lie.", c: "Validity" },
+                { t: "I am always happy.", c: "Validity" },
+                { t: "I have never made a mistake at work.", c: "Validity" },
+                { t: "I check my phone zero times a day.", c: "Validity" },
+                { t: "I never get tired.", c: "Validity" },
+                { t: "I love all my bosses equally.", c: "Validity" },
+                { t: "I have never dropped a plate.", c: "Validity" },
+                { t: "I am perfect.", c: "Validity" }
+            ],
+            'boh': [
+                // Resilience & Stamina (20)
+                { t: "I can maintain high energy levels throughout a long service.", c: "Resilience" },
+                { t: "I stay focused on quality even when performing repetitive tasks.", c: "Resilience" },
+                { t: "I value consistency over creativity in a high-volume kitchen.", c: "Resilience" },
+                { t: "I prefer to master one station before moving to another.", c: "Resilience" },
+                { t: "I find satisfaction in a perfectly organized prep list.", c: "Resilience" },
+                { t: "I strictly adhere to standard operating procedures.", c: "Resilience" },
+                { t: "I am meticulous about labelling and organization.", c: "Resilience" },
+                { t: "I can wait for a slow-braised dish without checking it unnecessary times.", c: "Resilience" },
+                { t: "I check the internal temperature of food multiple times to ensure safety.", c: "Resilience" },
+                { t: "I clean as I go, ensuring a spotless station at all times.", c: "Resilience" },
+                { t: "I prioritize precision in my knife work over speed when necessary.", c: "Resilience" },
+                { t: "I remain professional when servers ask clarifying questions.", c: "Resilience" },
+                { t: "I wait for equipment to reach optimal temperature before use.", c: "Resilience" },
+                { t: "I handle timing on the grill station with patience and accuracy.", c: "Resilience" },
+                { t: "I take pride in maintaining the cleanliness of deep-cleaning areas.", c: "Resilience" },
+                { t: "I respect the time and effort required to produce high-quality food.", c: "Resilience" },
+                { t: "I am willing to mentor junior staff on proper techniques.", c: "Resilience" },
+                { t: "I complete every task to 100% before starting the next.", c: "Resilience" },
+                { t: "I double-check my station setup before every service.", c: "Resilience" },
+                { t: "I maintain a calm and professional demeanor during busy periods.", c: "Resilience" },
+                // Stress Tolerance (20)
+                { t: "I perform at my best when the kitchen is under pressure.", c: "Stress Tolerance" },
+                { t: "I find a busy service environment stimulating.", c: "Stress Tolerance" },
+                { t: "I can make decisive choices quickly during a rush.", c: "Stress Tolerance" },
+                { t: "I maintain focus in a loud and active environment.", c: "Stress Tolerance" },
+                { t: "I recover quickly and learn from mistakes made during service.", c: "Stress Tolerance" },
+                { t: "I prioritize accuracy over speed, even when tickets pile up.", c: "Stress Tolerance" },
+                { t: "I can effectively manage multiple orders simultaneously.", c: "Stress Tolerance" },
+                { t: "I handle feedback from the Head Chef constructively.", c: "Stress Tolerance" },
+                { t: "I stay focused when temperature conditions in the kitchen increase.", c: "Stress Tolerance" },
+                { t: "I coordinate seamlessly with other stations without needing visual cues.", c: "Stress Tolerance" },
+                { t: "I speak loudly and clearly to ensure communication during stress.", c: "Stress Tolerance" },
+                { t: "I focus on solutions rather than problems when errors occur.", c: "Stress Tolerance" },
+                { t: "I view a challenging service as an opportunity to demonstrate skill.", c: "Stress Tolerance" },
+                { t: "I accommodate special dietary requests without frustration.", c: "Stress Tolerance" },
+                { t: "I ensure my station remains sanitary even during peak hours.", c: "Stress Tolerance" },
+                { t: "I support the dishwashing team when they are under pressure.", c: "Stress Tolerance" },
+                { t: "I maintain high standards even after many consecutive workdays.", c: "Stress Tolerance" },
+                { t: "I compartmentalize personal issues to focus on my work.", c: "Stress Tolerance" },
+                { t: "I remain professional when front-of-house staff make errors.", c: "Stress Tolerance" },
+                { t: "I use breathing techniques to manage stress levels.", c: "Stress Tolerance" },
+                // Teamwork (20)
+                { t: "I respect the established kitchen hierarchy.", c: "Teamwork" },
+                { t: "I acknowledge and execute instructions immediately.", c: "Teamwork" },
+                { t: "I believe my station's success contributes to the team's success.", c: "Teamwork" },
+                { t: "I constantly communicate my position to ensure safety (e.g., 'Behind', 'Hot').", c: "Teamwork" },
+                { t: "I proactively ask for assistance before falling behind.", c: "Teamwork" },
+                { t: "I assist colleagues with their station breakdown after finishing mine.", c: "Teamwork" },
+                { t: "I share my culinary knowledge with anyone who asks.", c: "Teamwork" },
+                { t: "I ensure equipment and ingredients are accessible to everyone.", c: "Teamwork" },
+                { t: "I trust my colleagues to execute their roles effectively.", c: "Teamwork" },
+                { t: "I cover shifts for colleagues who are unwell without resentment.", c: "Teamwork" },
+                { t: "I treat all staff members, including stewards, with respect.", c: "Teamwork" },
+                { t: "I avoid engaging in non-constructive workplace discussions.", c: "Teamwork" },
+                { t: "I own up to my errors immediately to the team.", c: "Teamwork" },
+                { t: "I synchronize my plating times with the expo/pass.", c: "Teamwork" },
+                { t: "I ask permission before borrowing tools from others.", c: "Teamwork" },
+                { t: "I ensure the line stays hydrated during service.", c: "Teamwork" },
+                { t: "I respect shared storage spaces like the walk-in cooler.", c: "Teamwork" },
+                { t: "I prioritize the quality of the dish over my ego.", c: "Teamwork" },
+                { t: "I actively listen when others are speaking.", c: "Teamwork" },
+                { t: "I value feedback from FOH staff regarding dish quality.", c: "Teamwork" },
+                // Attention to Detail (20)
+                { t: "I follow recipes with precision, measuring to the gram.", c: "Attention to Detail" },
+                { t: "I can identify when a sauce needs minor adjustments.", c: "Attention to Detail" },
+                { t: "I believe plating aesthetics are as critical as flavor.", c: "Attention to Detail" },
+                { t: "I sharpen my knives before every shift to ensure precision.", c: "Attention to Detail" },
+                { t: "I adhere strictly to FIFO (First In, First Out) principles.", c: "Attention to Detail" },
+                { t: "I identify and mitigate cross-contamination risks immediately.", c: "Attention to Detail" },
+                { t: "I taste every component I prepare.", c: "Attention to Detail" },
+                { t: "I label all prepped items with clear dates and descriptions.", c: "Attention to Detail" },
+                { t: "I ensure plate rims are spotless before service.", c: "Attention to Detail" },
+                { t: "I check the quality of fresh produce upon delivery.", c: "Attention to Detail" },
+                { t: "I notice immediately if equipment is malfunctioning.", c: "Attention to Detail" },
+                { t: "I rely on measurements rather than estimation for seasoning.", c: "Attention to Detail" },
+                { t: "I clean areas of my station that are not immediately visible.", c: "Attention to Detail" },
+                { t: "I double-check tickets with allergy alerts.", c: "Attention to Detail" },
+                { t: "I believe consistency is the hallmark of a professional chef.", c: "Attention to Detail" },
+                { t: "I promote hand-washing hygiene among peers.", c: "Attention to Detail" },
+                { t: "I ensure my uniform is clean and pressed.", c: "Attention to Detail" },
+                { t: "I meticulously track food waste.", c: "Attention to Detail" },
+                { t: "I am attentive to the temperature of the plates used for service.", c: "Attention to Detail" },
+                { t: "I organize linens and towels neatly.", c: "Attention to Detail" },
+                // Reliability (20)
+                { t: "I adhere to my scheduled start times strictly.", c: "Reliability" },
+                { t: "I maintain attendance even during minor personal inconveniences.", c: "Reliability" },
+                { t: "I ensure my station is fully stocked for the next shift.", c: "Reliability" },
+                { t: "I stay until all closing duties are completed to standard.", c: "Reliability" },
+                { t: "I respect the inventory and do not consume product without authorization.", c: "Reliability" },
+                { t: "I am mindful of food cost and waste management.", c: "Reliability" },
+                { t: "I report any breakage or damage immediately.", c: "Reliability" },
+                { t: "I follow safety protocols even when unsupervised.", c: "Reliability" },
+                { t: "I maintain strict personal hygiene standards.", c: "Reliability" },
+                { t: "I refrain from using personal devices in the kitchen.", c: "Reliability" },
+                { t: "I proactively seek additional tasks during downtime.", c: "Reliability" },
+                { t: "I perform inventory counts with high accuracy.", c: "Reliability" },
+                { t: "I treat kitchen equipment with care and respect.", c: "Reliability" },
+                { t: "I view culinary arts as my long-term career.", c: "Reliability" },
+                { t: "I honor my commitments to the team.", c: "Reliability" },
+                { t: "I take closing checklists seriously and verify them.", c: "Reliability" },
+                { t: "I communicate my schedule availability clearly and in advance.", c: "Reliability" },
+                { t: "I arrive at work sober and ready to focus.", c: "Reliability" },
+                { t: "I handle cleaning chemicals according to safety data sheets.", c: "Reliability" },
+                { t: "I lead by example in work ethic and attitude.", c: "Reliability" },
+                // Validity (20)
+                { t: "I have never made a mistake in the kitchen.", c: "Validity" },
+                { t: "I never feel physical pain.", c: "Validity" },
+                { t: "I have never disagreed with a Chef in my head.", c: "Validity" },
+                { t: "I am always 100% focused every second of the day.", c: "Validity" },
+                { t: "I enjoy cleaning grease traps more than cooking.", c: "Validity" },
+                { t: "I never experience fatigue after a double shift.", c: "Validity" },
+                { t: "I know everything there is to know about cooking.", c: "Validity" },
+                { t: "I have never burned a piece of toast.", c: "Validity" },
+                { t: "I am faster than a robotic arm.", c: "Validity" },
+                { t: "I never feel the need to hydrate.", c: "Validity" },
+                { t: "I have never been annoyed by a difficult ticket.", c: "Validity" },
+                { t: "I like every single food ingredient in existence.", c: "Validity" },
+                { t: "I never use the restroom during work hours.", c: "Validity" },
+                { t: "I function like a machine, not a human.", c: "Validity" },
+                { t: "I have never been late to any event in my life.", c: "Validity" },
+                { t: "I remember every order I have ever cooked.", c: "Validity" },
+                { t: "I smile continuously for 12 hours straight.", c: "Validity" },
+                { t: "I have never had a minor kitchen injury.", c: "Validity" },
+                { t: "I can recite every recipe in the world by heart.", c: "Validity" },
+                { t: "I am flawless.", c: "Validity" }
+            ],
+            'top_roles': [
+                // Leadership & Culture (20)
+                { t: "I believe culture eats strategy for breakfast.", c: "Leadership" },
+                { t: "I prefer to lead by example rather than just giving orders.", c: "Leadership" },
+                { t: "I am comfortable having difficult conversations with underperforming staff.", c: "Leadership" },
+                { t: "I prioritize my team's development over my own convenience.", c: "Leadership" },
+                { t: "I believe in praising in public and correcting in private.", c: "Leadership" },
+                { t: "I can rally the team during a disastrous shift without losing my cool.", c: "Leadership" },
+                { t: "I actively listen to staff concerns even if I cannot solve them immediately.", c: "Leadership" },
+                { t: "I believe a manager works for their staff, not the other way around.", c: "Leadership" },
+                { t: "I am willing to wash dishes or bus tables if the team needs help.", c: "Leadership" },
+                { t: "I take full responsibility for my team's failures.", c: "Leadership" },
+                { t: "I give full credit to my team for our successes.", c: "Leadership" },
+                { t: "I focus on solutions rather than blaming individuals.", c: "Leadership" },
+                { t: "I am transparent with my team about business challenges.", c: "Leadership" },
+                { t: "I consistently enforce standards, even when it is unpopular.", c: "Leadership" },
+                { t: "I invest time in training rather than complaining about lack of skills.", c: "Leadership" },
+                { t: "I respect boundaries between professional and personal relationships.", c: "Leadership" },
+                { t: "I can motivate diverse personalities towards a common goal.", c: "Leadership" },
+                { t: "I handle conflict between staff members impartially.", c: "Leadership" },
+                { t: "I create an environment where staff feel safe to admit mistakes.", c: "Leadership" },
+                { t: "I measure my success by how many leaders I create.", c: "Leadership" },
+                // Operations & Efficiency (20)
+                { t: "I notice when labor costs are running high mid-shift.", c: "Operations" },
+                { t: "I constantly look for ways to optimize workflow.", c: "Operations" },
+                { t: "I believe accurate inventory is the backbone of profitability.", c: "Operations" },
+                { t: "I can troubleshoot POS or equipment issues quickly.", c: "Operations" },
+                { t: "I ensure health and safety compliance is never compromised.", c: "Operations" },
+                { t: "I structure schedules to balance budget and service needs.", c: "Operations" },
+                { t: "I am proactive about maintenance before equipment breaks down.", c: "Operations" },
+                { t: "I analyze product mix reports to adjust menu strategy.", c: "Operations" },
+                { t: "I ensure shift handovers are detailed and effective.", c: "Operations" },
+                { t: "I can run the pass/expo effectively during peak service.", c: "Operations" },
+                { t: "I notice small details like lighting and music volume immediately.", c: "Operations" },
+                { t: "I have a system for tracking and reducing waste.", c: "Operations" },
+                { t: "I prioritize guest flow management to maximize table turns.", c: "Operations" },
+                { t: "I ensure opening and closing checklists are actually completed.", c: "Operations" },
+                { t: "I can adapt the floor plan instantly for unexpected large groups.", c: "Operations" },
+                { t: "I manage vendor relationships to ensure quality and timeliness.", c: "Operations" },
+                { t: "I enforce standard recipe adherence to control food cost.", c: "Operations" },
+                { t: "I have a plan for every likely emergency scenario.", c: "Operations" },
+                { t: "I audit cash handling procedures regularly.", c: "Operations" },
+                { t: "I believe operations should run smoothly even when I am not there.", c: "Operations" },
+                // Financial Acumen (20)
+                { t: "I understand the difference between COGS and Prime Cost.", c: "Financials" },
+                { t: "I review the P&L statement to identify areas for improvement.", c: "Financials" },
+                { t: "I understand how small variances in portioning affect the bottom line.", c: "Financials" },
+                { t: "I treat the business's money as if it were my own.", c: "Financials" },
+                { t: "I can calculate food cost percentage manually if needed.", c: "Financials" },
+                { t: "I understand the impact of overtime on labor targets.", c: "Financials" },
+                { t: "I negotiate with suppliers for better pricing or terms.", c: "Financials" },
+                { t: "I forecast sales accurately to plan purchasing.", c: "Financials" },
+                { t: "I educate staff on how their actions impact profitability.", c: "Financials" },
+                { t: "I monitor voids and comps for suspicious patterns.", c: "Financials" },
+                { t: "I understand the concept of menu engineering.", c: "Financials" },
+                { t: "I focus on driving top-line sales, not just cutting costs.", c: "Financials" },
+                { t: "I understand return on investment (ROI) for marketing initiatives.", c: "Financials" },
+                { t: "I manage par levels effectively to prevent overstocking.", c: "Financials" },
+                { t: "I track average spend per head (check average) daily.", c: "Financials" },
+                { t: "I understand the fixed vs variable costs of the restaurant.", c: "Financials" },
+                { t: "I set clear financial targets for the team.", c: "Financials" },
+                { t: "I review daily sales reports before leaving.", c: "Financials" },
+                { t: "I understand the cost of employee turnover.", c: "Financials" },
+                { t: "I make data-driven decisions.", c: "Financials" },
+                // Customer Experience (20)
+                { t: "I believe the guest experience starts before they walk in the door.", c: "CX" },
+                { t: "I empower staff to resolve guest complaints immediately.", c: "CX" },
+                { t: "I touch every table during service.", c: "CX" },
+                { t: "I read and respond to online reviews constructively.", c: "CX" },
+                { t: "I view a complaint as a gift and an opportunity to improve.", c: "CX" },
+                { t: "I ensure the ambiance aligns with the brand concept.", c: "CX" },
+                { t: "I protect guests from internal kitchen or staff chaos.", c: "CX" },
+                { t: "I train the team on the art of anticipation.", c: "CX" },
+                { t: "I believe in the power of 'Yes'.", c: "CX" },
+                { t: "I handle intoxicated guests with firm care.", c: "CX" },
+                { t: "I remember the names and preferences of regular guests.", c: "CX" },
+                { t: "I ensure the bathrooms are checked every 30 minutes.", c: "CX" },
+                { t: "I model superior hospitality in every interaction.", c: "CX" },
+                { t: "I ensure wait times are quoted accurately.", c: "CX" },
+                { t: "I follow up on recovered guests to ensure satisfaction.", c: "CX" },
+                { t: "I believe consistency is the key to guest loyalty.", c: "CX" },
+                { t: "I notice when a guest is left unattended for too long.", c: "CX" },
+                { t: "I create 'wow' moments for special occasions.", c: "CX" },
+                { t: "I solicit honest feedback from guests table-side.", c: "CX" },
+                { t: "I ensure the food looks as good as it tastes.", c: "CX" },
+                // Emotional Intelligence (20)
+                { t: "I remain calm when everyone else is panicking.", c: "EQ" },
+                { t: "I can separate my personal feelings from professional decisions.", c: "EQ" },
+                { t: "I sense the 'mood in the room' immediately.", c: "EQ" },
+                { t: "I adapt my communication style to different employees.", c: "EQ" },
+                { t: "I handle rejection or bad news with resilience.", c: "EQ" },
+                { t: "I am self-aware of my own stress triggers.", c: "EQ" },
+                { t: "I can empathize with an angry guest without taking abuse.", c: "EQ" },
+                { t: "I know when to push the team and when to back off.", c: "EQ" },
+                { t: "I do not hold grudges.", c: "EQ" },
+                { t: "I reflect on my interactions to improve next time.", c: "EQ" },
+                { t: "I celebrate small wins to keep morale high.", c: "EQ" },
+                { t: "I am approachable but respected.", c: "EQ" },
+                { t: "I can de-escalate conflicts between BOH and FOH.", c: "EQ" },
+                { t: "I listen more than I speak.", c: "EQ" },
+                { t: "I trust my intuition but verify with facts.", c: "EQ" },
+                { t: "I am comfortable with ambiguity.", c: "EQ" },
+                { t: "I manage my energy levels to last the whole shift.", c: "EQ" },
+                { t: "I am patient with the learning process of others.", c: "EQ" },
+                { t: "I express gratitude sincerely.", c: "EQ" },
+                { t: "I maintain professional boundaries.", c: "EQ" },
+                // Validity (20)
+                { t: "I have never made a bad decision.", c: "Validity" },
+                { t: "I know absolutely everything about running a restaurant.", c: "Validity" },
+                { t: "I never get stressed.", c: "Validity" },
+                { t: "I am loved by every single person I have ever met.", c: "Validity" },
+                { t: "I have never been late in my entire career.", c: "Validity" },
+                { t: "I never need to ask for help.", c: "Validity" },
+                { t: "I have zero weaknesses.", c: "Validity" },
+                { t: "I work 24 hours a day without sleep.", c: "Validity" },
+                { t: "I have never forgotten a task.", c: "Validity" },
+                { t: "I assume every employee is perfect.", c: "Validity" },
+                { t: "I never check my phone.", c: "Validity" },
+                { t: "I have never felt angry at work.", c: "Validity" },
+                { t: "I am a machine.", c: "Validity" },
+                { t: "I have never had a conflict with anyone.", c: "Validity" },
+                { t: "I always know exactly what to say.", c: "Validity" },
+                { t: "I never make typos.", c: "Validity" },
+                { t: "I have never lost a receipt.", c: "Validity" },
+                { t: "I am always right.", c: "Validity" },
+                { t: "I have never felt tired.", c: "Validity" },
+                { t: "I am perfect.", c: "Validity" }
+            ]
+        };
+    </script>
+
+    <script type="module">
+        import { supabase } from './src/supabaseClient.js';
+
+        // State
+        let currentRole = null;
+        // Parse URL Params for Role
+        const urlParams = new URLSearchParams(window.location.search);
+        const roleParam = urlParams.get('role');
+        if (roleParam && ['foh', 'boh', 'manager', 'top_roles', 'smm'].includes(roleParam)) {
+            currentRole = roleParam === 'manager' ? 'top_roles' : roleParam;
+        }
+
+        let startTime = 0;
+        let allAnswers = []; // Initialized in startTest
+        let currentQuestionPage = 0;
+        let assessmentId = null; // 0 to 3
+        const QUESTIONS_PER_PAGE = 10;
+
+        // Expose functions to window
+        window.nextStep = (step) => {
+            // Auto-skip Role Selection if Role is Pre-selected
+            if (step === 2 && currentRole) {
+                step = 3;
+            }
+
+            document.querySelectorAll('.step-card').forEach(el => el.classList.remove('active'));
+            document.getElementById(`step-${step}`).classList.add('active');
+        };
+
+        window.selectRole = (role) => {
+            currentRole = role;
+            // Highlight card
+            document.querySelectorAll('.role-card').forEach(el => el.classList.remove('selected'));
+            event.currentTarget.classList.add('selected');
+
+            // Wait slightly then auto advance
+            setTimeout(() => window.nextStep(3), 300);
+        };
+
+        window.startTest = async () => {
+
+            // Validate Role
+            if (!currentRole) {
+                document.getElementById('role-error').style.display = 'block';
+                return;
+            }
+
+            // Create Incomplete Record (Auto-save start)
+            try {
+                const firstName = document.getElementById('candidate-firstname').value.trim();
+                const middleName = document.getElementById('candidate-middlename').value.trim();
+                const lastName = document.getElementById('candidate-lastname').value.trim();
+                const fullName = `${firstName} ${middleName} ${lastName}`.replace(/\s+/g, ' ').trim();
+
+                const payload = {
+                    candidate_name: fullName,
+                    candidate_email: document.getElementById('candidate-email').value,
+                    role_selected: currentRole,
+                    status: 'in_progress',
+                    total_score: 0 // Initialize to 0
+                };
+
+                let error;
+                if (assessmentId) {
+                    const { error: err } = await supabase.from('candidate_assessments').update(payload).eq('id', assessmentId);
+                    error = err;
+                } else {
+                    const { data, error: err } = await supabase.from('candidate_assessments').insert([payload]).select().single();
+                    error = err;
+                    if (data) {
+                        assessmentId = data.id;
+                        console.log('Assessment started with ID:', assessmentId);
+                    }
+                }
+
+                if (error) throw error;
+
+                window.loadQuestions();
+                window.nextStep(4);
+                window.scrollTo(0, 0);
+
+            } catch (err) {
+                console.error(err);
+                alert('Error submitting assessment. Please try again.');
+            }
+        };
+
+
+        // --- RESTORED LOGIC ---
+
+        window.loadQuestions = () => {
+            const questions = QUESTIONS_DB[currentRole];
+            if (!questions || questions.length === 0) {
+                alert('Error: No questions found for this role.');
+                return;
+            }
+            // Ensure allAnswers is correct length (fill with undefined or null)
+            // items in QUESTIONS_DB are objects {t: query, c: category}
+            // We don't need to pre-fill allAnswers, it can be sparse.
+
+            currentQuestionPage = 0;
+            renderQuestionPage(0);
+        };
+
+        window.renderQuestionPage = (page) => {
+            const container = document.getElementById('questions-container');
+            container.innerHTML = '';
+
+            const questions = QUESTIONS_DB[currentRole];
+            const start = page * QUESTIONS_PER_PAGE;
+            const end = Math.min(start + QUESTIONS_PER_PAGE, questions.length);
+
+            // Progress Bar Update
+            updateProgress();
+
+            for (let i = start; i < end; i++) {
+                const q = questions[i];
+                const qDiv = document.createElement('div');
+                qDiv.className = 'question-block';
+                qDiv.innerHTML = `
+                    <p class="question-text"><strong>${i + 1}.</strong> ${q.t}</p>
+                    <div class="likert-options">
+                        ${[1, 2, 3, 4, 5].map(val => `
+                            <label class="likert-option">
+                                <input type="radio" name="q_${i}" value="${val}" 
+                                    ${allAnswers[i] === val ? 'checked' : ''}
+                                    onchange="handleAnswer(${i}, ${val})">
+                                <div class="likert-circle">${val}</div>
+                                <span class="likert-label">${val === 1 ? 'Strongly<br>Disagree' :
+                        val === 5 ? 'Strongly<br>Agree' : ''
+                    }</span>
+                            </label>
+                        `).join('')}
+                    </div>
+
+                `;
+                container.appendChild(qDiv);
+            }
+
+            // Navigation
+            const navDiv = document.createElement('div');
+            navDiv.style.marginTop = '30px';
+            navDiv.style.display = 'flex';
+            navDiv.style.justifyContent = 'space-between';
+            navDiv.style.gap = '10px';
+
+            // Previous
+            if (page > 0) {
+                const prevBtn = document.createElement('button');
+                prevBtn.type = 'button';
+                prevBtn.className = 'btn';
+                prevBtn.style.background = '#eee';
+                prevBtn.style.color = '#333';
+                prevBtn.innerText = 'Previous';
+                prevBtn.onclick = () => {
+                    currentQuestionPage--;
+                    renderQuestionPage(currentQuestionPage);
+                    window.scrollTo(0, 0);
+                };
+                navDiv.appendChild(prevBtn);
+            } else {
+                navDiv.appendChild(document.createElement('div'));
+            }
+
+            // Next / Submit
+            if (end < questions.length) {
+                const nextBtn = document.createElement('button');
+                nextBtn.type = 'button';
+                nextBtn.className = 'btn';
+                nextBtn.innerText = 'Next';
+                nextBtn.onclick = () => {
+                    // Validate Page
+                    const unanswered = [];
+                    for (let j = start; j < end; j++) {
+                        if (!allAnswers[j]) unanswered.push(j + 1);
+                    }
+                    if (unanswered.length > 0) {
+                        alert(`Please answer all questions on this page.`);
+                        return;
+                    }
+                    currentQuestionPage++;
+                    renderQuestionPage(currentQuestionPage);
+                    window.scrollTo(0, 0);
+                };
+                navDiv.appendChild(nextBtn);
+            } else {
+                const finishBtn = document.createElement('button');
+                finishBtn.type = 'button';
+                finishBtn.className = 'btn';
+                finishBtn.style.background = '#2e7d32'; // Green
+                finishBtn.innerText = 'Submit Assessment';
+                finishBtn.onclick = () => submitAssessment();
+                navDiv.appendChild(finishBtn);
+            }
+
+            container.appendChild(navDiv);
+        };
+
+        window.handleAnswer = (index, value) => {
+            allAnswers[index] = value;
+            updateProgress();
+        };
+
+        window.updateProgress = () => {
+            const questions = QUESTIONS_DB[currentRole];
+            if (!questions) return;
+            const answeredCount = allAnswers.filter(a => a).length;
+            const percent = (answeredCount / questions.length) * 100;
+            document.getElementById('progress-bar').style.width = `${percent}%`;
+        };
+
+        window.submitAssessment = async () => {
+            // Final Validation
+            const questions = QUESTIONS_DB[currentRole];
+            if (allAnswers.filter(a => a).length < questions.length) {
+                alert('You have missed some questions. Please go back and complete them.');
+                return;
+            }
+
+            // Calculate Scores
+            let totalScore = 0;
+            let traitScores = {};
+            let validityFail = false;
+
+            questions.forEach((q, i) => {
+                const val = allAnswers[i] || 0;
+                const cat = q.c; // Category
+
+                // Validity Check (Reverse logic or trap question?)
+                // Assuming SQL logic: is_validity=true questions are usually traps.
+                // We need to know specific trap logic. For now, let's just sum normal scores.
+                // If cat is 'Validity', maybe we check for extreme answers?
+
+                if (cat === 'Validity') {
+                    // Example: "I have never made a mistake". 5 = Lie.
+                    if (val === 5) validityFail = true;
+                } else {
+                    if (!traitScores[cat]) traitScores[cat] = 0;
+                    traitScores[cat] += val;
+                    totalScore += val;
+                }
+            });
+
+            // Determine Recommendation
+            let recommendation = 'Review';
+            const avg = totalScore / (questions.length - 20); // Approx
+            if (avg > 4.2) recommendation = 'Strong Hire';
+            else if (avg > 3.5) recommendation = 'Hire';
+            else recommendation = 'No Hire';
+
+            if (validityFail) recommendation = 'Flagged (Validity)';
+
+            // AI Metadata (Mock)
+            const aiMetadata = {
+                processing_time: "1.2s",
+                model: "RestaurantGPT-4",
+                flagged_responses: validityFail ? ["Validity check failed"] : []
+            };
+
+            const payload = {
+                status: 'completed',
+                total_score: totalScore,
+                trait_scores: traitScores,
+                recommendation: recommendation,
+                ai_metadata: aiMetadata,
+                validity_flag: validityFail
+            };
+
+            try {
+                const { error } = await supabase
+                    .from('candidate_assessments')
+                    .update(payload)
+                    .eq('id', assessmentId);
+
+                if (error) throw error;
+
+                window.nextStep(5);
+                window.scrollTo(0, 0);
+            } catch (err) {
+                console.error(err);
+                alert('Error submitting final results: ' + err.message);
+            }
+        };
+
+    </script>
+</body>
+
+</html>

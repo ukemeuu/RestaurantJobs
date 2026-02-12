@@ -112,6 +112,11 @@
                         created_at,
                         status,
                         candidate_id,
+                        name,
+                        email,
+                        phone,
+                        resume_url,
+                        job_id,
                         candidate_profiles (
                             full_name,
                             phone,
@@ -145,7 +150,12 @@
                 sortedApps.forEach(app => {
                     const profile = app.candidate_profiles || {};
                     const isPremium = profile.is_premium;
-                    const name = profile.full_name || 'Anonymous Candidate';
+                    // Fallback to application data if profile is missing (guest apply)
+                    const name = profile.full_name || app.name || 'Anonymous Candidate';
+                    const email = app.email || '';
+                    const phone = profile.phone || app.phone || 'N/A';
+                    const resumeUrl = profile.resume_url || app.resume_url;
+
                     const appliedDate = new Date(app.created_at).toLocaleDateString();
 
                     const el = document.createElement('div');
@@ -163,8 +173,8 @@
                             </div>
                             <div style="text-align: right;">
                                 <div style="font-size: 0.85rem; color: #888; margin-bottom: 10px;">Applied: ${appliedDate}</div>
-                                ${profile.resume_url ?
-                            `<a href="${profile.resume_url}" target="_blank" class="btn-secondary" style="font-size: 0.85rem; padding: 5px 12px;">View Resume</a>` :
+                                ${resumeUrl ?
+                            `<a href="${resumeUrl}" target="_blank" class="btn-secondary" style="font-size: 0.85rem; padding: 5px 12px;">View Resume</a>` :
                             '<span style="color: #999; font-size: 0.85rem;">No Resume</span>'
                         }
                             </div>

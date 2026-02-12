@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assessment Results | Admin</title>
+    <link rel="stylesheet" href="./style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .badge-green {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .badge-yellow {
+            background: #fff3e0;
+            color: #ef6c00;
+        }
+
+        .badge-red {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .badge-gray {
+            background: #eee;
+            color: #666;
+        }
+
+        .ai-flag {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            color: #d32f2f;
+            font-weight: bold;
+            font-size: 0.8rem;
+            background: #ffebee;
+            padding: 2px 8px;
+            border-radius: 4px;
+            border: 1px solid #ffcdd2;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="container" style="padding: 15px 20px; display: flex; justify-content: space-between;">
+        <a href="/employer-dashboard.html" style="font-weight: 600;">&larr; Back to Dashboard</a>
+        <span style="font-weight: 700;">Assessment Results</span>
+    </nav>
+
+    <main class="container" style="padding: 40px 20px;">
+        <h1 style="margin-bottom: 20px;">Candidate Assessments</h1>
+
+        <div class="card" style="padding: 0; overflow: hidden;">
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead style="background: #fafafa; border-bottom: 1px solid #eee;">
+                    <tr>
+                        <th style="padding: 15px 20px; text-align: left;">Candidate</th>
+                        <th style="padding: 15px 20px; text-align: left;">Role</th>
+                        <th style="padding: 15px 20px; text-align: left;">Status</th>
+                        <th style="padding: 15px 20px; text-align: left;">Score</th>
+                        <th style="padding: 15px 20px; text-align: left;">Rec.</th>
+                        <th style="padding: 15px 20px; text-align: left;">AI Check</th>
+                        <th style="padding: 15px 20px; text-align: right;">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="results-body">
+                    <!-- Results injected here -->
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <!-- Detail Modal -->
+    <div id="detail-modal"
+        style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000;">
+        <div
+            style="background: white; max-width: 600px; margin: 50px auto; padding: 30px; border-radius: 12px; position: relative; max-height: 90vh; overflow-y: auto;">
+            <button onclick="closeModal()"
+                style="position: absolute; right: 20px; top: 20px; border: none; background: none; font-size: 1.5rem; cursor: pointer;">&times;</button>
+
+            <h2 id="modal-name" style="margin-bottom: 5px;">Candidate Name</h2>
+            <p id="modal-role" style="color: #666; margin-bottom: 20px;">Role</p>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px;">
+                <div style="background: #fcfcfc; padding: 15px; border-radius: 8px; border: 1px solid #eee;">
+                    <span style="font-size: 0.8rem; color: #888; display: block; margin-bottom: 5px;">Total Score</span>
+                    <strong id="modal-score" style="font-size: 1.8rem;">--/200</strong>
+                </div>
+                <div style="background: #fcfcfc; padding: 15px; border-radius: 8px; border: 1px solid #eee;">
+                    <span style="font-size: 0.8rem; color: #888; display: block; margin-bottom: 5px;">Outcome</span>
+                    <span id="modal-outcome" class="badge">--</span>
+                </div>
+            </div>
+
+            <div id="ai-warning-box"
+                style="background: #fff3e0; border: 1px solid #ffe0b2; padding: 15px; border-radius: 8px; margin-bottom: 30px; display: none;">
+                <strong style="color: #e65100; display: block; margin-bottom: 5px;">⚠️ AI / Fraud Detection
+                    Warning</strong>
+                <p id="ai-reason" style="margin: 0; font-size: 0.9rem; color: #ef6c00;">Suspicious activity detected.
+                </p>
+                <div style="margin-top: 10px; font-size: 0.8rem; color: #666;">
+                    Time Taken: <span id="modal-time">--</span>s | Variance: <span id="modal-variance">--</span>
+                </div>
+            </div>
+
+            <h3 style="margin-bottom: 15px;">Trait Breakdown</h3>
+            <canvas id="traitChart"></canvas>
+
+            <div id="validity-warning" style="margin-top: 20px; color: #c62828; font-weight: bold; display: none;">
+                ❌ Failed Validity Check (Possible Dishonesty)
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { supabase } from './src/supabaseClient.js';
+
+        // Check Admin
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) window.location.href = '/employer-login.html';
+
+        async function loadResults() {
+            const { data, error } = await supabase
+                .from('candidate_assessments')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (error) { console.error(error); return; }
+
+            const tbody = document.getElementById('results-body');
+            tbody.innerHTML = '';
+
+            data.forEach(result => {
+                const recClass = result.recommendation === 'Highly Recommend' ? 'badge-green' :
+                    result.recommendation === 'Do Not Hire' ? 'badge-red' : 'badge-yellow';
+
+                const aiWarning = (result.ai_metadata && result.ai_metadata.flagged)
+                    ? `<span class="ai-flag" title="${result.ai_metadata.reason.join(', ')}">⚠️ Flagged</span>`
+                    : '<span style="color: #ccc;">Pass</span>';
+
+                const status = result.status || 'completed';
+                const statusBadge = status === 'in_progress'
+                    ? '<span class="badge badge-yellow" style="background: #fff8e1; color: #f57f17;">In Progress</span>'
+                    : '<span class="badge badge-green">Completed</span>';
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td style="padding: 15px 20px;">
+                        <div style="font-weight: 600;">${result.candidate_name}</div>
+                        <div style="font-size: 0.8rem; color: #888;">${result.candidate_email}</div>
+                    </td>
+                    <td style="padding: 15px 20px;">${result.role_selected ? result.role_selected.toUpperCase() : 'N/A'}</td>
+                    <td style="padding: 15px 20px;">${statusBadge}</td>
+                    <td style="padding: 15px 20px; font-weight: bold;">${result.total_score || 0}</td>
+                    <td style="padding: 15px 20px;"><span class="badge ${recClass}">${result.recommendation || 'Pending'}</span></td>
+                    <td style="padding: 15px 20px;">${aiWarning}</td>
+                    <td style="padding: 15px 20px; text-align: right;">
+                        <button class="btn-sm" style="padding: 6px 12px; border: 1px solid #ddd; background: white; border-radius: 6px; cursor: pointer;" onclick="viewDetail('${result.id}')">View</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            window._results = data; // Store for modal access
+        }
+
+        window.viewDetail = (id) => {
+            const result = window._results.find(r => r.id === id);
+            if (!result) return;
+
+            document.getElementById('modal-name').innerText = result.candidate_name;
+            document.getElementById('modal-role').innerText = result.role_selected.toUpperCase();
+            document.getElementById('modal-score').innerText = result.total_score + '/200';
+
+            const outcomeEl = document.getElementById('modal-outcome');
+            outcomeEl.innerText = result.recommendation;
+            outcomeEl.className = 'badge ' + (result.recommendation === 'Highly Recommend' ? 'badge-green' : result.recommendation === 'Do Not Hire' ? 'badge-red' : 'badge-yellow');
+
+            // AI Warning
+            const aiBox = document.getElementById('ai-warning-box');
+            if (result.ai_metadata && result.ai_metadata.flagged) {
+                aiBox.style.display = 'block';
+                document.getElementById('ai-reason').innerText = 'Issues: ' + (result.ai_metadata.reason || []).join(', ');
+                document.getElementById('modal-time').innerText = result.ai_metadata.time_taken_seconds;
+                document.getElementById('modal-variance').innerText = result.ai_metadata.variance;
+            } else {
+                aiBox.style.display = 'none';
+            }
+
+            // Validity
+            document.getElementById('validity-warning').style.display = result.validity_flag ? 'block' : 'none';
+
+            // Chart
+            renderChart(result.trait_scores);
+
+            document.getElementById('detail-modal').style.display = 'block';
+        };
+
+        window.closeModal = () => {
+            document.getElementById('detail-modal').style.display = 'none';
+        }
+
+        // Simple Chart Logic
+        let chartInstance = null;
+        function renderChart(scores) {
+            const ctx = document.getElementById('traitChart').getContext('2d');
+            if (chartInstance) chartInstance.destroy();
+
+            // Filter out internal/validity from visualization if desired, or keep them
+            const labels = Object.keys(scores).filter(k => k !== 'Validity');
+            const data = labels.map(k => scores[k]);
+
+            chartInstance = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Candidate Profile',
+                        data: data,
+                        backgroundColor: 'rgba(169, 132, 103, 0.2)',
+                        borderColor: 'rgba(169, 132, 103, 1)',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    scales: {
+                        r: {
+                            suggestedMin: 0,
+                            suggestedMax: 30 // Approx max per trait
+                        }
+                    }
+                }
+            });
+        }
+
+        // Expose viewDetail to window scope
+        window.viewDetail = viewDetail;
+
+        loadResults();
+    </script>
+</body>
+
+</html>

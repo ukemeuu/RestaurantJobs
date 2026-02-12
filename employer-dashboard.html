@@ -37,6 +37,8 @@
         <div style="display: flex; align-items: center; gap: 30px;">
             <div id="nav-links" class="nav-links">
                 <!-- Links injected by ui.js -->
+                <a href="/admin-assessment-results.html" id="admin-assess-link"
+                    style="display: none; font-weight: 600; color: var(--text-color); margin-right: 20px;">Assessments</a>
                 <a href="/settings.html" style="font-weight: 600; color: var(--text-color);">Settings</a>
             </div>
 
@@ -168,6 +170,11 @@
         if (!roleData || (roleData.role !== 'employer' && roleData.role !== 'admin')) {
             const submitBtn = document.getElementById('submit-job-btn');
             if (submitBtn) submitBtn.style.display = 'none';
+        }
+
+        // Show Assessment Link for Admins
+        if (roleData && roleData.role === 'admin') {
+            document.getElementById('admin-assess-link').style.display = 'inline';
         }
 
         const employerName = localStorage.getItem('employerName') || 'Partner';
