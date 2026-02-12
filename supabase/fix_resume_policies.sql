@@ -5,8 +5,8 @@ insert into storage.buckets (id, name, public)
 values ('resumes', 'resumes', false)
 on conflict (id) do nothing;
 
--- 2. Enable RLS
-alter table storage.objects enable row level security;
+-- 2. Enable RLS (Commented out to avoid permission errors - enabled by default)
+-- alter table storage.objects enable row level security;
 
 -- 3. Policy: Authenticated users can upload (Candidates)
 drop policy if exists "Authenticated users can upload resumes" on storage.objects;
