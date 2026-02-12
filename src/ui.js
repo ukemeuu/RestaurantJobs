@@ -187,7 +187,7 @@ export async function updateNavigation() {
     // 5. Update UI based on Role
     if (role === 'employer' || role === 'admin') {
         toggleLink(navLinks, '/employer-dashboard.html', true, 'Dashboard');
-        toggleLink(navLinks, '/post-job.html', true, 'Post a Job');
+        // toggleLink(navLinks, '/post-job.html', true, 'Post a Job'); // User requested removal
         toggleLink(navLinks, '/settings.html', true, 'Settings');
 
         toggleLink(navLinks, '/candidate-dashboard.html', false);
