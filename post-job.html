@@ -170,13 +170,25 @@
         import { supabase } from './src/supabaseClient.js';
         import { generateJobDescription } from './src/aiGenerator.js';
 
-        // Check Auth
+        // Check Auth & Profile
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) {
             window.location.href = '/employer-login.html';
         }
 
-        const employerName = localStorage.getItem('employerName') || 'Partner';
+        // Check if employer profile exists
+        const { data: profile } = await supabase
+            .from('employers')
+            .select('company_name, logo_url')
+            .eq('id', user.id)
+            .single();
+
+        if (!profile) {
+            alert('Please complete your company profile before posting a job.');
+            window.location.href = '/employer-profile.html';
+        }
+
+        const employerName = profile?.company_name || localStorage.getItem('employerName') || 'Partner';
         document.getElementById('welcome-msg').innerText = `Welcome, ${employerName}`;
 
         window.logout = async function () {
@@ -184,8 +196,6 @@
             localStorage.clear();
             window.location.href = '/';
         }
-
-
 
         // AI Generator Logic
         document.getElementById('ai-gen-btn').addEventListener('click', async function () {
@@ -231,17 +241,10 @@
                 const salaryMax = document.getElementById('salary-max').value;
                 const description = quill.root.innerHTML;
 
-                // Features (Free for now or default)
+                // Features
                 const features = {
-                    show_logo: true // Default to showing logo for free
+                    show_logo: true
                 };
-
-                // Get employer profile for logo
-                const { data: profile } = await supabase
-                    .from('employers')
-                    .select('logo_url')
-                    .eq('id', user.id)
-                    .single();
 
                 const { data, error } = await supabase
                     .from('jobs')
@@ -253,8 +256,8 @@
                         salary_max: salaryMax || null,
                         description,
                         employer_id: user.id,
-                        status: 'published',
-                        is_paid: true, // Mark as paid/valid so it shows up
+                        status: 'pending', // Pending Approval
+                        is_paid: true,
                         features,
                         logo_url: profile?.logo_url || null
                     })
@@ -263,8 +266,8 @@
 
                 if (error) throw error;
 
-                // Redirect to success page
-                window.location.href = `/job-success.html?id=${data.id}&action=posted`;
+                // Redirect to success page with pending status
+                window.location.href = `/job-success.html?id=${data.id}&action=posted&status=pending`;
 
             } catch (err) {
                 console.error(err);

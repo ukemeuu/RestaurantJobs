@@ -82,9 +82,24 @@
         const jobId = params.get('id');
         const action = params.get('action'); // 'posted' or 'edited'
 
+        const status = params.get('status'); // 'pending', 'published'
+
         if (action === 'edited') {
             document.getElementById('success-title').textContent = 'Job Updated Successfully!';
-            document.getElementById('success-message').textContent = 'Your changes have been saved and are now live.';
+            document.getElementById('success-message').textContent = 'Your changes have been saved.';
+        } else if (status === 'pending') {
+            document.getElementById('success-title').textContent = 'Job Submitted for Review';
+            document.getElementById('success-title').style.color = '#f57f17'; // Orange
+            document.getElementById('success-message').innerHTML = `
+                Your job posting has been received and is currently <strong>pending approval</strong>.<br>
+                Our team will review it shortly. You will be notified once it goes live.
+            `;
+            // Hide view job link as it might not be visible to public yet
+            const viewLink = document.getElementById('view-job-link');
+            if (viewLink) {
+                viewLink.textContent = 'Preview Job';
+                // It might still be visible to the author due to RLS
+            }
         }
 
         // Load job details

@@ -37,8 +37,13 @@
         <div style="display: flex; align-items: center; gap: 30px;">
             <div id="nav-links" class="nav-links">
                 <!-- Links injected by ui.js -->
+                <a href="/admin-jobs.html" id="admin-jobs-link"
+                    style="display: none; font-weight: 600; color: var(--accent-color); margin-right: 20px;">Manage
+                    Jobs</a>
                 <a href="/admin-assessment-results.html" id="admin-assess-link"
                     style="display: none; font-weight: 600; color: var(--text-color); margin-right: 20px;">Assessments</a>
+                <a href="/employer-profile.html"
+                    style="font-weight: 600; color: var(--text-color); margin-right: 20px;">Company Profile</a>
                 <a href="/settings.html" style="font-weight: 600; color: var(--text-color);">Settings</a>
             </div>
 
@@ -172,12 +177,29 @@
             if (submitBtn) submitBtn.style.display = 'none';
         }
 
-        // Show Assessment Link for Admins
+        // Show Admin Links
         if (roleData && roleData.role === 'admin') {
             document.getElementById('admin-assess-link').style.display = 'inline';
+            document.getElementById('admin-jobs-link').style.display = 'inline';
         }
 
-        const employerName = localStorage.getItem('employerName') || 'Partner';
+        // Get & Display Employer Name from Profile if possible, else localStorage
+        let employerName = 'Partner';
+
+        // Try fetch profile
+        const { data: profile } = await supabase
+            .from('employers')
+            .select('company_name')
+            .eq('id', user.id)
+            .single();
+
+        if (profile && profile.company_name) {
+            employerName = profile.company_name;
+            localStorage.setItem('employerName', employerName);
+        } else {
+            employerName = localStorage.getItem('employerName') || 'Partner';
+        }
+
         document.getElementById('welcome-msg').innerText = employerName;
         document.getElementById('user-initial').innerText = employerName.charAt(0).toUpperCase();
 
@@ -235,9 +257,20 @@
                 activityList.innerHTML = '';
 
                 // Calculate Stats
-                document.getElementById('stat-active-jobs').innerText = jobs.filter(j => j.status === 'published').length;
-                document.getElementById('stat-total-views').innerText = jobs.reduce((acc, curr) => acc + (curr.views || 0), 0) || Math.floor(Math.random() * 50); // Fallback to random if no view count
-                document.getElementById('stat-expiring').innerText = jobs.filter(j => j.status === 'published').length > 0 ? '0' : '0'; // Placeholder logic
+                const published = jobs.filter(j => j.status === 'published' || j.status === 'approved');
+                const pending = jobs.filter(j => j.status === 'pending');
+
+                document.getElementById('stat-active-jobs').innerText = published.length;
+                document.getElementById('stat-total-views').innerText = jobs.reduce((acc, curr) => acc + (curr.views || 0), 0);
+
+                // Show Pending Count instead of expiring
+                const expiringCard = document.querySelector('.card:nth-child(3)');
+                if (expiringCard) {
+                    expiringCard.querySelector('h3').innerText = pending.length;
+                    expiringCard.querySelector('span').innerText = 'Pending Approval';
+                    expiringCard.querySelector('div').style.color = '#f57f17'; // Orange
+                    expiringCard.querySelector('div').style.background = '#fff3e0';
+                }
 
                 jobs.forEach(job => {
                     const row = document.createElement('div');
@@ -245,8 +278,20 @@
                     row.onmouseover = () => row.style.background = '#f9f9f9';
                     row.onmouseout = () => row.style.background = 'white';
 
-                    const statusColor = job.status === 'published' ? '#2e7d32' : job.status === 'closed' ? '#c62828' : '#f57f17';
-                    const statusBg = job.status === 'published' ? '#e8f5e9' : job.status === 'closed' ? '#ffebee' : '#fff3e0';
+                    let statusColor = '#f57f17'; // Default pending orange
+                    let statusBg = '#fff3e0';
+
+                    if (job.status === 'published' || job.status === 'approved') {
+                        statusColor = '#2e7d32'; // Green
+                        statusBg = '#e8f5e9';
+                    } else if (job.status === 'rejected' || job.status === 'closed') {
+                        statusColor = '#c62828'; // Red
+                        statusBg = '#ffebee';
+                    }
+
+                    // Normalize status text
+                    let statusText = job.status === 'published' ? 'Active' : job.status;
+                    statusText = statusText.charAt(0).toUpperCase() + statusText.slice(1);
 
                     row.innerHTML = `
                         <div style="flex: 1; min-width: 250px;">
@@ -259,7 +304,7 @@
                         
                         <div style="display: flex; align-items: center; gap: 20px;">
                             <span style="background:${statusBg}; color:${statusColor}; padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; text-transform: uppercase;">
-                                ${job.status}
+                                ${statusText}
                             </span>
                             
                             <div style="display: flex; gap: 8px;">

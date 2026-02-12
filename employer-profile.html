@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Company Profile | RestaurantJobs Kenya</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&family=Playfair+Display:wght@500;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="./style.css">
+</head>
+
+<body>
+    <nav class="container">
+        <a href="/employer-dashboard.html" class="nav-brand">Restaurant<span
+                style="color: var(--accent-color);">Jobs</span></a>
+
+        <div id="nav-links" class="nav-links">
+            <a href="/employer-dashboard.html">← Back to Dashboard</a>
+            <button onclick="logout()" class="btn-secondary">Logout</button>
+        </div>
+    </nav>
+
+    <main class="container" style="padding: 40px 20px; max-width: 600px;">
+        <h1 style="margin-bottom: 10px;">Company Profile</h1>
+        <p style="color: var(--text-muted); margin-bottom: 30px;">Set up your company details so candidates know who
+            they're applying to.</p>
+
+        <div class="card" style="padding: 30px;">
+            <form id="profile-form">
+
+                <!-- Logo Upload -->
+                <div style="margin-bottom: 30px; text-align: center;">
+                    <label style="display: block; margin-bottom: 10px; font-weight: 600;">Company Logo</label>
+                    <div style="position: relative; width: 100px; height: 100px; margin: 0 auto; border-radius: 50%; overflow: hidden; background: #f0f0f0; border: 2px dashed #ccc; cursor: pointer;"
+                        onclick="document.getElementById('logo-upload').click()">
+                        <img id="logo-preview" src="/company-logo.png"
+                            style="width: 100%; height: 100%; object-fit: cover; display: none;">
+                        <span id="logo-placeholder"
+                            style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #999; font-size: 0.8rem;">Upload
+                            Logo</span>
+                    </div>
+                    <input type="file" id="logo-upload" accept="image/*" style="display: none;">
+                    <p style="font-size: 0.8rem; color: #999; margin-top: 5px;">Click to upload (Max 2MB)</p>
+                </div>
+
+                <div class="form-group">
+                    <label>Company Name <span style="color: red;">*</span></label>
+                    <input type="text" id="company-name" required placeholder="e.g. Java House">
+                </div>
+
+                <div class="form-group">
+                    <label>Website (Optional)</label>
+                    <input type="url" id="company-website" placeholder="https://example.com">
+                </div>
+
+                <button type="submit" class="btn" id="save-btn" style="width: 100%;">Save Profile</button>
+            </form>
+        </div>
+    </main>
+
+    <script type="module">
+        import { supabase } from './src/supabaseClient.js';
+
+        // Auth Check
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) window.location.href = '/employer-login.html';
+
+        window.logout = async function () {
+            await supabase.auth.signOut();
+            window.location.href = '/';
+        }
+
+        const logoInput = document.getElementById('logo-upload');
+        const logoPreview = document.getElementById('logo-preview');
+        const placeholder = document.getElementById('logo-placeholder');
+        const form = document.getElementById('profile-form');
+        let logoFile = null;
+
+        // Load existing profile
+        async function loadProfile() {
+            const { data, error } = await supabase
+                .from('employers')
+                .select('*')
+                .eq('id', user.id)
+                .single();
+
+            if (data) {
+                document.getElementById('company-name').value = data.company_name || '';
+                document.getElementById('company-website').value = data.website || '';
+
+                if (data.logo_url) {
+                    logoPreview.src = data.logo_url;
+                    logoPreview.style.display = 'block';
+                    placeholder.style.display = 'none';
+                }
+            }
+        }
+        loadProfile();
+
+        // Handle File Selection
+        logoInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                if (file.size > 2 * 1024 * 1024) {
+                    alert('File too large (Max 2MB).');
+                    return;
+                }
+                logoFile = file;
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    logoPreview.src = e.target.result;
+                    logoPreview.style.display = 'block';
+                    placeholder.style.display = 'none';
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Save Profile
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('save-btn');
+            btn.innerText = 'Saving...';
+            btn.disabled = true;
+
+            const companyName = document.getElementById('company-name').value;
+            const website = document.getElementById('company-website').value;
+            let logoUrl = logoPreview.src;
+
+            try {
+                // Upload Logo if changed
+                if (logoFile) {
+                    const fileExt = logoFile.name.split('.').pop();
+                    const fileName = `${user.id}-${Math.random()}.${fileExt}`;
+                    const filePath = `${fileName}`;
+
+                    const { error: uploadError } = await supabase.storage
+                        .from('logos')
+                        .upload(filePath, logoFile);
+
+                    if (uploadError) throw uploadError;
+
+                    const { data: { publicUrl } } = supabase.storage
+                        .from('logos')
+                        .getPublicUrl(filePath);
+
+                    logoUrl = publicUrl;
+                }
+
+                // Upsert Profile
+                const { error } = await supabase
+                    .from('employers')
+                    .upsert({
+                        id: user.id,
+                        company_name: companyName,
+                        website: website,
+                        logo_url: logoUrl,
+                        updated_at: new Date()
+                    });
+
+                if (error) throw error;
+
+                // Update Local Storage
+                localStorage.setItem('employerName', companyName);
+
+                alert('Profile saved successfully!');
+                window.location.href = '/post-job.html'; // Redirect back to posting flow
+
+            } catch (error) {
+                console.error(error);
+                alert('Error saving profile: ' + error.message);
+            } finally {
+                btn.innerText = 'Save Profile';
+                btn.disabled = false;
+            }
+        });
+    </script>
+</body>
+
+</html>

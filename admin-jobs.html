@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Job Management | RestaurantJobs Kenya</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&family=Playfair+Display:wght@500;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="./style.css">
+    <style>
+        .badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .badge-pending {
+            background: #fff3e0;
+            color: #f57f17;
+        }
+
+        .badge-published {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .badge-rejected {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .badge-closed {
+            background: #eee;
+            color: #666;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="container">
+        <a href="/employer-dashboard.html" class="nav-brand">Restaurant<span
+                style="color: var(--accent-color);">Jobs</span></a>
+
+        <div id="nav-links" class="nav-links">
+            <a href="/employer-dashboard.html">← Dashboard</a>
+            <button onclick="logout()" class="btn-secondary">Logout</button>
+        </div>
+    </nav>
+
+    <main class="container" style="padding: 40px 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+            <h1>Admin Job Approvals</h1>
+
+            <select id="status-filter" style="padding: 10px; border-radius: 8px; border: 1px solid #ddd;">
+                <option value="all">All Statuses</option>
+                <option value="pending" selected>Pending Review</option>
+                <option value="published">Published</option>
+                <option value="rejected">Rejected</option>
+            </select>
+        </div>
+
+        <div class="card" style="padding: 0; overflow: hidden;">
+            <div id="jobs-list" style="max-height: 800px; overflow-y: auto;">
+                <!-- Jobs loaded here -->
+                <div style="padding: 40px; text-align: center; color: #999;">Loading...</div>
+            </div>
+        </div>
+    </main>
+
+    <script type="module">
+        import { supabase } from './src/supabaseClient.js';
+
+        // Auth & Role Check
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) window.location.href = '/employer-login.html';
+
+        const { data: roleData } = await supabase
+            .from('user_roles')
+            .select('role')
+            .eq('id', user.id)
+            .single();
+
+        if (!roleData || roleData.role !== 'admin') {
+            alert('Access Denied: Admins only.');
+            window.location.href = '/employer-dashboard.html';
+        }
+
+        window.logout = async function () {
+            await supabase.auth.signOut();
+            window.location.href = '/';
+        }
+
+        // Fetch Jobs
+        async function loadJobs() {
+            const filter = document.getElementById('status-filter').value;
+            let query = supabase
+                .from('jobs')
+                .select(`
+                    *,
+                    employers (company_name, logo_url)
+                `)
+                .order('created_at', { ascending: false });
+
+            if (filter !== 'all') {
+                query = query.eq('status', filter);
+            }
+
+            const { data: jobs, error } = await query;
+
+            const list = document.getElementById('jobs-list');
+            list.innerHTML = '';
+
+            if (jobs && jobs.length > 0) {
+                jobs.forEach(job => {
+                    const row = document.createElement('div');
+                    row.style.cssText = 'padding: 20px; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; gap: 20px;';
+
+                    const companyName = job.employers?.company_name || 'Unknown Company';
+                    const logo = job.employers?.logo_url || '/company-logo.png';
+                    const badgeClass = `badge-${job.status}`;
+
+                    row.innerHTML = `
+                        <div style="flex: 1;">
+                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">
+                                <img src="${logo}" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover;">
+                                <span style="font-weight: 600; color: #666;">${companyName}</span>
+                                <span class="badge ${badgeClass}">${job.status}</span>
+                            </div>
+                            <h3 style="margin: 0 0 5px 0;"><a href="/job-details.html?id=${job.id}" target="_blank" style="text-decoration: none; color: inherit;">${job.title}</a></h3>
+                            <div style="font-size: 0.9rem; color: #999;">
+                                📍 ${job.location} • 📅 ${new Date(job.created_at).toLocaleDateString()}
+                            </div>
+                        </div>
+
+                        <div style="display: flex; gap: 10px;">
+                            ${job.status === 'pending' || job.status === 'rejected' ? `
+                                <button onclick="updateStatus('${job.id}', 'published')" class="btn" style="padding: 8px 15px; font-size: 0.9rem;">Approve</button>
+                            ` : ''}
+                            
+                            ${job.status === 'pending' || job.status === 'published' ? `
+                                <button onclick="updateStatus('${job.id}', 'rejected')" class="btn-secondary" style="padding: 8px 15px; font-size: 0.9rem; color: #c62828; border-color: #ffcdd2; background: #ffebee;">Reject</button>
+                            ` : ''}
+                        </div>
+                    `;
+                    list.appendChild(row);
+                });
+            } else {
+                list.innerHTML = `<div style="padding: 40px; text-align: center; color: #999;">No jobs found.</div>`;
+            }
+        }
+
+        window.updateStatus = async function (jobId, newStatus) {
+            if (!confirm(`Mark this job as ${newStatus}?`)) return;
+
+            const { error } = await supabase
+                .from('jobs')
+                .update({ status: newStatus })
+                .eq('id', jobId);
+
+            if (error) {
+                alert('Error: ' + error.message);
+            } else {
+                loadJobs(); // Refresh
+            }
+        }
+
+        // Init
+        loadJobs();
+        document.getElementById('status-filter').addEventListener('change', loadJobs);
+
+    </script>
+</body>
+
+</html>
