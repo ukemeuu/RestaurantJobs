@@ -164,16 +164,24 @@
 
                     // If it's a storage path (not a full URL), generate a signed URL
                     if (resumeUrl && !resumeUrl.startsWith('http')) {
+                        const originalPath = resumeUrl;
                         const { data, error } = await supabase
                             .storage
                             .from('resumes')
-                            .createSignedUrl(resumeUrl, 3600); // Valid for 1 hour
+                            .createSignedUrl(originalPath, 3600); // 1 hour token
 
                         if (data) {
                             resumeUrl = data.signedUrl;
+
+                            // Check extension for viewing strategy using the actual path
+                            const lowerPath = originalPath.toLowerCase();
+                            if (lowerPath.endsWith('.doc') || lowerPath.endsWith('.docx')) {
+                                // Use Google Docs Viewer for Word files
+                                resumeUrl = `https://docs.google.com/gview?url=${encodeURIComponent(resumeUrl)}&embedded=true`;
+                            }
                         } else {
                             console.warn('Could not generate signed URL for', resumeUrl);
-                            // Fallback to public URL assumption if signed fails, or keep relative to debug
+                            // Fallback
                             const { data: publicData } = supabase.storage.from('resumes').getPublicUrl(resumeUrl);
                             resumeUrl = publicData.publicUrl;
                         }
