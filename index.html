@@ -172,7 +172,7 @@
                 const { data: jobs, error } = await supabase
                     .from('jobs')
                     .select('*')
-                    .eq('status', 'published')
+                    .in('status', ['published', 'approved'])
                     .order('sticky_until', { ascending: false, nullsFirst: false }) // Prioritize sticky
                     .order('created_at', { ascending: false }) // Then newest
                     .limit(3);

@@ -181,7 +181,7 @@
                 let query = supabase
                     .from('jobs')
                     .select('*')
-                    .eq('status', 'published')
+                    .in('status', ['published', 'approved'])
                     // Sort by sticky first (nulls last), then newest
                     .order('sticky_until', { ascending: false, nullsFirst: false })
                     .order('created_at', { ascending: false });

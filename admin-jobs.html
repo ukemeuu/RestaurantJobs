@@ -108,7 +108,12 @@
                 .order('created_at', { ascending: false });
 
             if (filter !== 'all') {
-                query = query.eq('status', filter);
+                if (filter === 'published') {
+                    // Match both published and approved
+                    query = query.in('status', ['published', 'approved']);
+                } else {
+                    query = query.eq('status', filter);
+                }
             }
 
             const { data: jobs, error } = await query;
@@ -146,10 +151,10 @@
 
                         <div style="display: flex; gap: 10px;">
                             ${job.status === 'pending' || job.status === 'rejected' ? `
-                                <button onclick="updateStatus('${job.id}', 'published')" class="btn" style="padding: 8px 15px; font-size: 0.9rem;">Approve</button>
+                                <button onclick="updateStatus('${job.id}', 'approved')" class="btn" style="padding: 8px 15px; font-size: 0.9rem;">Approve</button>
                             ` : ''}
                             
-                            ${job.status === 'pending' || job.status === 'published' ? `
+                            ${job.status === 'pending' || job.status === 'published' || job.status === 'approved' ? `
                                 <button onclick="updateStatus('${job.id}', 'rejected')" class="btn-secondary" style="padding: 8px 15px; font-size: 0.9rem; color: #c62828; border-color: #ffcdd2; background: #ffebee;">Reject</button>
                             ` : ''}
                         </div>

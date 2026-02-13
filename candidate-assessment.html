@@ -901,7 +901,7 @@
 
             } catch (err) {
                 console.error(err);
-                alert('Error submitting assessment. Please try again.');
+                alert('Error submitting assessment: ' + (err.message || err.error_description || JSON.stringify(err)));
             }
         };
 

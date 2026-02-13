@@ -156,7 +156,7 @@
                 let query = supabase
                     .from('jobs')
                     .select('*')
-                    .eq('status', 'published')
+                    .in('status', ['published', 'approved'])
                     .order('created_at', { ascending: false });
 
                 // Apply Filters
