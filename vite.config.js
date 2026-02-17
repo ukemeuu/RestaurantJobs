@@ -36,6 +36,12 @@ export default defineConfig({
                 candidateAssessment: resolve(__dirname, 'candidate-assessment.html'),
                 adminAssessmentResults: resolve(__dirname, 'admin-assessment-results.html'),
                 adminEmployers: resolve(__dirname, 'admin-employers.html'),
+
+                // Recruiter Pages
+                recruiters: resolve(__dirname, 'recruiters.html'),
+                recruiterRegister: resolve(__dirname, 'recruiter-register.html'),
+                recruiterDashboard: resolve(__dirname, 'recruiter-dashboard.html'),
+                adminRecruiters: resolve(__dirname, 'admin-recruiters.html'),
             },
         },
     },
