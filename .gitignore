@@ -26,3 +26,4 @@ dist-ssr
 # Deployment Artifacts
 deploy_*
 *.zip
+email_templates.md
