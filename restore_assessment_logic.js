@@ -133,20 +133,17 @@ window.submitAssessment = async () => {
     // Calculate Scores
     let totalScore = 0;
     let traitScores = {};
-    let validityFail = false;
+    let validityFlags = 0;
 
     questions.forEach((q, i) => {
         const val = allAnswers[i] || 0;
         const cat = q.c; // Category
 
-        // Validity Check (Reverse logic or trap question?)
-        // Assuming SQL logic: is_validity=true questions are usually traps.
-        // We need to know specific trap logic. For now, let's just sum normal scores.
-        // If cat is 'Validity', maybe we check for extreme answers?
-
+        // Validity Check: "Validity" questions are traps.
+        // We only count it as a flag if they answer "Strongly Agree" (5).
+        // Relaxed Rule: Require 3 or more flags to fail validity
         if (cat === 'Validity') {
-            // Example: "I have never made a mistake". 5 = Lie.
-            if (val === 5) validityFail = true;
+            if (val === 5) validityFlags++;
         } else {
             if (!traitScores[cat]) traitScores[cat] = 0;
             traitScores[cat] += val;
@@ -155,8 +152,10 @@ window.submitAssessment = async () => {
     });
 
     // Determine Recommendation
+    const validityFail = validityFlags >= 3;
+
     let recommendation = 'Review';
-    const avg = totalScore / (questions.length - 20); // Approx
+    const avg = totalScore / (questions.length - 20); // Approx (excluding validity q's)
     if (avg > 4.2) recommendation = 'Strong Hire';
     else if (avg > 3.5) recommendation = 'Hire';
     else recommendation = 'No Hire';
