@@ -46,3 +46,51 @@ Cheers,
 
 ## Option 3: Short & Direct (For SMS/WhatsApp)
 Hi [Candidate Name], thanks for applying to [Restaurant Name]. Please complete this 10-min assessment to proceed to the interview stage: [Insert Link]. Thanks!
+
+---
+
+## Inviting Candidates for a 15-Minute Interview (Agency Recommendation)
+
+### Option 1: Professional (Agency to Candidate)
+**Subject:** Interview Invitation: [Role Name] at [Partner Restaurant Name]
+
+Dear [Candidate Name],
+
+Congratulations! We are pleased to inform you that based on your successful assessment results, you have been selected to move forward in the hiring process for the [Role Name] position at our partner restaurant, [Restaurant Name].
+
+We have arranged for you to have a 15-minute introductory interview with the management team at [Restaurant Name]. This is your chance to showcase your skills and personality directly to them.
+
+Please select a convenient time for your interview using the link below:
+
+[Insert Booking Link Here]
+
+**Interview Details:**
+*   **Role:** [Role Name]
+*   **Restaurant:** [Restaurant Name]
+*   **Location:** [Restaurant Address / "Video Call"]
+
+We wish you the best of luck!
+
+Best regards,
+
+Recruitment Team
+RestaurantJobs Kenya
+
+---
+
+### Option 2: Friendly & Encouraging (Agency to Candidate)
+**Subject:** You passed! 🌟 Next Step: Interview with [Restaurant Name]
+
+Hi [Candidate Name],
+
+Great news! You passed our candidate assessment with flying colors. We think you'd be a great match for the [Role Name] position at [Partner Restaurant Name].
+
+The next step is a quick 15-minute chat directly with the team at [Restaurant Name]. We want you to meet them and show them why you're perfect for the job.
+
+👉 **Book your interview slot here:** [Insert Booking Link Here]
+
+Go show them what you've got! We're rooting for you.
+
+Cheers,
+
+The Team at RestaurantJobs Kenya
