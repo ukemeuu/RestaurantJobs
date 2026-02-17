@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recruit for Restaurants | RestaurantJobs Kenya</title>
+    <!-- Google Analytics (GA4) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-8657N4RY1S"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'G-8657N4RY1S');
+    </script>
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&family=Playfair+Display:wght@500;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="./style.css">
+    <style>
+        .recruiter-hero {
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('/hero-dining.png') center/cover;
+            color: white;
+            padding: 100px 20px;
+            text-align: center;
+        }
+
+        .step-card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            border: 1px solid #eee;
+            text-align: center;
+            transition: transform 0.3s;
+        }
+
+        .step-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .step-icon {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            display: inline-block;
+            background: #fff9f0;
+            width: 70px;
+            height: 70px;
+            line-height: 70px;
+            border-radius: 50%;
+            color: var(--accent-color);
+        }
+
+        .price-card {
+            background: white;
+            border: 2px solid var(--accent-color);
+            border-radius: 16px;
+            padding: 40px;
+            max-width: 400px;
+            margin: 0 auto;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .popular-badge {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--accent-color);
+            color: white;
+            padding: 5px 20px;
+            border-radius: 20px;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="container">
+        <a href="/" class="nav-brand">Restaurant<span style="color: var(--accent-color);">Jobs</span></a>
+
+        <div id="nav-links" class="nav-links">
+            <a href="/">Home</a>
+            <a href="/jobs.html">Find Jobs</a>
+            <a href="/employer-register.html">Post a Job</a>
+            <a href="/auth.html">Sign In</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="recruiter-hero">
+        <div class="container fade-in">
+            <h1 style="font-size: 3.5rem; margin-bottom: 20px; color: white;">Turn Your Network into Income</h1>
+            <p style="font-size: 1.25rem; max-width: 700px; margin: 0 auto 40px; color: #ddd;">
+                Become a <strong>Verified Recruiter</strong>. Post jobs, source top culinary talent, and earn
+                commissions connecting candidates with Kenya's best restaurants.
+            </p>
+            <div style="display: flex; gap: 15px; justify-content: center;">
+                <a href="/recruiter-register.html" class="btn"
+                    style="background-color: var(--accent-color); color: white; padding: 15px 40px; font-size: 1.1rem;">Start
+                    Recruiting</a>
+                <a href="#how-it-works" class="btn-secondary" style="color: white; border-color: white;">How it
+                    Works</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Value Prop / How it Works -->
+    <section id="how-it-works" class="container" style="padding: 80px 20px;">
+        <div style="text-align: center; margin-bottom: 60px;">
+            <h2 style="font-size: 2.5rem; margin-bottom: 15px;">How You Earn</h2>
+            <p style="color: var(--text-muted);">Manage the hiring process end-to-end and build your agency business.
+            </p>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 30px;">
+            <!-- Step 1 -->
+            <div class="step-card">
+                <div class="step-icon">📝</div>
+                <h3>1. Register</h3>
+                <p style="color: var(--text-muted);">Create your agency profile. Get verified to build trust with
+                    candidates and restaurants.</p>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="step-card">
+                <div class="step-icon">📢</div>
+                <h3>2. Post Jobs</h3>
+                <p style="color: var(--text-muted);">Post unlimited job openings for your clients. Your jobs get the
+                    "Agency" tag.</p>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="step-card">
+                <div class="step-icon">🔍</div>
+                <h3>3. Source Talent</h3>
+                <p style="color: var(--text-muted);">Access our database of chefs, waiters, and managers. Screen and
+                    shortlist the best.</p>
+            </div>
+
+            <!-- Step 4 -->
+            <div class="step-card">
+                <div class="step-icon">💰</div>
+                <h3>4. Earn</h3>
+                <p style="color: var(--text-muted);">Charge employers for placement or charge candidates for premium
+                    representation. You keep 100% of your fees.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing / CTA -->
+    <section style="background-color: #f9f9f9; padding: 80px 20px;">
+        <div class="container">
+            <div class="price-card">
+                <div class="popular-badge">Launch Offer</div>
+                <h3 style="margin-bottom: 10px;">Verified Recruiter Access</h3>
+                <div style="font-size: 3rem; font-weight: 700; color: var(--text-main); margin: 20px 0;">
+                    KES 3,000<span style="font-size: 1rem; color: var(--text-muted); font-weight: 400;">/month</span>
+                </div>
+                <p style="color: var(--text-muted); margin-bottom: 30px;">Everything you need to run your recruitment
+                    business.</p>
+
+                <ul style="text-align: left; margin-bottom: 30px; list-style: none; padding: 0;">
+                    <li style="margin-bottom: 10px;">✅ <strong>Unlimited Job Posts</strong></li>
+                    <li style="margin-bottom: 10px;">✅ <strong>Verified Agency Badge</strong></li>
+                    <li style="margin-bottom: 10px;">✅ <strong>Access Candidate Database</strong></li>
+                    <li style="margin-bottom: 10px;">✅ <strong>Dedicated Support</strong></li>
+                </ul>
+
+                <a href="/recruiter-register.html" class="btn" style="width: 100%; display: block;">Get Started Now</a>
+                <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 15px;">No long-term contracts. Cancel
+                    anytime.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer style="background-color: var(--text-main); color: white; padding: 40px 0; margin-top: 0;">
+        <div class="container">
+            <div style="text-align: center;">
+                <h4 style="color: white; margin-bottom: 10px;">RestaurantJobs</h4>
+                <p style="color: #999; font-size: 0.9rem;">Connecting Kenya's Hospitality Industry.</p>
+                <p style="margin-top: 20px; font-size: 0.8rem; color: #666;">&copy; 2026 RestaurantJobs Kenya.</p>
+            </div>
+        </div>
+    </footer>
+
+</body>
+
+</html>

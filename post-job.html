@@ -176,19 +176,62 @@
             window.location.href = '/employer-login.html';
         }
 
-        // Check if employer profile exists
-        const { data: profile } = await supabase
-            .from('employers')
-            .select('company_name, logo_url')
+        // Check Role first to know which table to query
+        const { data: roleData } = await supabase
+            .from('user_roles')
+            .select('role')
             .eq('id', user.id)
             .single();
 
-        if (!profile) {
-            alert('Please complete your company profile before posting a job.');
-            window.location.href = '/employer-profile.html';
+        const role = roleData?.role || 'employer'; // Default to employer if missing
+
+        let profile = null;
+        let employerName = 'Partner';
+        let profileLogo = null;
+
+        if (role === 'recruiter') {
+            const { data: recProfile } = await supabase
+                .from('recruiter_profiles')
+                .select('agency_name, logo_url, subscription_status')
+                .eq('id', user.id)
+                .single();
+
+            if (recProfile) {
+                profile = recProfile;
+                employerName = recProfile.agency_name;
+                profileLogo = recProfile.logo_url;
+
+                // Enforce Subscription for Recruiters
+                if (recProfile.subscription_status !== 'active') {
+                    alert('Your recruiter subscription is inactive. Please activate it to post jobs.');
+                    window.location.href = '/recruiter-dashboard.html';
+                }
+            } else {
+                // Redirect to recruiter dashboard if profile missing (registration should have handled it)
+                window.location.href = '/recruiter-dashboard.html';
+            }
+
+        } else {
+            // Assume Employer or Admin
+            const { data: empProfile } = await supabase
+                .from('employers')
+                .select('company_name, logo_url')
+                .eq('id', user.id)
+                .single();
+
+            if (empProfile) {
+                profile = empProfile;
+                employerName = empProfile.company_name;
+                profileLogo = empProfile.logo_url;
+            } else if (role === 'employer') {
+                alert('Please complete your company profile before posting a job.');
+                window.location.href = '/employer-profile.html';
+            }
         }
 
-        const employerName = profile?.company_name || localStorage.getItem('employerName') || 'Partner';
+        // Admin bypass or fallback
+        if (role === 'admin') employerName = 'Admin';
+
         document.getElementById('welcome-msg').innerText = `Welcome, ${employerName}`;
 
         window.logout = async function () {
